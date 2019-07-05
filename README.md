@@ -1,0 +1,2 @@
+# Briscola
+Briscola web application
