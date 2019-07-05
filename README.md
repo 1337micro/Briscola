@@ -1,2 +1,0 @@
-# Briscola
-Briscola web application
