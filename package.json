@@ -12,5 +12,9 @@
     "@babel/cli": "^7.5.0",
     "@babel/core": "^7.5.0",
     "@babel/plugin-transform-modules-commonjs": "^7.5.0"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.2.0"
   }
 }

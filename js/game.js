@@ -45,8 +45,8 @@ function Game()
 
 function start()
 {
-  let game = new Game();
-  let hand = game.player1.hand;
+  //let game = new Game();
+  //let hand = game.player1.hand;
 
   let cardSprites = _generateCardSprites(hand)
   makeSpritesInteractive(cardSprites);
@@ -209,4 +209,4 @@ app.renderer.view.style.display = "block";
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 }
-export { start };
+export { start, Game };
