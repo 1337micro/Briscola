@@ -12,13 +12,13 @@ import { Game } from "./Game.js"
 function BackendServer() {
     expressApp.use(express.static(__dirname))
     expressApp.get('/', function (req, res) {
-        res.send('<html><head><body><script src="./socket.io.js"></script>\n' +
-            '<script>\n' +
-            '  var socket = io();\n' +
-            '</script></body></head></html>')
+
     });
     io.on('connection', function (socket) {
         console.log('a user connected');
+        socket.on('disconnect', function(){
+            console.log('user disconnected');
+        });
     });
     http.listen(3000, function () {
         console.log('listening on *:3000');

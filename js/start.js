@@ -2,12 +2,13 @@
 import { app } from './index.js'
 import { Constants } from './Constants.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
+import { Game } from './Game.js'
 
 
 function start()
 {
-  //let game = new Game();
-  //let hand = game.player1.hand;
+  let game = new Game();
+  let hand = game.player1.hand;
 
   let cardSprites = _generateCardSprites(hand)
   makeSpritesInteractive(cardSprites);
