@@ -49,6 +49,7 @@ function start()
   let hand = game.player1.hand;
 
   let cardSprites = _generateCardSprites(hand)
+  makeSpritesInteractive(cardSprites);
   _positionCardSprites(cardSprites)
   _rotateCardSprites(cardSprites)
   _scaleSpritesDownTo(0.5, cardSprites)
@@ -62,6 +63,21 @@ function start()
 
   app.ticker.add(delta => gameLoop(delta));
 
+function makeSpritesInteractive(sprites)
+{
+  sprites.forEach(sprite =>
+    {
+      sprite.interactive = true
+      sprite.tap = _onPress
+      sprite.click = _onPress
+    })
+}
+function _onPress(arg)
+{
+  arg.currentTarget.y = Constants.height / 2
+  arg.currentTarget.y -= Math.random() * 10
+  console.log("pressed")
+}
 function setUpOpponentBackOfCards(opponentBackOfCardSprites)
 {
   for (let i = 0; i<3; i++)
