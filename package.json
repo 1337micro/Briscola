@@ -14,7 +14,9 @@
     "@babel/plugin-transform-modules-commonjs": "^7.5.0"
   },
   "dependencies": {
+    "esm": "^3.2.25",
     "express": "^4.17.1",
+    "pixi.js": "^5.0.4",
     "socket.io": "^2.2.0"
   }
 }

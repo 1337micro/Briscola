@@ -1,12 +1,14 @@
 "use strict";
+const express = require('express')
+const expressApp = express();
 
-import express from 'express';
-let expressApp = express();
-import httpNode from 'http'
-let http =  httpNode.createServer(expressApp);
-import ioNode from 'socket.io';
-let io = ioNode(http)
-import path from 'path';
+const http = require('http').createServer(expressApp);
+
+const io = require('socket.io')(http);
+
+var path = require('path');
+
+
 
 
 import { dirname } from 'path';
