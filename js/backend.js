@@ -8,17 +8,14 @@ const io = require('socket.io')(http);
 
 var path = require('path');
 
-
-
-
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { Game } from "./Game.js"
 function BackendServer() {
-
+    expressApp.use(express.static(__dirname))
     expressApp.get('/', function (req, res) {
-
+        res.send('<html><head><body><script src="./socket.io.js"></script>\n' +
+            '<script>\n' +
+            '  var socket = io();\n' +
+            '</script></body></head></html>')
     });
     io.on('connection', function (socket) {
         console.log('a user connected');

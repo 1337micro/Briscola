@@ -1,5 +1,5 @@
 "use strict";
-import {  start } from './game.js'
+import {  start } from './start.js'
 import { suits } from './Suits.js'
 import { Constants } from './Constants.js'
 
