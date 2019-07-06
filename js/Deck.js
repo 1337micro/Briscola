@@ -9,7 +9,8 @@ function Deck(cards)
     for(let i = 1; i<=10; i++)
     {
       Object.keys(enumSuits).forEach(suit => {
-         this.cards.push(i+enumSuits[suit])
+        const card = new Card(i, enumSuits[suit])
+         this.cards.push(card)
       })
     }
   }

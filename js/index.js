@@ -1,18 +1,15 @@
 "use strict";
 import {  start } from './game.js'
 import { suits } from './Suits.js'
+import { Constants } from './Constants.js'
 
-let type = "WebGL"
-if(!PIXI.utils.isWebGLSupported()){
-  type = "canvas"
-}
 
-PIXI.utils.sayHello(type)
+
 
 //Create a Pixi Application
 let app = new PIXI.Application({
-  width: 1024,
-  height:768,
+  width: Constants.width,
+  height:Constants.height,
   antialias: true,    // default: false
     transparent: false, // default: false
     resolution: 1       // default: 1
@@ -36,6 +33,7 @@ function fetListOfImages(){
        allImages.push("../images/"+i+enumSuits[suit]+".png")
     })
   }
+  allImages.push("../images/backOfCard.png")
   return allImages;
 }
 let allImages = fetListOfImages();
