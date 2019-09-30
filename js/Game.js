@@ -32,7 +32,9 @@ function Game()
 
     this.player1 = new Player(new Hand(this.drawCard(), this.drawCard(), this.drawCard()))
     this.player2 = new Player(new Hand(this.drawCard(), this.drawCard(), this.drawCard()))
+    this.players = [this.player1, this.player2]
     this.trumpCard = this.drawCard()
+    
 
 
 }

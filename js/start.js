@@ -1,16 +1,21 @@
 "use strict";
 import { app } from './index.js'
 import { Constants } from './Constants.js'
+import { _onCardPress, getGame, getTrumpCard } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 import { Game } from './Game.js'
 
 
-function start()
+async function start()
 {
-  let game = new Game();
-  let hand = game.player1.hand;
+  //let opponent = await awaitOpponent()
+  let game = await getGame();
+  const player = game.players[game.playerIndex]
+  const trumpCard = game.trumpCard
+  //let trumpCard = await getTrumpCard()
 
-  let cardSprites = _generateCardSprites(hand)
+
+  let cardSprites = _generateCardSprites(player.hand)
   makeSpritesInteractive(cardSprites);
   _positionCardSprites(cardSprites)
   _rotateCardSprites(cardSprites)
@@ -30,16 +35,11 @@ function makeSpritesInteractive(sprites)
   sprites.forEach(sprite =>
     {
       sprite.interactive = true
-      sprite.tap = _onPress
-      sprite.click = _onPress
+      sprite.tap = _onCardPress
+      sprite.click = _onCardPress
     })
 }
-function _onPress(arg)
-{
-  arg.currentTarget.y = Constants.height / 2
-  arg.currentTarget.y -= Math.random() * 10
-  console.log("pressed")
-}
+
 function setUpOpponentBackOfCards(opponentBackOfCardSprites)
 {
   for (let i = 0; i<3; i++)
@@ -51,7 +51,7 @@ function setUpOpponentBackOfCards(opponentBackOfCardSprites)
   _positionOpponentBackCardSprites(opponentBackOfCardSprites)
 }
 function setUpTrumpCard(){
-  let trumpCardSprite = _generateCardSprite(`../images/${game.trumpCard.rank + game.trumpCard.suit}.png`)
+  let trumpCardSprite = _generateCardSprite(`../images/${trumpCard.rank + trumpCard.suit}.png`)
   _positionTrumpCard(trumpCardSprite)
   _scaleSpriteDownTo(0.5, trumpCardSprite)
   addCardSpriteToStage(trumpCardSprite)
@@ -83,6 +83,7 @@ function _generateCardSprites(hand)
     let cardSprite = new PIXI.Sprite(
       PIXI.loader.resources[`../images/${hand.cards[i].rank + hand.cards[i].suit}.png`].texture
     );
+    cardSprite.card = hand.cards[i]
     cardSprites.push(cardSprite)
   }
   return cardSprites
