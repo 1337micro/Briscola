@@ -12,37 +12,34 @@ var path = require('path');
 import { Game } from "./Game.js"
 
 
-const listOfSockets = [];
+
 const game = new Game()
 function BackendServer() {
     expressApp.use(express.static(__dirname))
     expressApp.get('/', function (req, res) {
-
+        console.log('a user requested the page');
+    });
+    expressApp.get('/game', function (req, res) {
+        console.log('a requested the game');
     });
     io.on('connection', function (socket) {
         console.log('a user connected', socket.id);
-        if(listOfSockets.length % 2 === 0)
+        if(game.players[0].socketId == undefined)
         {
-            listOfSockets.push(socket);
-            let player1Socket = socket
-            game.playerIndex = 0;
-            player1Socket.emit(Constants.events.GAME_START, game);
-            //player1Socket.emit(Constants.events.TRUMP_CARD, game.trumpCard);
+            game.players[0].socketId = socket.id;
+            game.playerIndexForClientSide = 0;
+            socket.emit(Constants.events.GAME_START, game);
+
         }
-        else if(listOfSockets.length % 2 !== 0)
+        else if(game.players[1].socketId == undefined)
         {
             //len 1
-            listOfSockets.push(socket)
-            let player2Socket = socket
-            game.playerIndex = 1;
-            player2Socket.emit(Constants.events.GAME_START, game);
+            game.players[1].socketId = socket.id;
+            game.playerIndexForClientSide = 1;
+            socket.emit(Constants.events.GAME_START, game);
             //player2Socket.emit(Constants.events.TRUMP_CARD, game.trumpCard);
-            
+
         }
-
-
-
-
 
         socket.on(Constants.events.CARD_PLAYED, function(cardPlayed)
         {

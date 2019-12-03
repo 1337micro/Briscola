@@ -14,6 +14,8 @@ let app = new PIXI.Application({
     transparent: false, // default: false
     resolution: 1       // default: 1
 });
+
+
 app.renderer.backgroundColor = 0x66CD00 // green
 
 app.renderer.view.style.position = "absolute";

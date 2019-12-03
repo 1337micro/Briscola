@@ -1,5 +1,5 @@
 "use strict";
-import { app } from './index.js'
+import { app } from './app.js'
 import { Constants } from './Constants.js'
 import { _onCardPress, getGame, getTrumpCard } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
@@ -10,7 +10,7 @@ async function start()
 {
   //let opponent = await awaitOpponent()
   let game = await getGame();
-  const player = game.players[game.playerIndex]
+  const player = game.players[game.playerIndexForClientSide]
   const trumpCard = game.trumpCard
   //let trumpCard = await getTrumpCard()
 
@@ -22,7 +22,7 @@ async function start()
   _scaleSpritesDownTo(0.5, cardSprites)
   addCardSpritesToStage(cardSprites)
 
-  setUpTrumpCard()
+  setUpTrumpCard(trumpCard)
   setUpBackOfDeck()
 
   let opponentBackOfCardSprites = _generateOpponentCardSprites();
@@ -50,7 +50,7 @@ function setUpOpponentBackOfCards(opponentBackOfCardSprites)
   }
   _positionOpponentBackCardSprites(opponentBackOfCardSprites)
 }
-function setUpTrumpCard(){
+function setUpTrumpCard(trumpCard){
   let trumpCardSprite = _generateCardSprite(`../images/${trumpCard.rank + trumpCard.suit}.png`)
   _positionTrumpCard(trumpCardSprite)
   _scaleSpriteDownTo(0.5, trumpCardSprite)

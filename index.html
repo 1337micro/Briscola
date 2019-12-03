@@ -1,25 +1,16 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-
-  <title>Briscola</title>
-  <meta name="description" content="Briscola">
-  <meta name="author" content="1337micro">
-  <link rel="stylesheet" href="css/styles.css">
-
-
+    <meta charset="UTF-8">
+    <title>Briscola</title>
 </head>
-
 <body>
-  <script src="https://pixijs.download/v5.0.4/pixi.js"></script>
-
-  <script type="module" src="js/start.js"></script>
-  <script type="module" src="js/index.js"></script>
-  <script src="./js/socket.io.js"></script>
-  <script src="js/eventHandlers.js"></script>
-
-
+<script>
+    function startGame()
+    {
+        window.location.assign("game.html")
+    }
+</script>
+    <button onclick="startGame()">Start</button>
 </body>
 </html>

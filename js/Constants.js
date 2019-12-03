@@ -6,6 +6,12 @@ const Constants = {
       CARD_PLAYED: "CARD_PLAYED",
         GAME_START: "GAME_START",
         TRUMP_CARD: "TRUMP_CARD"
-    }
+    },
+    gameStates:
+      {
+        NORMAL_ROUND: "NORMAL_ROUND",
+
+
+      }
 }
 export { Constants };
