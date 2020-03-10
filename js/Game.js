@@ -1,10 +1,13 @@
 import { Deck } from './Deck.js'
 import { Hand } from './Hand.js'
 import { Player } from './Player.js'
+import { Pile } from './Pile.js'
 import { Constants } from './Constants.js'
 function Game()
 {
     this.gameState = Constants.gameStates.NORMAL_ROUND;
+    this.NUMBER_OF_PLAYERS = 2;
+    this.pile = new Pile([], this.NUMBER_OF_PLAYERS);
     this.deck = new Deck();
     this.deck.generateDeck();
     this.deck.shuffle();
@@ -13,12 +16,10 @@ function Game()
         return this.deck.cards.pop();
     }
 
-
-
     this.player1 = new Player(new Hand(this.drawCard(), this.drawCard(), this.drawCard()))
     this.player2 = new Player(new Hand(this.drawCard(), this.drawCard(), this.drawCard()))
     this.players = [this.player1, this.player2]
-    this.playerForClientSide;
+
 
     this.drawTrumpCard = function (){
         let card = this.drawCard()
@@ -32,30 +33,19 @@ function Game()
     this.currentPlayerToActByIndex = 0
     this.playerIndexForClientSide;
 
-    this.canPlayerAct = function(player){
-        return this.playerToAct === player;
-    }
     this.next = function()
     {
+        if(!this.isRoundOver())
+        {
+            this.currentPlayerToActByIndex++;
+        }
+
 
     }
-
-    this.decideWinner = function(firstCard, secondCard)
+    this.isRoundOver = function()
     {
-        let listOfStrengthsByRank = [1, 3, 10, 9, 8, 7, 6,5,4,3,2]//decreasing
-        if(firstCard.suit !== secondCard.suit)
-        {
-            return firstCard;
-        }
-        else if(listOfStrengthsByRank.indexOf(firstCard.rank) < listOfStrengthsByRank.indexOf(secondCard.rank))
-        {
-            return firstCard
-        }
-        else {
-            return secondCard;
-        }
+        return this.pile.isPileComplete();
     }
-
 
 }
 export { Game }

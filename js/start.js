@@ -1,22 +1,33 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
-import { _onCardPress, getGame, getTrumpCard } from './eventHandlers.js'
+import { _onCardPress, getGame, requestGameStart, onGameUpdate, onCardPlayed } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 import { Game } from './Game.js'
 
+let game;
 
 async function start()
 {
   //let opponent = await awaitOpponent()
-  let game = await getGame();
+  requestGameStart();
+  game = await getGame();
+  onGameUpdate((newGameObj)=>
+  {
+      game = newGameObj
+  })
+  onCardPlayed((cardPlayed)=>
+  {
+    //add the card to the pile
+      addPileCard(cardPlayed)
+  })
   const player = game.players[game.playerIndexForClientSide]
   const trumpCard = game.trumpCard
   //let trumpCard = await getTrumpCard()
 
 
   let cardSprites = _generateCardSprites(player.hand)
-  makeSpritesInteractive(cardSprites);
+  makeSpritesInteractive(cardSprites, game);
   _positionCardSprites(cardSprites)
   _rotateCardSprites(cardSprites)
   _scaleSpritesDownTo(0.5, cardSprites)
@@ -30,13 +41,13 @@ async function start()
 
   app.ticker.add(delta => gameLoop(delta));
 
-function makeSpritesInteractive(sprites)
+function makeSpritesInteractive(sprites, game)
 {
   sprites.forEach(sprite =>
     {
       sprite.interactive = true
-      sprite.tap = _onCardPress
-      sprite.click = _onCardPress
+      sprite.tap = (arg) => _onCardPress(arg, game)
+      sprite.click = (arg) => _onCardPress(arg, game)
     })
 }
 
@@ -49,6 +60,13 @@ function setUpOpponentBackOfCards(opponentBackOfCardSprites)
     addCardSpriteToStage(backOfDeckSprite)
   }
   _positionOpponentBackCardSprites(opponentBackOfCardSprites)
+}
+function addPileCard(pileCard)
+{
+    let pileCardSprite = _generateCardSprite(`../images/${pileCard.rank + pileCard.suit}.png`)
+    _positionPileCard(pileCardSprite)
+    _scaleSpriteDownTo(0.5, pileCardSprite)
+    addCardSpriteToStage(pileCardSprite)
 }
 function setUpTrumpCard(trumpCard){
   let trumpCardSprite = _generateCardSprite(`../images/${trumpCard.rank + trumpCard.suit}.png`)
@@ -88,7 +106,7 @@ function _generateCardSprites(hand)
   }
   return cardSprites
 }
-//for back of card
+
 function _positionCardSprite(cardSprite, x, y)
 {
   cardSprite.x = x
@@ -104,6 +122,13 @@ function _positionOpponentBackCardSprites(backOfCardSprites)
 function _positionBackOfCard(backOfCardSprite)
 {
     _positionCardSprite(backOfCardSprite, Constants.width / 2, Constants.height / 2)
+}
+function _positionPileCard(pileCardSprite)
+{
+    _positionCardSprite(pileCardSprite, (Constants.width / 2 - 100* Math.random()), Constants.height / 2 - 100* Math.random())
+    pileCardSprite.anchor.x = 0.5
+    pileCardSprite.anchor.y = 0.5
+    pileCardSprite.rotation = Math.random()/2
 }
 function _positionTrumpCard(trumpCardSprite)
 {

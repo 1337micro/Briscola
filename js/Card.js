@@ -1,3 +1,4 @@
+"use strict";
 function Card(rank, suit)
 {
   this.rank = rank

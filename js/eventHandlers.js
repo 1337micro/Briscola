@@ -2,15 +2,22 @@
 import { Constants } from './Constants.js'
 
 const socket = io("http://localhost:3000")
-function _onCardPress(arg)
+function _onCardPress(arg, game)
 {
-    arg.currentTarget.y = Constants.height / 2
-    arg.currentTarget.y -= Math.random() * 10
 
     const cardPressed = arg.currentTarget.card
-    socket.emit(Constants.events.CARD_PLAYED, cardPressed)
+    if(game.playerIndexForClientSide === game.currentPlayerToActByIndex)
+    {
+        //make sprite invisible
+        arg.currentTarget.visible = false;
+        //remove sprite from visible screen
+        arg.currentTarget.y = -100
+        socket.emit(Constants.events.CARD_PLAYED, cardPressed)
+    }
+//TODO make the sprite no longer interactive
     console.log("pressed")
 }
+
 function awaitOpponent()
 {
     return new Promise(function(resolve, reject)
@@ -34,6 +41,10 @@ function getGame()
         })
     })
 }
+function requestGameStart()
+{
+    socket.emit(Constants.events.REQUEST_GAME_START)
+}
 function getTrumpCard()
 {
     return new Promise(function(resolve, reject)
@@ -47,4 +58,20 @@ function getTrumpCard()
 }
 
 
-export { _onCardPress, awaitOpponent, getGame, getTrumpCard }
+function onGameUpdate(cb)
+{
+    socket.on(Constants.events.UPDATE_GAME, function(game)
+    {
+        console.log("Game updated", game)
+        cb(game)
+    })
+}
+function onCardPlayed(cb)
+{
+    socket.on(Constants.events.CARD_PLAYED, function(cardPlayed)
+    {
+        console.log("cardPlayed", cardPlayed)
+        cb(cardPlayed)
+    })
+}
+export { _onCardPress, awaitOpponent, getGame,  requestGameStart, onGameUpdate, onCardPlayed}
