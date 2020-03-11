@@ -3,7 +3,6 @@ import { app } from './app.js'
 import { Constants } from './Constants.js'
 import { _onCardPress, getGame, requestGameStart, onGameUpdate, onCardPlayed } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
-import { Game } from './Game.js'
 
 let game;
 
@@ -18,7 +17,7 @@ async function start()
   })
   onCardPlayed((cardPlayed)=>
   {
-    //add the card to the pile
+    //add the card to the middlePile
       addPileCard(cardPlayed)
   })
   const player = game.players[game.playerIndexForClientSide]

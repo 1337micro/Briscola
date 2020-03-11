@@ -71,15 +71,26 @@ function BackendServer() {
             if(socket.handshake.session.game.currentPlayerToActByIndex === socket.handshake.session.game.playerIndexForClientSide)
             {
                 //player is allowed to act (backend check)
-                socket.handshake.session.game.pile.addCard(cardPlayed)
-                socket.handshake.session.game.next()
+                let game = socket.handshake.session.game;
+                let playerIndex = game.playerIndexForClientSide;
+                let player = game.players[playerIndex];
+                let playerHand = player.hand;
+                playerHand.removeCard(cardPlayed)//remove card from player's hand
+                game.middlePile.addCard(cardPlayed)//add card to middle pile
 
-                if(socket.handshake.session.game.isRoundOver())
+                game.next()
+                if(game.isRoundOver())
                 {
-
+                    game.autoSetNextToAct()
+                    let winningPlayer = game.getWinningPlayer()
+                    winningPlayer.pile.addCards(game.middlePile.cards)
+                    game.middlePile.reset()
+                    //todo check if game is over
+                    game.dealNextCardToAllPlayers()
+                    io.emit(Constants.events.ROUND_OVER, winningPlayer)
                 }
-                io.emit(Constants.events.CARD_PLAYED, cardPlayed)
-                io.emit(Constants.events.UPDATE_GAME, socket.handshake.session.game)
+                io.emit(Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
+                io.emit(Constants.events.UPDATE_GAME, game)
             }
             console.log(cardPlayed)
         })

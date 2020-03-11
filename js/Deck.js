@@ -1,8 +1,10 @@
 import { Card } from './Card.js'
 import { suits } from './Suits.js'
-function Deck(cards)
+import {CardList} from "./CardList";
+import {DeckEmptyError} from "./errors/DeckErrors";
+function Deck(cards = [])
 {
-  this.cards = cards || [];
+  CardList.call(this, cards);
   this.generateDeck = function()
   {
     let enumSuits = suits();
@@ -28,5 +30,16 @@ function Deck(cards)
     }
 }
 
+}
+Deck.prototype.drawCard = function()
+{
+    if(this.cards.length === 0)
+    {
+        throw new DeckEmptyError();
+    }
+    else
+    {
+        return this.cards.pop();
+    }
 }
 export { Deck }

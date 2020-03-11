@@ -1,18 +1,21 @@
 "use strict";
-class PileIncompleteError extends Error {
-    constructor(message)
+import {BriscolaError} from "./BriscolaError";
+
+class MiddlePileIncompleteError extends BriscolaError {
+    constructor(message = "MiddlePile is not complete.There is at least 1 player that has not played their card yet. " +
+    "The number of cards in the middlePile should be equal to the number of players before deciding who the winner is ")
     {
         super(message);
-        this.name = "PileIncompleteError";
+        this.name = "MiddlePileIncompleteError";
     }
 }
 
-class PileFullError extends Error {
-    constructor(message)
+class MiddlePileFullError extends BriscolaError {
+    constructor(message="MiddlePile is full. Cannot have more cards than there are players in the game. Did you call middlePile.reset()?")
     {
         super(message);
-        this.name = "PileFullError";
+        this.name = "MiddlePileFullError";
     }
 }
 
-export { PileIncompleteError,  PileFullError}
+export { MiddlePileIncompleteError,  MiddlePileFullError}
