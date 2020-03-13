@@ -33,7 +33,8 @@ io.use(sharedsession(session, {
     autoSave:true
 }));
 
-let game = new Game()
+let game = Game()
+game.init()
 function BackendServer() {
     expressApp.use(express.static(__dirname))
     database.insertNewGame(game)//automaticall assigns game._id
@@ -70,12 +71,12 @@ function BackendServer() {
             if(gameFromDb.currentPlayerToActByIndex === session.playerIndex)
             {
                 //player is allowed to act (backend check)
-                let game = Game.prototype.copy(gameFromDb);
+                let game = Game(gameFromDb);
                 let playerIndex = session.playerIndex;
                 let player = game.players[playerIndex];
-                let playerHand = Hand.prototype.copy(player.hand);
+                let playerHand = Hand(player.hand);
                 playerHand.removeCard(cardPlayed)//remove card from player's hand
-                let middlePile = MiddlePile.prototype.copy(game.middlePile)
+                let middlePile = MiddlePile(game.middlePile)
                 middlePile.addCard(cardPlayed)//add card to middle pile
 
                 game.next()
@@ -90,7 +91,7 @@ function BackendServer() {
                     io.emit(Constants.events.ROUND_OVER, winningPlayer)
                 }
                 socket.emit(Constants.events.CARD_PLAYED_CONFIRMED)
-                io.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//tell clients that a card was played so that it will get displayed
+                io.emit(Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
                 io.emit(Constants.events.UPDATE_GAME, game)
                 database.saveGame(game)
             }

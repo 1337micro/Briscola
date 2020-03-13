@@ -5,55 +5,68 @@ import { MiddlePile } from './MiddlePile.js'
 import { Constants } from './Constants.js'
 function Game()
 {
-    this.middlePile = new MiddlePile();
-    this.deck = new Deck();
-    this.deck.generateDeck();
-    this.deck.shuffle();
-
-    this.player1 = new Player(new Hand([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]))
-    this.player2 = new Player(new Hand([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]))
-    this.players = [this.player1, this.player2]
-    this.trumpCard = this.drawTrumpCard()
-
-    this.firstPlayerToActByIndex = 0
-    this.currentPlayerToActByIndex = this.firstPlayerToActByIndex
-    this.playerForClientSide;
-    //stored in session this.playerIndexForClientSide;//set in backend before sending off the first game object
+    let state = {
+        middlePile: MiddlePile(),
+        deck: Deck()
+    }
+    let game = Object.assign({},
+        gameLogicController(state)
+    )
+    return game;
+    //stored in session state.playerIndexForClientSide;//set in backend before sending off the first game object
 }
-Game.prototype.drawTrumpCard = function(){
-    let card = this.deck.drawCard()
-    this.deck.cards.unshift(card)//add trump card back to the end of the deck
-    return card
-}
-Game.prototype.next = function()
+
+function gameLogicController(state)
 {
-    if(!this.isRoundOver())
-    {
-        this.currentPlayerToActByIndex++;
+    return{
+        init: function()
+        {
+            state.deck.generateDeck();
+            state.deck.shuffle();
+            const hand1 = Hand({cards:[state.deck.drawCard(), state.deck.drawCard(), state.deck.drawCard()]})
+            const hand2 = Hand({cards:[state.deck.drawCard(), state.deck.drawCard(), state.deck.drawCard()]})
+            state.player1 = Player({hand:hand1})
+            state.player2 = Player({hand:hand2})
+            state.players = [state.player1, state.player2]
+            state.trumpCard = state.deck.drawTrumpCard()
+
+            state.firstPlayerToActByIndex = 0
+            state.currentPlayerToActByIndex = state.firstPlayerToActByIndex
+            state.playerForClientSide;
+        },
+        next: function()
+        {
+            if(!state.isRoundOver())
+            {
+                state.currentPlayerToActByIndex++;
+            }
+        },
+        isRoundOver: function()
+        {
+            return state.middlePile.isPileComplete();
+        },
+        getWinningPlayerIndex : function()
+        {
+            return state.middlePile.decideWinningCardIndex()
+        },
+        getWinningPlayer : function()
+        {
+            return state.players[state.middlePile.decideWinningCardIndex()]
+        },
+        autoSetNextToAct : function()
+        {
+            state.currentPlayerToActByIndex = state.getWinningPlayerIndex()
+        },
+        dealNextCardToAllPlayers : function()
+        {
+            state.players.forEach((player)=>
+            {
+                let nextCard = state.deck.drawCard()
+                player.hand.addCard(nextCard)
+            })
+        }
     }
 }
-Game.prototype.isRoundOver = function()
-{
-    return this.middlePile.isPileComplete();
-}
-Game.prototype.getWinningPlayerIndex = function()
-{
-    return this.middlePile.decideWinningCardIndex()
-}
-Game.prototype.getWinningPlayer = function()
-{
-    return this.players[this.middlePile.decideWinningCardIndex()]
-}
-Game.prototype.autoSetNextToAct = function()
-{
-    this.currentPlayerToActByIndex = this.getWinningPlayerIndex()
-}
-Game.prototype.dealNextCardToAllPlayers = function()
-{
-    this.players.forEach((player)=>
-    {
-        let nextCard = this.deck.drawCard()
-        player.hand.addCard(nextCard)
-    })
-}
+
+
 export { Game }

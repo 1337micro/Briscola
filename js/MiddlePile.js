@@ -8,61 +8,85 @@ import {CardList} from "./CardList";
  * @param cards An array of Card objects. ORDER MATTERS! The first card should be the first one that was played
  * @constructor
  */
-function MiddlePile(cards = [])
+function MiddlePile(cards =[])
 {
-    Pile.call(this, cards)
-}
-MiddlePile.prototype.reset = function()
-{
-    Pile.prototype.reset.call(this)
-}
-/**
- * Return true if the middlePile has the same number of cards as there are players (meaning every player has played), false otherwise
- * @returns {boolean}
- */
-MiddlePile.prototype.isPileComplete = function()
-{
-    return this.cards.length === Constants.gameConstants.NUMBER_OF_PLAYERS;
-}
-MiddlePile.prototype.addCard = function(card)
-{
-    if(this.isPileComplete())
-    {
-        throw new MiddlePileFullError();
+    let state={
+        cards: cards
     }
-    else
-    {
-        Pile.prototype.addCard.call(this, card)
-    }
+    return Object.assign({}, Pile(state), middlePileReseter(state), middlePileFullChecker(state),
+        middlePileAdder(state),winnerDecider(state))
 }
-MiddlePile.prototype.decideWinningCard = function()
+function middlePileReseter(state)
 {
-    if(!this.isPileComplete())
-    {
-        throw new MiddlePileIncompleteError()
-    }
-    else
-    {
-        let winningCard = this.cards[0]
-
-
-        for(let i = 1; i<this.cards.length; i++)
+    return {
+        reset: function()
         {
-            let otherCard = this.cards[i]
-
-            if(winningCard.suit === otherCard.suit &&
-                Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(otherCard.rank) <  Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(winningCard.rank))
+            if(!this.isPileComplete())
             {
-                winningCard = otherCard;
+                console.error("Warning, reseting incomplete middle pile")
+            }            
+            state.cards.reset()
+        }
+    }
+}
+function middlePileFullChecker(state)
+{
+    return{
+        isPileComplete: function()
+        {
+            return state.cards.length === Constants.gameConstants.NUMBER_OF_PLAYERS;
+        }
+    }
+}
+function middlePileAdder(state)
+{
+    return {
+        addCard: function(card)
+        {
+            if(this.isPileComplete())
+            {
+                throw new MiddlePileFullError();
+            }
+            else
+            {
+                state.cards.push(card)
             }
         }
-
-        return winningCard;
     }
 }
-MiddlePile.prototype.decideWinningCardIndex = function()
+function winnerDecider(state)
 {
-    return CardList.prototype.indexOfCard.call(this, this.decideWinningCard());
+    return {
+        decideWinningCard: function()
+        {
+            if(!this.isPileComplete())
+            {
+                throw new MiddlePileIncompleteError()
+            }
+            else
+            {
+                let winningCard = state.cards[0]
+
+
+                for(let i = 1; i<state.cards.length; i++)
+                {
+                    let otherCard = state.cards[i]
+
+                    if(winningCard.suit === otherCard.suit &&
+                        Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(otherCard.rank) <  Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(winningCard.rank))
+                    {
+                        winningCard = otherCard;
+                    }
+                }
+
+                return winningCard;
+            }
+        },
+        decideWinningCardIndex: function()
+        {
+            return this.indexOfCard(this.decideWinningCard());
+        }
+    }
 }
 
 export { MiddlePile }

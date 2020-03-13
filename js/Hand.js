@@ -2,38 +2,31 @@ import {HandEmptyError, HandFullError, HandDoesNotContainCardError} from "./erro
 import { Constants } from './Constants.js'
 import {CardList} from "./CardList";
 
-function Hand(cards = [])
+function Hand(state)
 {
-  CardList.call(this, cards)
+    let state=
+        {
+            cards:CardList()
+        }
+  return Object.assign({}, handAdder(state))
 }
-Hand.prototype.removeCard = function(card)
+
+function handAdder(state)
 {
-  if(this.cards.length === 0)
-  {
-    throw new HandEmptyError();
-  }
-  else
-  {
-      let indexOfCardInHand = CardList.prototype.indexOfCard.call(this, card);
-      if(indexOfCardInHand === -1)
-      {
-        throw new HandDoesNotContainCardError();
-      }
-      else
-      {
-          this.cards.splice(indexOfCardInHand, 1);
-      }
-  }
-}
-Hand.prototype.addCard = function(card)
-{
-    if(this.cards.length === Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND)
-    {
-        throw new HandFullError();
-    }
-    else
-    {
-        this.cards.push(card)
+    return{
+        //overwrites addCard from CardList because we need custom logic for the hand to check if hand is full
+        addCard: function(card)
+        {
+            if(state.cards.length === Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND)
+            {
+                throw new HandFullError();
+            }
+            else
+            {
+                state.cards.push(card)
+            }
+        }
     }
 }
+
 export { Hand }

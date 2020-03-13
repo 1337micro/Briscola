@@ -1,7 +1,9 @@
 "use strict";
 function Card(rank, suit)
 {
-  this.rank = rank
-  this.suit = suit
+  return {
+    rank: rank,
+    suit: suit
+  }
 }
 export { Card }

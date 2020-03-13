@@ -5,26 +5,11 @@ import { CardList } from "./CardList";
  * @param cards an array of card objects
  * @constructor
  */
-function Pile(cards = [])
+function Pile(cards=[])
 {
-    CardList.call(this, cards);
-}
-Pile.prototype.addCard = function(card)
-{
-    this.cards.push(card)
-}
-Pile.prototype.addCards = function(cards)
-{
-    cards.forEach((card)=>{
-        this.addCard(card)
-    })
-}
-Pile.prototype.reset = function()
-{
-    if(!this.isPileComplete())
-    {
-        console.error("Warning: clearing an incomplete middlePile of cards")
+    let state = {
+        cards: cards
     }
-    this.cards.clear()
+    return Object.assign({}, CardList(state))
 }
 export { Pile }

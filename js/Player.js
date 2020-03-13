@@ -1,12 +1,15 @@
 "use strict";
 import {Pile} from "./Pile";
+import {Hand} from "./Hand";
 
-function Player(hand, socketId)
+function Player()
 {
-  this.hand = hand;
-  this.socketId = socketId;
-
-  this.pile = new Pile();
+  let state = {
+    hand: Hand(),
+    socketId: undefined,
+    pile: Pile()
+  }
+  return Object.assign({})
 }
 
 export { Player }
