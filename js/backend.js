@@ -1,6 +1,8 @@
 "use strict";
-var path = require('path');
+import {Hand} from "./Hand";
+
 var cloneDeep = require('lodash.clonedeep');
+const database = require('./database.js')
 const express = require('express')
 const expressApp = express();
 import { Constants } from './Constants.js'
@@ -12,6 +14,7 @@ const io = require('socket.io')(http);
 
 
 import { Game } from "./Game.js"
+import {MiddlePile} from "./MiddlePile";
 
 var session = require("express-session")({
     secret: "my-secret",
@@ -33,55 +36,52 @@ io.use(sharedsession(session, {
 let game = new Game()
 function BackendServer() {
     expressApp.use(express.static(__dirname))
-
+    database.insertNewGame(game)//automaticall assigns game._id
     io.on('connection', function (socket) {
         console.log('a user connected', socket.id);
         let session = socket.handshake.session;
         socket.on(Constants.events.REQUEST_GAME_START, function(){
-            if (socket.handshake.session.game != undefined) {
-                //return existing game
-                socket.emit(Constants.events.GAME_START, socket.handshake.session.game);
+            let playerIndex;
+            if (game.players[0].socketId == undefined) {
+                playerIndex = 0;
             }
-            else {
-                if (game.players[0].socketId == undefined) {
-
-                    game.playerIndexForClientSide = 0;
-                    game.currentPlayerToActByIndex = 0;
-                    game.players[0].socketId = socket.id;
-                    socket.handshake.session.game = cloneDeep(game);
-                }
-                else if (game.players[1].socketId == undefined) {
-                    //len 1
-                    game.playerIndexForClientSide = 1;
-                    game.currentPlayerToActByIndex = 0;
-                    game.players[1].socketId = socket.id;
-                    socket.handshake.session.game = cloneDeep(game);
-
-                }
-                socket.handshake.session.save()
-                socket.emit(Constants.events.GAME_START, socket.handshake.session.game);
+            else if (game.players[1].socketId == undefined) {
+                //len 1
+                playerIndex = 1;
             }
+            session.playerIndex = playerIndex
+            session.gameId = game._id
+
+            game.players[playerIndex].socketId = socket.id;
+            game.playerForClientSide = game.players[playerIndex]
+            game = cloneDeep(game)
+
+            database.saveGame(game)
+            socket.emit(Constants.events.GAME_START, game);
+
         })
-        socket.on(Constants.events.CARD_PLAYED, function(cardPlayed)
+        socket.on(Constants.events.CARD_PLAYED, async function(cardPlayed)
         {
-            if(socket.handshake.session.game == undefined)
+            const gameFromDb = await database.getGame(socket.handshake.session.gameId);
+            if(gameFromDb == undefined)
             {
                 console.error("Undefined game?")
             }
-            if(socket.handshake.session.game.currentPlayerToActByIndex === socket.handshake.session.game.playerIndexForClientSide)
+            if(gameFromDb.currentPlayerToActByIndex === session.playerIndex)
             {
                 //player is allowed to act (backend check)
-                let game = socket.handshake.session.game;
-                let playerIndex = game.playerIndexForClientSide;
+                let game = Game.prototype.copy(gameFromDb);
+                let playerIndex = session.playerIndex;
                 let player = game.players[playerIndex];
-                let playerHand = player.hand;
+                let playerHand = Hand.prototype.copy(player.hand);
                 playerHand.removeCard(cardPlayed)//remove card from player's hand
-                game.middlePile.addCard(cardPlayed)//add card to middle pile
+                let middlePile = MiddlePile.prototype.copy(game.middlePile)
+                middlePile.addCard(cardPlayed)//add card to middle pile
 
                 game.next()
+
                 if(game.isRoundOver())
                 {
-                    game.autoSetNextToAct()
                     let winningPlayer = game.getWinningPlayer()
                     winningPlayer.pile.addCards(game.middlePile.cards)
                     game.middlePile.reset()
@@ -89,8 +89,14 @@ function BackendServer() {
                     game.dealNextCardToAllPlayers()
                     io.emit(Constants.events.ROUND_OVER, winningPlayer)
                 }
-                io.emit(Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
+                socket.emit(Constants.events.CARD_PLAYED_CONFIRMED)
+                io.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//tell clients that a card was played so that it will get displayed
                 io.emit(Constants.events.UPDATE_GAME, game)
+                database.saveGame(game)
+            }
+            else
+            {
+                socket.emit(Constants.events.CARD_PLAYED_REJECTED)
             }
             console.log(cardPlayed)
         })
@@ -98,7 +104,13 @@ function BackendServer() {
             console.log('user disconnected');
         });
     });
-
+    function emitUpdateGame(game)
+    {
+        game.players.forEach(function (player, index) {
+            const deepCopyGame = cloneDeep(game)
+            io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
+        })
+    }
     http.listen(3000, function () {
         console.log('listening on *:3000');
     });

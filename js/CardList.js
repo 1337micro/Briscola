@@ -1,7 +1,7 @@
 "use strict";
 import { CardNotInCardListError} from "./errors/CardListErrors";
 
-function CardList(cards = [])
+function CardList(state)
 {
     this.cards = cards;
 }

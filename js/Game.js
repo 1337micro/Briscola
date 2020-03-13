@@ -5,7 +5,6 @@ import { MiddlePile } from './MiddlePile.js'
 import { Constants } from './Constants.js'
 function Game()
 {
-    this.gameState = Constants.gameStates.NORMAL_ROUND;
     this.middlePile = new MiddlePile();
     this.deck = new Deck();
     this.deck.generateDeck();
@@ -18,7 +17,8 @@ function Game()
 
     this.firstPlayerToActByIndex = 0
     this.currentPlayerToActByIndex = this.firstPlayerToActByIndex
-    this.playerIndexForClientSide;//set in backend before sending off the first game object
+    this.playerForClientSide;
+    //stored in session this.playerIndexForClientSide;//set in backend before sending off the first game object
 }
 Game.prototype.drawTrumpCard = function(){
     let card = this.deck.drawCard()

@@ -31,6 +31,10 @@ function Deck(cards = [])
 }
 
 }
+Deck.prototype.copy = function(deck)
+{
+
+}
 Deck.prototype.drawCard = function()
 {
     if(this.cards.length === 0)

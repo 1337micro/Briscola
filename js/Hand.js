@@ -6,7 +6,6 @@ function Hand(cards = [])
 {
   CardList.call(this, cards)
 }
-
 Hand.prototype.removeCard = function(card)
 {
   if(this.cards.length === 0)

@@ -4,18 +4,20 @@ import { Constants } from './Constants.js'
 const socket = io("http://localhost:3000")
 function _onCardPress(arg, game)
 {
-
     const cardPressed = arg.currentTarget.card
-    if(game.playerIndexForClientSide === game.currentPlayerToActByIndex)
+    socket.on(Constants.events.CARD_PLAYED_CONFIRMED)
     {
         //make sprite invisible
         arg.currentTarget.visible = false;
         //remove sprite from visible screen
         arg.currentTarget.y = -100
-        socket.emit(Constants.events.CARD_PLAYED, cardPressed)
     }
-//TODO make the sprite no longer interactive
-    console.log("pressed")
+    socket.on(Constants.events.CARD_PLAYED_REJECTED)
+    {
+        console.error("Cannot play your card, it is not your turn")
+    }
+
+    socket.emit(Constants.events.CARD_PLAYED, cardPressed)
 }
 
 function awaitOpponent()

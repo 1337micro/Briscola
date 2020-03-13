@@ -20,7 +20,7 @@ async function start()
     //add the card to the middlePile
       addPileCard(cardPlayed)
   })
-  const player = game.players[game.playerIndexForClientSide]
+  const player = game.playerForClientSide
   const trumpCard = game.trumpCard
   //let trumpCard = await getTrumpCard()
 
