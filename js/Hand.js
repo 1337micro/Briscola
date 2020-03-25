@@ -2,13 +2,12 @@ import {HandEmptyError, HandFullError, HandDoesNotContainCardError} from "./erro
 import { Constants } from './Constants.js'
 import {CardList} from "./CardList";
 
-function Hand(state)
+function Hand(handState = {})
 {
-    let state=
-        {
-            cards:CardList()
-        }
-  return Object.assign({}, handAdder(state))
+    let state={
+        cards: handState.cards
+    }
+  return Object.assign(state, CardList(state), handAdder(state))
 }
 
 function handAdder(state)

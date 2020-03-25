@@ -8,12 +8,10 @@ import {CardList} from "./CardList";
  * @param cards An array of Card objects. ORDER MATTERS! The first card should be the first one that was played
  * @constructor
  */
-function MiddlePile(cards =[])
+function MiddlePile(middlePileState = {})
 {
-    let state={
-        cards: cards
-    }
-    return Object.assign({}, Pile(state), middlePileReseter(state), middlePileFullChecker(state),
+    let state={cards:middlePileState.cards}
+    return Object.assign(state, Pile(state), middlePileReseter(state), middlePileFullChecker(state),
         middlePileAdder(state),winnerDecider(state))
 }
 function middlePileReseter(state)

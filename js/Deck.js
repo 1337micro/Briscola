@@ -2,10 +2,11 @@ import { Card } from './Card.js'
 import { suits } from './Suits.js'
 import {CardList} from "./CardList";
 import {DeckEmptyError} from "./errors/DeckErrors";
-function Deck() {
+function Deck(deckState = {}) {
     let state = {
-    }
-    return Object.assign({}, CardList(state), generator(state), shuffler(state), drawer(state), drawerForTrumpCard(state))
+        cards: deckState.cards
+    };
+    return Object.assign(state, CardList(state), generator(state), shuffler(state), drawer(state), drawerForTrumpCard(state))
 }
     function generator(state)
     {
@@ -36,7 +37,7 @@ function shuffler(state)
           var j, x, i;
           for (i = state.cards.length - 1; i > 0; i--) {
               j = Math.floor(Math.random() * (i + 1));
-              x = this.cards[i];
+              x = state.cards[i];
               state.cards[i] = state.cards[j];
               state.cards[j] = x;
           }
@@ -65,7 +66,7 @@ function drawerForTrumpCard(state)
     return{
         drawTrumpCard: function()
         {
-            let card = this.drawCard()
+            let card = state.drawCard()
             state.cards.unshift(card)//add trump card back to the end of the deck
             return card
         }

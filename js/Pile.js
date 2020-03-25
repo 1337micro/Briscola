@@ -5,11 +5,11 @@ import { CardList } from "./CardList";
  * @param cards an array of card objects
  * @constructor
  */
-function Pile(cards=[])
+function Pile(pileState = {})
 {
     let state = {
-        cards: cards
+        cards:pileState.cards
     }
-    return Object.assign({}, CardList(state))
+    return Object.assign(state, CardList(state))
 }
 export { Pile }

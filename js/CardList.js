@@ -2,14 +2,14 @@
 import { CardNotInCardListError} from "./errors/CardListErrors";
 import {HandDoesNotContainCardError, HandEmptyError} from "./errors/HandErrors";
 
-function CardList()
+function CardList(cardState = {})
 {
     let state =
     {
-        cards: []
+        cards: cardState.cards || []
     }
 
-    return Object.assign({}, indexer(state), remover(state), adder(state), reseter(state))
+    return Object.assign(state, indexer(state), remover(state), adder(state), reseter(state))
 }
 function indexer(state)
 {

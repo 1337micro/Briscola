@@ -15,6 +15,7 @@ const io = require('socket.io')(http);
 
 import { Game } from "./Game.js"
 import {MiddlePile} from "./MiddlePile";
+import {Player} from "./Player";
 
 var session = require("express-session")({
     secret: "my-secret",
@@ -74,7 +75,7 @@ function BackendServer() {
                 let game = Game(gameFromDb);
                 let playerIndex = session.playerIndex;
                 let player = game.players[playerIndex];
-                let playerHand = Hand(player.hand);
+                let playerHand = player.hand;
                 playerHand.removeCard(cardPlayed)//remove card from player's hand
                 let middlePile = MiddlePile(game.middlePile)
                 middlePile.addCard(cardPlayed)//add card to middle pile

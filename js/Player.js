@@ -2,14 +2,14 @@
 import {Pile} from "./Pile";
 import {Hand} from "./Hand";
 
-function Player()
+function Player(playerState = {})
 {
-  let state = {
-    hand: Hand(),
+  let state = Object.assign({
+    hand: Hand(playerState.hand),
     socketId: undefined,
-    pile: Pile()
-  }
-  return Object.assign({})
+    pile: Pile(playerState.pile)
+  })
+  return Object.assign(state)
 }
 
 export { Player }
