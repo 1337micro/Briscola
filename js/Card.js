@@ -1,9 +1,18 @@
 "use strict";
-function Card(rank, suit)
+function Card(cardState = {})
 {
+  let state = {
+    rank: cardState.rank,
+    suit: cardState.suit
+  }
+  return Object.assign(state, equals(state))
+}
+function equals(state){
   return {
-    rank: rank,
-    suit: suit
+    equals: function(otherCard)
+    {
+      return state.rank === otherCard.rank && state.suit === otherCard.suit
+    }
   }
 }
 export { Card }

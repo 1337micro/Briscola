@@ -5,11 +5,24 @@ import {CardList} from "./CardList";
 function Hand(handState = {})
 {
     let state={
-        cards: handState.cards
+        cards: handState.cards || []
     }
   return Object.assign(state, CardList(state), handAdder(state))
 }
-
+function equals(state)
+{
+    return {
+        equals: function(otherHand)
+        {
+            return state.cards.length === otherHand.cards.length && //lenth of hands are the same
+                state.cards.every(cardInHand => { //for every card in this hand
+                    return otherHand.cards.some(cardInOtherHand=>{//there is at least one card
+                        return cardInHand.equals(cardInOtherHand)//that is equal to the card in this hand
+                    })
+                })
+        }
+    }
+}
 function handAdder(state)
 {
     return{

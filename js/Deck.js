@@ -17,7 +17,7 @@ function Deck(deckState = {}) {
                 for(let i = 1; i<=10; i++)
                 {
                     Object.keys(enumSuits).forEach(suit => {
-                        const card = Card(i, enumSuits[suit])
+                        const card = Card({rank:i, suit:enumSuits[suit]})
                         state.cards.push(card)
                     })
                 }

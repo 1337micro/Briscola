@@ -19,11 +19,11 @@ function middlePileReseter(state)
     return {
         reset: function()
         {
-            if(!this.isPileComplete())
+            if(!state.isPileComplete())
             {
                 console.error("Warning, reseting incomplete middle pile")
             }            
-            state.cards.reset()
+            state.cards = []
         }
     }
 }
@@ -41,7 +41,7 @@ function middlePileAdder(state)
     return {
         addCard: function(card)
         {
-            if(this.isPileComplete())
+            if(state.isPileComplete())
             {
                 throw new MiddlePileFullError();
             }
@@ -57,7 +57,7 @@ function winnerDecider(state)
     return {
         decideWinningCard: function()
         {
-            if(!this.isPileComplete())
+            if(!state.isPileComplete())
             {
                 throw new MiddlePileIncompleteError()
             }
@@ -82,7 +82,7 @@ function winnerDecider(state)
         },
         decideWinningCardIndex: function()
         {
-            return this.indexOfCard(this.decideWinningCard());
+            return state.indexOfCard(state.decideWinningCard());
         }
     }
 }

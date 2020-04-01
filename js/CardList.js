@@ -1,9 +1,16 @@
 "use strict";
+import {Card} from './Card'
 import { CardNotInCardListError} from "./errors/CardListErrors";
 import {HandDoesNotContainCardError, HandEmptyError} from "./errors/HandErrors";
 
 function CardList(cardState = {})
 {
+    if(cardState.cards)
+    {
+        cardState.cards = cardState.cards.map((card)=>{
+            return Card({rank: card.rank, suit:card.suit})
+        })
+    }
     let state =
     {
         cards: cardState.cards || []

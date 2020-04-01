@@ -1,16 +1,22 @@
 import { Deck } from './Deck.js'
 import { Hand } from './Hand.js'
 import { Player } from './Player.js'
+import { Card } from './Card.js'
 import { MiddlePile } from './MiddlePile.js'
 import { Constants } from './Constants.js'
 function Game(gameState = {})
 {
     let state = {}
+    state._id = gameState._id //game id
     state.middlePile = MiddlePile(gameState.middlePile)
     state.deck = Deck(gameState.deck)
     state.player1 = Player(gameState.player1)
-    state.player2 = Player(gameState.player1)
+    state.player2 = Player(gameState.player2)
     state.players=[state.player1, state.player2]
+    state.trumpCard = Card(gameState.trumpCard)
+    state.firstPlayerToActByIndex = gameState.firstPlayerToActByIndex
+    state.currentPlayerToActByIndex = gameState.currentPlayerToActByIndex
+    state.playerForClientSide = gameState.playerForClientSide
 
     let game = Object.assign(state,
         gameLogicController(state)

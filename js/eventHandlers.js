@@ -5,19 +5,19 @@ const socket = io("http://localhost:3000")
 function _onCardPress(arg, game)
 {
     const cardPressed = arg.currentTarget.card
-    socket.on(Constants.events.CARD_PLAYED_CONFIRMED)
-    {
-        //make sprite invisible
-        arg.currentTarget.visible = false;
-        //remove sprite from visible screen
-        arg.currentTarget.y = -100
-    }
-    socket.on(Constants.events.CARD_PLAYED_REJECTED)
-    {
-        console.error("Cannot play your card, it is not your turn")
-    }
+    const cardSprite = arg.target
+    socket.on(Constants.events.CARD_PLAYED_CONFIRMED, onCardPlaySuccess)
+    socket.on(Constants.events.CARD_PLAYED_REJECTED, onCardPlayFail)
 
     socket.emit(Constants.events.CARD_PLAYED, cardPressed)
+
+    function onCardPlayFail() {
+        console.error("Cannot play your card, it is not your turn");
+    }
+
+    function onCardPlaySuccess() {
+        cardSprite.parent.removeChild(cardSprite)
+    }
 }
 
 function awaitOpponent()
@@ -76,4 +76,11 @@ function onCardPlayed(cb)
         cb(cardPlayed)
     })
 }
-export { _onCardPress, awaitOpponent, getGame,  requestGameStart, onGameUpdate, onCardPlayed}
+function onRoundOver(cb)
+{
+    socket.on(Constants.events.ROUND_OVER, function(winningPlayer){
+        console.log("round over", winningPlayer)
+        cb(winningPlayer)
+    })
+}
+export { _onCardPress, awaitOpponent, getGame,  requestGameStart, onGameUpdate, onCardPlayed, onRoundOver}

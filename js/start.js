@@ -1,7 +1,7 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
-import { _onCardPress, getGame, requestGameStart, onGameUpdate, onCardPlayed } from './eventHandlers.js'
+import { _onCardPress, getGame, requestGameStart, onGameUpdate, onCardPlayed, onRoundOver } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 let game;
@@ -11,28 +11,46 @@ async function start()
   //let opponent = await awaitOpponent()
   requestGameStart();
   game = await getGame();
+  let middlePileCardSprites = []
   onGameUpdate((newGameObj)=>
   {
       game = newGameObj
+      if(game.playerForClientSide.hand.cards.length === Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND)
+      {
+        removeHandCardSprites(cardSprites)
+        cardSprites = addPlayerHandSprites(game.playerForClientSide)
+      }
+      
   })
   onCardPlayed((cardPlayed)=>
   {
     //add the card to the middlePile
       addPileCard(cardPlayed)
   })
-  const player = game.playerForClientSide
-  const trumpCard = game.trumpCard
+  onRoundOver((winningPlayer)=>
+  {
+    //add the card to the middlePile
+    setTimeout(()=>{
+      removeMiddlePileCardSprites(middlePileCardSprites)
+      middlePileCardSprites.length = 0;
+    }, 2000)
+  })
+  
+
   //let trumpCard = await getTrumpCard()
-
-
-  let cardSprites = _generateCardSprites(player.hand)
-  makeSpritesInteractive(cardSprites, game);
-  _positionCardSprites(cardSprites)
-  _rotateCardSprites(cardSprites)
-  _scaleSpritesDownTo(0.5, cardSprites)
-  addCardSpritesToStage(cardSprites)
-
-  setUpTrumpCard(trumpCard)
+  let cardSprites =addPlayerHandSprites(game.playerForClientSide)
+  function addPlayerHandSprites(player)
+  {
+    let cardSprites = _generateCardSprites(player.hand)
+    makeSpritesInteractive(cardSprites, game)
+    _positionCardSprites(cardSprites)
+    _rotateCardSprites(cardSprites)
+    _scaleSpritesDownTo(0.5, cardSprites)
+    addCardSpritesToStage(cardSprites)
+    return cardSprites
+  }
+ 
+  setUpTrumpCard(game.trumpCard)
   setUpBackOfDeck()
 
   let opponentBackOfCardSprites = _generateOpponentCardSprites();
@@ -63,6 +81,7 @@ function setUpOpponentBackOfCards(opponentBackOfCardSprites)
 function addPileCard(pileCard)
 {
     let pileCardSprite = _generateCardSprite(`../images/${pileCard.rank + pileCard.suit}.png`)
+    middlePileCardSprites.push(pileCardSprite)
     _positionPileCard(pileCardSprite)
     _scaleSpriteDownTo(0.5, pileCardSprite)
     addCardSpriteToStage(pileCardSprite)
@@ -79,6 +98,23 @@ function setUpBackOfDeck()
   _positionBackOfCard(backOfDeckSprite)
   _scaleSpriteDownTo(0.5, backOfDeckSprite)
   addCardSpriteToStage(backOfDeckSprite)
+}
+function _removeSprites(sprites)
+{
+  sprites.forEach((sprite)=>{
+    if(sprite.parent && sprite.parent.removeChild)
+    {
+      sprite.parent.removeChild(sprite)
+    }
+  })
+}
+function removeMiddlePileCardSprites(middlePileCardSprites)
+{
+  _removeSprites(middlePileCardSprites)
+}
+function removeHandCardSprites(handCardSprites)
+{
+  _removeSprites(handCardSprites)
 }
 function _generateOpponentCardSprites()
 {

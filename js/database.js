@@ -41,8 +41,19 @@ async function saveGame(game)
     return client.connect()
         .then(client => {
             const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
-            const savedDocumentConfirmation = collection.save(game)
-            return savedDocumentConfirmation.insertedId
+            const savedDocumentConfirmation = collection.updateOne({_id:game._id}, {
+                $set:{
+                    middlePile: game.middlePile,
+                    deck: game.deck,
+                    player1: game.player1,
+                    player2: game.player2,
+                    players: game.players,
+                    trumpCard: game.trumpCard,
+                    firstPlayerToActByIndex: game.firstPlayerToActByIndex,
+                    currentPlayerToActByIndex: game.currentPlayerToActByIndex
+                }
+            })
+            return savedDocumentConfirmation;
         })
         .catch(reason => console.error(reason))
 }
