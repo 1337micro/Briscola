@@ -30,7 +30,7 @@ function gameLogicController(state)
     return{
         init: function()
         {
-            state.middlePile = MiddlePile()
+            
             state.deck = Deck()
             state.deck.generateDeck();
             state.deck.shuffle();
@@ -44,6 +44,7 @@ function gameLogicController(state)
             state.player2.hand = hand2
             state.players = [state.player1, state.player2]
             state.trumpCard = state.deck.drawTrumpCard()
+            state.middlePile = MiddlePile({trumpCard:state.trumpCard})
 
             state.firstPlayerToActByIndex = 0
             state.currentPlayerToActByIndex = state.firstPlayerToActByIndex
@@ -53,20 +54,24 @@ function gameLogicController(state)
         {
             if(!state.isRoundOver())
             {
-                state.currentPlayerToActByIndex++;
+                state.currentPlayerToActByIndex = (state.currentPlayerToActByIndex + 1) % Constants.gameConstants.NUMBER_OF_PLAYERS;
             }
         },
         isRoundOver: function()
         {
             return state.middlePile.isPileComplete();
         },
+        isLastDeal: function()
+        {
+            return state.deck.cards.length ===0;
+        },
         getWinningPlayerIndex : function()
         {
-            return state.middlePile.decideWinningCardIndex()
+            return (state.firstPlayerToActByIndex + state.middlePile.decideWinningCardIndex()) % Constants.gameConstants.NUMBER_OF_PLAYERS
         },
         getWinningPlayer : function()
         {
-            return state.players[state.middlePile.decideWinningCardIndex()]
+            return state.players[state.getWinningPlayerIndex()]
         },
         autoSetNextToAct : function()
         {

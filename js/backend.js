@@ -89,10 +89,15 @@ function BackendServer() {
                     let winningPlayer = game.getWinningPlayer()
                     let winningPlayerIndex =  game.getWinningPlayerIndex()
                     game.currentPlayerToActByIndex = winningPlayerIndex
+                    game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
                     winningPlayer.pile.addCards(game.middlePile.cards)
                     game.middlePile.reset()
+                    if(!game.isLastDeal())
+                    {
+                        game.dealNextCardToAllPlayers()
+                    }
                     //todo check if game is over
-                    game.dealNextCardToAllPlayers()
+                    
                     io.emit(Constants.events.ROUND_OVER, winningPlayer)
                 }
                 

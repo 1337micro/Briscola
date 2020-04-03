@@ -10,7 +10,8 @@ import {CardList} from "./CardList";
  */
 function MiddlePile(middlePileState = {})
 {
-    let state={cards:middlePileState.cards}
+    let state={cards:middlePileState.cards,
+    trumpCard:middlePileState.trumpCard}
     return Object.assign(state, Pile(state), middlePileReseter(state), middlePileFullChecker(state),
         middlePileAdder(state),winnerDecider(state))
 }
@@ -69,11 +70,37 @@ function winnerDecider(state)
                 for(let i = 1; i<state.cards.length; i++)
                 {
                     let otherCard = state.cards[i]
-
-                    if(winningCard.suit === otherCard.suit &&
-                        Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(otherCard.rank) <  Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(winningCard.rank))
+                    //the winning card is a trump suit
+                    if(winningCard.suit === state.trumpCard.suit)
                     {
+                        //the other card is also trump suit
+                        if(otherCard.suit === state.trumpCard.suit)
+                        {
+                            //the other card is also a trump suit
+                            if(Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(otherCard.rank) <  
+                            Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(winningCard.rank))
+                            {
+                                //the other card is a stronger trump suit
+                                winningCard = otherCard;
+                            }
+                            //the other card is not a trump suit
+                            //do nothing
+                        }
+                    }
+                    //the other card is a trump suit
+                    else if(otherCard.suit === state.trumpCard.suit)
+                    {
+                        //but the winning card isn't,
                         winningCard = otherCard;
+                    }
+                    else
+                    {
+                        //no trump suits
+                        if(winningCard.suit === otherCard.suit &&
+                            Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(otherCard.rank) <  Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(winningCard.rank))
+                        {
+                            winningCard = otherCard;
+                        }
                     }
                 }
 
