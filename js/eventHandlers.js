@@ -36,10 +36,19 @@ function getGame()
 {
     return new Promise(function(resolve, reject)
     {
-        socket.on(Constants.events.GAME_START, function(game)
+        socket.on(Constants.events.GET_GAME, function(game)
         {
-            console.log("Hand recieved", game)
             resolve(game)
+        })
+    })
+}
+function gameStart()
+{
+    return new Promise(function(resolve, reject)
+    {
+        socket.on(Constants.events.GAME_START, function()
+        {            
+            resolve()
         })
     })
 }
@@ -83,4 +92,18 @@ function onRoundOver(cb)
         cb(winningPlayer)
     })
 }
-export { _onCardPress, awaitOpponent, getGame,  requestGameStart, onGameUpdate, onCardPlayed, onRoundOver}
+function onLastDeal(cb)
+{
+    socket.on(Constants.events.LAST_DEAL, function(){
+        console.log("Last round")
+        cb()
+    })
+}
+function onGameOver(cb)
+{
+    socket.on(Constants.events.GAME_OVER, function(game){
+        console.log("game over")
+        cb(game)
+    })
+}
+export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, onGameUpdate, onCardPlayed, onRoundOver, onLastDeal, onGameOver}

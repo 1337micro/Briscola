@@ -63,15 +63,29 @@ function gameLogicController(state)
         },
         isLastDeal: function()
         {
-            return state.deck.cards.length ===0;
+            return state.deck.cards.length - Constants.gameConstants.NUMBER_OF_PLAYERS === 0;
         },
+        isDeckEmpty: function()
+        {
+            return state.deck.cards.length === 0;
+        },
+        /**
+         * winning for the particular round
+         */
         getWinningPlayerIndex : function()
         {
             return (state.firstPlayerToActByIndex + state.middlePile.decideWinningCardIndex()) % Constants.gameConstants.NUMBER_OF_PLAYERS
         },
+        /**
+         * winning for the particular round
+         */
         getWinningPlayer : function()
         {
             return state.players[state.getWinningPlayerIndex()]
+        },
+        isGameOver: function()
+        {
+            return state.deck.cards.length === 0 && state.players.every((player)=>player.hand.cards.length ===0)
         },
         autoSetNextToAct : function()
         {

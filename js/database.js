@@ -2,17 +2,24 @@
 require('dotenv').config()
 const MongoClient = require('mongodb').MongoClient;
 const uri = process.env.DB_HOST_PREFIX + process.env.DB_USER +":" + process.env.DB_PASS+ "@" + process.env.DB_HOST_SUFFIX;
-const client = new MongoClient(uri, { useNewUrlParser: true });
 
+const client = newMongoClient().connect()
+function newMongoClient()
+{
+    return new MongoClient(uri, { useNewUrlParser: true })
+}
 
 async function getGame(id)
 {
-    return client.connect()
+    
+    return client
         .then(client => {
             const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
             return collection.findOne({_id: id})
         })
-        .catch(reason => console.error(reason))
+        .catch(reason => {
+            console.error(reason)
+        })
 }
 
 /**
@@ -22,13 +29,15 @@ async function getGame(id)
  */
 async function insertNewGame(game)
 {
-    return client.connect()
+ 
+    return client
         .then(client => {
             const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
             const savedDocumentConfirmation = collection.insertOne(game)
             return savedDocumentConfirmation.insertedId
         })
         .catch(reason => console.error(reason))
+
 }
 
 /**
@@ -38,7 +47,8 @@ async function insertNewGame(game)
  */
 async function saveGame(game)
 {
-    return client.connect()
+
+    return client
         .then(client => {
             const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
             const savedDocumentConfirmation = collection.updateOne({_id:game._id}, {
@@ -52,7 +62,7 @@ async function saveGame(game)
                     firstPlayerToActByIndex: game.firstPlayerToActByIndex,
                     currentPlayerToActByIndex: game.currentPlayerToActByIndex
                 }
-            })
+            }, {upsert:true} )
             return savedDocumentConfirmation;
         })
         .catch(reason => console.error(reason))
