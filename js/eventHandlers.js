@@ -1,6 +1,5 @@
 "use strict";
 import { Constants } from './Constants.js'
-
 const socket = io("http://briscola.online:3000")
 function _onCardPress(arg, game)
 {
