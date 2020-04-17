@@ -6,6 +6,7 @@ const uri = process.env.DB_HOST_PREFIX + process.env.DB_USER +":" + process.env.
 const client = newMongoClient().connect()
 function newMongoClient()
 {
+    console.log(uri)
     return new MongoClient(uri, { useNewUrlParser: true })
 }
 
