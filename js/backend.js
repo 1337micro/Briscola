@@ -10,13 +10,12 @@ import { Constants } from './Constants.js'
 const http = require('http').createServer(expressApp);
 
 const Server = require('socket.io')
-const io = Server(http, {pingTimeout: 900000});
+const io = Server(http, {pingTimeout: 60});
 
 
 
 import { Game } from "./Game.js"
-import {MiddlePile} from "./MiddlePile";
-import {Player} from "./Player";
+
 
 var session = require("express-session")({
     secret: "my-secret",
@@ -186,6 +185,13 @@ function BackendServer() {
         })
         socket.on('disconnect', function(){
             console.log('user disconnected');
+            game.players.forEach((player)=>{
+                const playerSocketId = player.socketId
+                if(socket.id === playerSocketId)
+                {
+                    emitEvent(game, Constants.events.PLAYER_LEFT)
+                }
+            })
         });
     });
 

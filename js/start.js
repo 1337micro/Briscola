@@ -1,7 +1,7 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
-import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate, onCardPlayed, onRoundOver, onLastDeal, onGameOver } from './eventHandlers.js'
+import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate, onCardPlayed, onRoundOver, onLastDeal, onGameOver, onPlayerLeft } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 let game;
@@ -112,6 +112,9 @@ async function start()
     app.stage.addChild(pointsText)
     app.stage.addChild(winningText)
     app.stage.addChild(refreshPageForNewGame)
+  })
+  onPlayerLeft( ()=>{
+    window.location.reload(true); 
   })
   
 
