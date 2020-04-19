@@ -190,6 +190,8 @@ function BackendServer() {
                 if(socket.id === playerSocketId)
                 {
                     emitEvent(game, Constants.events.PLAYER_LEFT)
+                    game = new Game()
+                    game.init()
                 }
             })
         });
