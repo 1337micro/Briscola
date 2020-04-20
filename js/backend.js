@@ -10,7 +10,7 @@ import { Constants } from './Constants.js'
 const http = require('http').createServer(expressApp);
 
 const Server = require('socket.io')
-const io = Server(http, {pingTimeout: 900000});
+const io = Server(http, {pingTimeout: 10000});
 
 
 
@@ -41,6 +41,15 @@ function BackendServer() {
     expressApp.use(express.static(__dirname))
     database.insertNewGame(game)//automaticall assigns game._id
     io.on('connection', function (socket) {
+        function getSocketBySocketId(socketId)
+        {
+            return io.sockets.connected[socketId]
+        }
+        function isSocketConnected(socketId)
+        {
+            const connectedSocket = getSocketBySocketId(socketId)
+            return (connectedSocket != undefined)
+        }
         function emitEvent(game, event, data)
         {
             game.players.forEach(function (player, index) {
@@ -78,11 +87,30 @@ function BackendServer() {
             socket.emit(Constants.events.GET_GAME, game)
             if(game.players[0].socketId && game.players[1].socketId)
             {
-                //both players joined
-                emitEvent(game, Constants.events.GAME_START);//start game
-                game = new Game()//create new game for next connections
-                game.init()
-                database.insertNewGame(game)//automaticall assigns game._id
+                const isPlayer1Connected = isSocketConnected(game.players[0].socketId)
+                const isPlayer2Connected = isSocketConnected(game.players[1].socketId)
+                if(isPlayer1Connected && isPlayer2Connected)
+                {
+                    //both players joined
+                    emitEvent(game, Constants.events.GAME_START);//start game
+                    game = new Game()//create new game for next connections
+                    game.init()
+                    database.insertNewGame(game)//automaticall assigns game._id
+                }
+                else
+                {
+                    if(!isPlayer1Connected)
+                    {
+                        //player 1 left
+                        game.players[0].socketId = undefined//waits for another player
+                    }
+                    if(!isPlayer2Connected)
+                    {
+                        //player 2 left
+                        game.players[1].socketId = undefined//waits for another player
+                    }
+                }
+                
             }
 
         })
@@ -184,8 +212,27 @@ function BackendServer() {
             }
            
         })
-        socket.on('disconnect', function(){
-            console.log('user disconnected');
+        socket.on('disconnect', async function(){
+            console.log('user with socket id ' + socket.id + 'has disconnected');
+            const socketIdOfPlayerWhoDisconnected = socket.id
+            if(socketIdOfPlayerWhoDisconnected != undefined)
+            {
+                const gamesWithAPlayerThatQuit = await database.getGamesByPlayerSocketId(socketIdOfPlayerWhoDisconnected)
+                gamesWithAPlayerThatQuit.forEach(gameWithAPlayerThatQuit=>{
+                    if(gameWithAPlayerThatQuit.players)
+                    {
+                        gameWithAPlayerThatQuit.players.forEach(player=>{
+                            const playerSocketId = player.socketId
+                            if(isSocketConnected(playerSocketId))
+                            {
+                                console.log("Notified player "+ playerSocketId+ " that their opponent has disconnected")
+                                getSocketBySocketId(playerSocketId).emit(Constants.events.PLAYER_LEFT, socketIdOfPlayerWhoDisconnected)
+                            }
+                        })
+                    }
+                })
+            }
+           
         });
     });
 

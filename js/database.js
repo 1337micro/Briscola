@@ -22,7 +22,22 @@ async function getGame(id)
             console.error(reason)
         })
 }
-
+/**
+ * Get all the games that contain a player with this socketId
+ * @param {String} Player's socketId 
+ */
+async function getGamesByPlayerSocketId(socketId)
+{
+    
+    return client
+        .then(client => {
+            const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
+            return collection.find({players: {$elemMatch:{socketId:socketId}}})
+        })
+        .catch(reason => {
+            console.error(reason)
+        })
+}
 /**
  * Insert a new game and return its ID to persist in user session
  * @param game
@@ -73,3 +88,4 @@ async function saveGame(game)
 module.exports.getGame = getGame;
 module.exports.insertNewGame = insertNewGame;
 module.exports.saveGame = saveGame;
+module.exports.getGamesByPlayerSocketId = getGamesByPlayerSocketId;

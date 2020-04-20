@@ -1,7 +1,7 @@
 "use strict";
 import { Constants } from './Constants.js'
 
-const socket = io("http://66.70.201.142:3000")
+const socket = io("http://briscola.online:3000")
 function _onCardPress(arg, game)
 {
     const cardPressed = arg.currentTarget.card
@@ -106,4 +106,19 @@ function onGameOver(cb)
         cb(game)
     })
 }
-export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, onGameUpdate, onCardPlayed, onRoundOver, onLastDeal, onGameOver}
+function onServerConnectionLost(cb)
+{
+    socket.on('disconnect', function(reason){
+        console.log("Server connection lost", reason)
+        cb(reason)
+    })
+}
+function onOpponentLeft(cb)
+{
+    socket.on(Constants.events.PLAYER_LEFT, function(leavingPlayerSocketId){
+        console.log("Opponent left", leavingPlayerSocketId)
+        cb(leavingPlayerSocketId)
+    })
+}
+export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, onGameUpdate, 
+    onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft}

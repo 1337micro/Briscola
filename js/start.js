@@ -1,7 +1,8 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
-import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate, onCardPlayed, onRoundOver, onLastDeal, onGameOver } from './eventHandlers.js'
+import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate, 
+  onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 let game;
@@ -68,12 +69,7 @@ async function start()
   })
   onGameOver((game)=>{
     //remove all elements
-    app.stage.children.forEach((childSprite)=>{
-      if(childSprite.parent && childSprite.parent.removeChild)
-      {
-        childSprite.parent.removeChild(childSprite)
-      }
-    })
+    removeAllSpritesOnScreen()
     let textFontSize = 24
     let textPositionX = 0
     let textPositionY = Constants.height/2;
@@ -113,10 +109,26 @@ async function start()
     app.stage.addChild(winningText)
     app.stage.addChild(refreshPageForNewGame)
   })
+  onServerConnectionLost((reason)=>{
+    removeAllSpritesOnScreen()
+    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
+    const gameOverText = new PIXI.Text('Server connection lost. Game aborted. ', gameOverStyle);
+    gameOverText.x = Constants.width/2
+    gameOverText.y = Constants.height/2
+    app.stage.addChild(gameOverText)
+  })
+  onOpponentLeft((reason)=>{
+    removeAllSpritesOnScreen()
+    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
+    const gameOverText = new PIXI.Text('Opponent Left. Game aborted. ', gameOverStyle);
+    gameOverText.x = Constants.width/2
+    gameOverText.y = Constants.height/2
+    app.stage.addChild(gameOverText)
+  })
   
 
   //let trumpCard = await getTrumpCard()
-  let cardSprites =addPlayerHandSprites(game.playerForClientSide)
+  let cardSprites = addPlayerHandSprites(game.playerForClientSide)
   function addPlayerHandSprites(player)
   {
     let cardSprites = _generateCardSprites(player.hand)
@@ -365,7 +377,15 @@ function _positionCardSprites(cardSprites)
     return cardSprite
   }
 }
-
+  function removeAllSpritesOnScreen()
+  {
+    app.stage.children.forEach((childSprite)=>{
+      if(childSprite.parent && childSprite.parent.removeChild)
+      {
+        childSprite.parent.removeChild(childSprite)
+      }
+    })
+  }
 function gameLoop(delta)
 {
  scaleToWindow(app.renderer.view)
