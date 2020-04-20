@@ -106,11 +106,4 @@ function onGameOver(cb)
         cb(game)
     })
 }
-function onPlayerLeft(cb)
-{
-    socket.on(Constants.events.PLAYER_LEFT, function(){
-        console.log("Player left")
-        cb()
-    })
-}
-export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, onGameUpdate, onCardPlayed, onRoundOver, onLastDeal, onGameOver, onPlayerLeft}
+export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, onGameUpdate, onCardPlayed, onRoundOver, onLastDeal, onGameOver}
