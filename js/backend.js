@@ -92,6 +92,7 @@ function BackendServer() {
                 if(isPlayer1Connected && isPlayer2Connected)
                 {
                     //both players joined
+                    console.log("Both players joined... Starting game, ", game._id)
                     emitEvent(game, Constants.events.GAME_START);//start game
                     game = new Game()//create new game for next connections
                     game.init()
@@ -102,11 +103,13 @@ function BackendServer() {
                     if(!isPlayer1Connected)
                     {
                         //player 1 left
+                        console.log("Player 1 left before game could be started.. Resetting player 1", game._id)
                         game.players[0].socketId = undefined//waits for another player
                     }
                     if(!isPlayer2Connected)
                     {
                         //player 2 left
+                        console.log("Player 2 left before game could be started.. Resetting player 2", game._id)
                         game.players[1].socketId = undefined//waits for another player
                     }
                 }
