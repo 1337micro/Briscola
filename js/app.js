@@ -16,7 +16,7 @@ let app = new PIXI.Application({
 });
 
 
-app.renderer.backgroundColor = 0x66CD00 // green
+app.renderer.backgroundColor = 0xFFFFFF // white
 
 app.renderer.view.style.position = "absolute";
 app.renderer.view.style.display = "block";

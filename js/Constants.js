@@ -14,14 +14,10 @@ const Constants = {
         LAST_DEAL: "LAST_DEAL",
         GAME_START: "GAME_START",
         GET_GAME:"GET_GAME",
-        TRUMP_CARD: "TRUMP_CARD"
+        TRUMP_CARD: "TRUMP_CARD",
+
+        REDIRECT: "REDIRECT"
     },
-    gameStates:
-      {
-        NORMAL_ROUND: "NORMAL_ROUND",
-
-
-      },
       gameConstants:
       {
           NUMBER_OF_PLAYERS : 2,

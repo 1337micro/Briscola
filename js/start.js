@@ -2,19 +2,22 @@
 import { app } from './app.js'
 import { Constants } from './Constants.js'
 import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate, 
-  onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft } from './eventHandlers.js'
+  onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 let game;
 
 async function start()
 {
-  const awaitingOpponentTextStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
-  let awaitingOpponentText = new PIXI.Text("Waiting for opponent... Please be patient.", awaitingOpponentTextStyle)
+  onRedirect((newUrl)=>{
+    window.location.assign(newUrl)
+  })
+  
+  const awaitingOpponentTextStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
+  let awaitingOpponentText = new PIXI.Text("Share the link in your address bar with your opponent to play", awaitingOpponentTextStyle)
   app.stage.addChild(awaitingOpponentText)
   requestGameStart();
   game = await getGame();
-  await gameStart();
   if(awaitingOpponentText.parent && awaitingOpponentText.parent.removeChild)
   {
     awaitingOpponentText.parent.removeChild(awaitingOpponentText)
@@ -74,7 +77,7 @@ async function start()
     let textPositionX = 0
     let textPositionY = Constants.height/2;
 
-    const gameOverStyle = {fontFamily : 'Arial', fontSize: textFontSize, fill : 0xff1010, align : 'center'}
+    const gameOverStyle = {fontFamily : 'Arial', fontSize: textFontSize, align : 'center'}
     const gameOverText = new PIXI.Text('Game over.', gameOverStyle);
     gameOverText.x = textPositionX
     gameOverText.y = textPositionY
@@ -100,32 +103,49 @@ async function start()
     winningText.x = textPositionX
     winningText.y = textPositionY
     textPositionY = textPositionY + textFontSize + 5;
-    const refreshPageForNewGame = new PIXI.Text('Refresh page for new game', gameOverStyle);
-    refreshPageForNewGame.x = textPositionX
-    refreshPageForNewGame.y = textPositionY
     textPositionY = textPositionY + textFontSize + 5;
     app.stage.addChild(gameOverText)
     app.stage.addChild(pointsText)
     app.stage.addChild(winningText)
-    app.stage.addChild(refreshPageForNewGame)
+    showNewGameButton()
   })
   onServerConnectionLost((reason)=>{
     removeAllSpritesOnScreen()
-    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
+    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
     const gameOverText = new PIXI.Text('Server connection lost. Game aborted. ', gameOverStyle);
     gameOverText.x = Constants.width/2
     gameOverText.y = Constants.height/2
     app.stage.addChild(gameOverText)
+
+    showNewGameButton()
   })
   onOpponentLeft((reason)=>{
     removeAllSpritesOnScreen()
-    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
+    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
     const gameOverText = new PIXI.Text('Opponent Left. Game aborted. ', gameOverStyle);
     gameOverText.x = Constants.width/2
     gameOverText.y = Constants.height/2
     app.stage.addChild(gameOverText)
+
+    showNewGameButton()
   })
-  
+  function redirectToNewGame()
+  {
+    window.location.assign("/new")
+  }
+  function showNewGameButton()
+  {
+    const gameOverStyle = {fontFamily : 'Arial', fontSize: textFontSize, align : 'center'}
+    const refreshPageForNewGame = new PIXI.Text('CLICK HERE FOR A NEW GAME', gameOverStyle);
+    refreshPageForNewGame.buttonMode = true
+    refreshPageForNewGame.interactive = true
+    refreshPageForNewGame.backgroundColor = 0x000000
+    refreshPageForNewGame.x = textPositionX
+    refreshPageForNewGame.y = textPositionY
+    refreshPageForNewGame.tap = redirectToNewGame
+    refreshPageForNewGame.click = redirectToNewGame
+    app.stage.addChild(refreshPageForNewGame)
+  }
 
   //let trumpCard = await getTrumpCard()
   let cardSprites = addPlayerHandSprites(game.playerForClientSide)
@@ -154,7 +174,7 @@ function removePlayerToActText(playerToActText)
 }
 function generatePlayerToActText(game)
 {
-  const playerMoveTextStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
+  const playerMoveTextStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
 
   let playerToActText;
   if(isMyTurnToAct(game))

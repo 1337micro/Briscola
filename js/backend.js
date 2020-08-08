@@ -1,6 +1,4 @@
 "use strict";
-import {Hand} from "./Hand";
-
 var cloneDeep = require('lodash.clonedeep');
 const database = require('./database.js')
 const express = require('express')
@@ -15,8 +13,6 @@ const io = Server(http, {pingTimeout: 10000});
 
 
 import { Game } from "./Game.js"
-import {MiddlePile} from "./MiddlePile";
-import {Player} from "./Player";
 
 var session = require("express-session")({
     secret: "my-secret",
@@ -35,11 +31,10 @@ io.use(sharedsession(session, {
     autoSave:true
 }));
 
-let game = Game()
-game.init()
+
 function BackendServer() {
     expressApp.use(express.static(__dirname))
-    database.insertNewGame(game)//automaticall assigns game._id
+
     io.on('connection', function (socket) {
         function getSocketBySocketId(socketId)
         {
@@ -69,57 +64,85 @@ function BackendServer() {
         console.log('a user connected', socket.id);
         let session = socket.handshake.session;
         socket.on(Constants.events.REQUEST_GAME_START, async function(){
-            let playerIndex;
-            if (game.players[0].socketId == undefined) {
-                playerIndex = 0;
-            }
-            else if (game.players[1].socketId == undefined) {
-                //len 1
-                playerIndex = 1;
-            }
-            session.playerIndex = playerIndex
-            session.gameId = game._id
-
-            game.players[playerIndex].socketId = socket.id;
-            game.playerForClientSide = game.players[playerIndex]
-
-            database.saveGame(game)
-            socket.emit(Constants.events.GET_GAME, game)
-            if(game.players[0].socketId && game.players[1].socketId)
+            if(socket.handshake.query.gameId)
             {
-                const isPlayer1Connected = isSocketConnected(game.players[0].socketId)
-                const isPlayer2Connected = isSocketConnected(game.players[1].socketId)
-                if(isPlayer1Connected && isPlayer2Connected)
+                let game = await database.getGame(socket.handshake.query.gameId);
+                if(game.started)
                 {
-                    //both players joined
-                    console.log("Both players joined... Starting game, ", game._id)
-                    emitEvent(game, Constants.events.GAME_START);//start game
-                    game = new Game()//create new game for next connections
-                    game.init()
-                    database.insertNewGame(game)//automaticall assigns game._id
+                    //this game already started. The user refreshed the page on an existing game. Redirecting to new game
+                    socket.emit(Constants.events.REDIRECT, "/new")
+                    return;
                 }
-                else
+                let playerIndex;
+                if (game.players[0].socketId == undefined) {
+                    playerIndex = 0;
+                    game.player1.socketId = socket.id
+                }
+                else if (game.players[1].socketId == undefined) {
+                    //len 1
+                    playerIndex = 1;
+                    game.player2.socketId = socket.id
+                }
+                session.playerIndex = playerIndex
+                session.gameId = game._id
+    
+                game.players[playerIndex].socketId = socket.id;
+                game.playerForClientSide = game.players[playerIndex]
+    
+                database.saveGame(game)
+                if(game.players[0].socketId && game.players[1].socketId)
                 {
-                    if(!isPlayer1Connected)
+                    const isPlayer1Connected = isSocketConnected(game.players[0].socketId)
+                    const isPlayer2Connected = isSocketConnected(game.players[1].socketId)
+                    if(isPlayer1Connected && isPlayer2Connected)
                     {
-                        //player 1 left
-                        console.log("Player 1 left before game could be started.. Resetting player 1", game._id)
-                        game.players[0].socketId = undefined//waits for another player
+                        game.started = true;
+                        database.saveGame(game)
+                        emitGetGame(game)
                     }
-                    if(!isPlayer2Connected)
+                    else
                     {
-                        //player 2 left
-                        console.log("Player 2 left before game could be started.. Resetting player 2", game._id)
-                        game.players[1].socketId = undefined//waits for another player
+                        if(!isPlayer1Connected)
+                        {
+                            //player 1 left
+                            console.log("Player 1 left before game could be started.. Resetting player 1", game._id)
+                            game.players[0].socketId = undefined//waits for another player
+                        }
+                        if(!isPlayer2Connected)
+                        {
+                            //player 2 left
+                            console.log("Player 2 left before game could be started.. Resetting player 2", game._id)
+                            game.players[1].socketId = undefined//waits for another player
+                        }
                     }
+                    
                 }
-                
+    
             }
+            function emitGetGame(game)
+            {
+                game.players.forEach(function (player, index) {
+                    const deepCopyGame = cloneDeep(game)
+                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    if(socket.id === player.socketId)
+                    {
+                        //the current player made this request so we have to send it normally with socket.emit()
+                        socket.emit(Constants.events.GET_GAME, deepCopyGame)
+                    }
+                    else
+                    {
+                        //this player is not the current socket, so we can send a message to the default room of this player with .emit()
+                        io.to(player.socketId).emit(Constants.events.GET_GAME, deepCopyGame)
+                    }
+                   
+                })
+            }
+           
 
         })
         socket.on(Constants.events.CARD_PLAYED, async function(cardPlayed)
         {
-            const gameFromDb = await database.getGame(socket.handshake.session.gameId);
+            const gameFromDb = await database.getGame(socket.handshake.query.gameId);
             if(gameFromDb == undefined)
             {
                 console.error("Undefined game?")
@@ -132,6 +155,7 @@ function BackendServer() {
                 let player = game.players[playerIndex];
                 game.playerForClientSide = player
                 let playerHand = player.hand;
+                game.addCardToHistory(cardPlayed,playerIndex);
                 playerHand.removeCard(cardPlayed)//remove card from player's hand
                 let middlePile = game.middlePile
                 middlePile.addCard(cardPlayed)//add card to middle pile
@@ -213,7 +237,7 @@ function BackendServer() {
                    
                 })
             }
-           
+            
         })
         socket.on('disconnect', async function(){
             console.log('user with socket id ' + socket.id + 'has disconnected');
@@ -238,7 +262,20 @@ function BackendServer() {
            
         });
     });
+    expressApp.get("/new", (req, res)=>{
+        let game = Game()
+        game.init()
 
+        database.insertNewGame(game).then((confirmation)=>{
+            redirectToNewGamePage(res, confirmation.insertedId.toString())
+        })
+    })
+    function redirectToNewGamePage(res, gameId){
+        if(res && res.redirect)
+        {
+            res.redirect("../game.html?gameId="+gameId)
+        }
+    }
     http.listen(3000, function () {
         console.log('listening on *:3000');
     });

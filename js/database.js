@@ -1,6 +1,7 @@
 "use strict";
 require('dotenv').config()
 const MongoClient = require('mongodb').MongoClient;
+const ObjectID = require('mongodb').ObjectID
 const uri = process.env.DB_HOST_PREFIX + process.env.DB_USER +":" + process.env.DB_PASS+ "@" + process.env.DB_HOST_SUFFIX;
 
 const client = newMongoClient().connect()
@@ -9,10 +10,16 @@ function newMongoClient()
     console.log(uri)
     return new MongoClient(uri, { useNewUrlParser: true })
 }
-
+/**
+ * 
+ * @param {*} mongo ObjectId of game 
+ */
 async function getGame(id)
 {
-    
+    if(typeof id === "string")
+    {
+        id = ObjectID(id)
+    }
     return client
         .then(client => {
             const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
@@ -43,13 +50,29 @@ async function getGamesByPlayerSocketId(socketId)
  * @param game
  * @returns {Promise<String>} the ID of the saved document
  */
-async function insertNewGame(game)
+function insertNewGame(game)
 {
  
     return client
         .then(client => {
             const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
-            const savedDocumentConfirmation = collection.insertOne(game)
+            return collection.insertOne(game)
+        })
+        .catch(reason => console.error(reason))
+
+}
+/**
+ * Insert a new game string and return its ID to persist in user session
+ * @param game
+ * @returns {Promise<String>} the ID of the saved document
+ */
+async function insertNewGameString(game)
+{
+ 
+    return client
+        .then(async client => {
+            const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_AS_STRINGS_COLLECTION_NAME)
+            const savedDocumentConfirmation = await collection.insertOne(game) //should await if id necessary
             return savedDocumentConfirmation.insertedId
         })
         .catch(reason => console.error(reason))
@@ -76,7 +99,9 @@ async function saveGame(game)
                     players: game.players,
                     trumpCard: game.trumpCard,
                     firstPlayerToActByIndex: game.firstPlayerToActByIndex,
-                    currentPlayerToActByIndex: game.currentPlayerToActByIndex
+                    currentPlayerToActByIndex: game.currentPlayerToActByIndex,
+                    history: game.history,
+                    started: game.started
                 }
             }, {upsert:true} )
             return savedDocumentConfirmation;
@@ -87,5 +112,6 @@ async function saveGame(game)
 
 module.exports.getGame = getGame;
 module.exports.insertNewGame = insertNewGame;
+module.exports.insertNewGameString = insertNewGameString;
 module.exports.saveGame = saveGame;
 module.exports.getGamesByPlayerSocketId = getGamesByPlayerSocketId;

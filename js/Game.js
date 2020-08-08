@@ -4,6 +4,7 @@ import { Player } from './Player.js'
 import { Card } from './Card.js'
 import { MiddlePile } from './MiddlePile.js'
 import { Constants } from './Constants.js'
+import { BriscolaError } from './errors/BriscolaError.js'
 function Game(gameState = {})
 {
     let state = {}
@@ -17,7 +18,8 @@ function Game(gameState = {})
     state.firstPlayerToActByIndex = gameState.firstPlayerToActByIndex
     state.currentPlayerToActByIndex = gameState.currentPlayerToActByIndex
     state.playerForClientSide = gameState.playerForClientSide
-
+    state.history = gameState.history
+    state.started = gameState.started
     let game = Object.assign(state,
         gameLogicController(state)
     )
@@ -49,6 +51,8 @@ function gameLogicController(state)
             state.firstPlayerToActByIndex = 0
             state.currentPlayerToActByIndex = state.firstPlayerToActByIndex
             state.playerForClientSide;
+            state.history = "";
+            state.started = false;
         },
         next: function()
         {
@@ -98,6 +102,50 @@ function gameLogicController(state)
                 let nextCard = state.deck.drawCard()
                 player.hand.addCard(nextCard)
             })
+        },
+        addCardToHistory : function(card,playerIndex)
+        {
+            if(card == undefined || playerIndex == undefined)
+            {
+                throw new BriscolaError("Cannot add play to history, playerIndex or card undefined")
+            }
+            else
+            {
+                state.history += ("p"+playerIndex+ " " + card.rank + card.suit + " ")
+            }
+            
+        },
+        //play a round at random for testing
+        _playRound : function()
+        {
+            const currentPlayerToActByIndex = state.currentPlayerToActByIndex
+            const otherPlayerToActByIndex = (currentPlayerToActByIndex + 1) % Constants.gameConstants.NUMBER_OF_PLAYERS
+
+            const currentPlayerToAct = state.players[currentPlayerToActByIndex]
+            const otherPlayer = state.players[otherPlayerToActByIndex]
+
+            state.middlePile = MiddlePile(state.middlePile)
+            const firstCardPlayed = currentPlayerToAct.hand.cards.pop()
+            state.addCardToHistory(firstCardPlayed, currentPlayerToActByIndex)
+            const secondCardPlayed = otherPlayer.hand.cards.pop()
+            state.addCardToHistory(secondCardPlayed, otherPlayerToActByIndex)
+
+            state.middlePile.addCard(firstCardPlayed)
+            state.middlePile.addCard(secondCardPlayed)
+
+            let winningPlayer = state.getWinningPlayer()
+            let winningPlayerIndex =  state.getWinningPlayerIndex()
+
+            state.currentPlayerToActByIndex = winningPlayerIndex
+            state.firstPlayerToActByIndex = state.currentPlayerToActByIndex;
+            winningPlayer.pile.addCards(state.middlePile.cards)
+            state.middlePile.reset()
+
+            if(!state.isDeckEmpty())
+            {
+                state.dealNextCardToAllPlayers()
+            }
+
         }
     }
 }

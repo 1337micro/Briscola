@@ -1,7 +1,9 @@
 "use strict";
 import { Constants } from './Constants.js'
 
-const socket = io("http://briscola.online:3000")
+const urlParams = new URLSearchParams(window.location.search);
+const gameId = urlParams.get('gameId');
+const socket = io("http://localhost:3000?gameId="+gameId )
 function _onCardPress(arg, game)
 {
     const cardPressed = arg.currentTarget.card
@@ -120,5 +122,12 @@ function onOpponentLeft(cb)
         cb(leavingPlayerSocketId)
     })
 }
+function onRedirect(cb)
+{
+    socket.on(Constants.events.REDIRECT, function(newUrl){
+        console.log("redirecting to new URL ", newUrl)
+        cb(newUrl)
+    })
+}
 export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, onGameUpdate, 
-    onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft}
+    onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect}
