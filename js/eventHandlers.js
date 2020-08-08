@@ -3,7 +3,7 @@ import { Constants } from './Constants.js'
 
 const urlParams = new URLSearchParams(window.location.search);
 const gameId = urlParams.get('gameId');
-const socket = io("http://localhost:3000?gameId="+gameId )
+const socket = io("http://briscola.online:3000?gameId="+gameId )
 function _onCardPress(arg, game)
 {
     const cardPressed = arg.currentTarget.card
