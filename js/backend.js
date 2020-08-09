@@ -267,7 +267,11 @@ function BackendServer() {
         game.init()
 
         database.insertNewGame(game).then((confirmation)=>{
-            console.log(confirmation)
+            if(confirmation && confirmation.insertedId)
+            {
+                console.log(confirmation.insertedId)
+            }
+            else console.log("Confirmation was undefined")
             redirectToNewGamePage(res, confirmation.insertedId.toString())
         })
     })
