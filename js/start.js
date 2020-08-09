@@ -201,7 +201,7 @@ function generatePlayerToActText(game)
     playerToActText = new PIXI.Text("Opponent's move", playerMoveTextStyle);
   }
   playerToActText.x = 0.05*Constants.width;
-  playerToActText.y = Constants.height - 100;
+  playerToActText.y = Constants.height - 135;
 
   return  playerToActText
 }
@@ -335,7 +335,7 @@ function _positionOpponentBackCardSprites(backOfCardSprites)
 }
 function _positionBackOfCard(backOfCardSprite)
 {
-    _positionCardSprite(backOfCardSprite, Constants.width / 2, Constants.height / 2)
+    _positionCardSprite(backOfCardSprite, Constants.width / 2, Constants.height / 2 - 100)
 }
 function _positionPileCard(pileCardSprite)
 {
@@ -346,7 +346,7 @@ function _positionPileCard(pileCardSprite)
 }
 function _positionTrumpCard(trumpCardSprite)
 {
-  _positionCardSprite(trumpCardSprite, Constants.width / 2, Constants.height / 2)
+  _positionCardSprite(trumpCardSprite, Constants.width / 2, Constants.height / 2 - 100)
   trumpCardSprite.anchor.x = 0.5
   trumpCardSprite.anchor.y = 0.5
   trumpCardSprite.rotation = Math.PI /2

@@ -1,6 +1,6 @@
 const Constants = {
-  width:1280,
-  height:720,
+  width:800,
+  height:600,
     events: {
         REQUEST_GAME_START:"REQUEST_GAME_START",
         UPDATE_GAME: "UPDATE_GAME",
