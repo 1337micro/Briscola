@@ -18,6 +18,11 @@ const Constants = {
 
         REDIRECT: "REDIRECT"
     },
+    soundUrl:
+    {
+      SHUFFLE_CARDS: "sound/cardShuffle.wav",
+      PLAY_CARD: "sound/playCard.wav"
+    },
       gameConstants:
       {
           NUMBER_OF_PLAYERS : 2,

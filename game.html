@@ -8,18 +8,48 @@
   <meta name="description" content="Briscola">
   <meta name="author" content="1337micro">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 
 </head>
 
 <body>
-  <script src="https://pixijs.download/v5.0.4/pixi.js"></script>
+  <div id="greeting" class="container-fluid">
+    <div class="row">
+      <div class="col">
+      <p>To invite someone to play, give this URL: </p>
+      <input class="gameUrlInputField" id="awaiting_opponent_game_url_input" type="text" readonly /> 
+      <button class="button buttonMarginTop" data-clipboard-target="#awaiting_opponent_game_url_input">
+        <img src="images/clipboard.png" alt="Copy to clipboard">
+      </button>
+      <p>The first person to come to this URL will play with you.</p>
+      </div>
+    </div>
+  </div>
 
+
+  <script src="https://pixijs.download/v5.0.4/pixi.js"></script>
+  <script src="node_modules/howler/dist/howler.min.js"></script>
+  <script src="node_modules/clipboard/dist/clipboard.min.js"></script>
   <script type="module" src="js/start.js"></script>
   <script type="module" src="js/app.js"></script>
   <script src="./js/socket.io.js"></script>
   <script src="js/eventHandlers.js"></script>
 
+
+
+  <script>
+    var clipboard = new ClipboardJS('.button');
+
+    function setInputFieldText(){
+      const inputFieldForUrl = document.getElementById("awaiting_opponent_game_url_input")
+      if(inputFieldForUrl)
+      {
+        inputFieldForUrl.value = window.location.href
+      }
+    }
+    setInputFieldText()
+  </script>
 
 </body>
 </html>

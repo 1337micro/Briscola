@@ -5,6 +5,18 @@ import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate,
   onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
+const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD] });
+const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS] });
+
+function hideGreeting()
+{
+  const greetingElement = document.getElementById("greeting");
+  if(greetingElement)
+  {
+    greetingElement.innerHTML = null;
+  }
+}
+
 let game;
 
 async function start()
@@ -12,16 +24,18 @@ async function start()
   onRedirect((newUrl)=>{
     window.location.assign(newUrl)
   })
-  
-  const awaitingOpponentTextStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
-  let awaitingOpponentText = new PIXI.Text("Share the link in your address bar with your opponent to play", awaitingOpponentTextStyle)
-  app.stage.addChild(awaitingOpponentText)
+
   requestGameStart();
-  game = await getGame();
-  if(awaitingOpponentText.parent && awaitingOpponentText.parent.removeChild)
-  {
-    awaitingOpponentText.parent.removeChild(awaitingOpponentText)
-  }
+  game = await getGame().catch( (error)=> {
+    console.error(error)
+    redirectToNewGame()
+  });
+  //game starts after this point
+  SHUFFLE_CARDS_SOUND.play()
+  hideGreeting()
+  //Add the canvas that Pixi automatically created for you to the HTML document
+  document.body.appendChild(app.view);
+  
   let playerToActText = generatePlayerToActText(game)
   app.stage.addChild(playerToActText)
 
@@ -39,6 +53,7 @@ async function start()
   onCardPlayed((cardPlayed)=>
   {
     //add the card to the middlePile
+      PLAY_CARD_SOUND.play()
       addPileCard(cardPlayed)
       removePlayerToActText(playerToActText)
       playerToActText = generatePlayerToActText(game)
