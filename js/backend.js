@@ -267,6 +267,7 @@ function BackendServer() {
         game.init()
 
         database.insertNewGame(game).then((confirmation)=>{
+            console.log(confirmation)
             redirectToNewGamePage(res, confirmation.insertedId.toString())
         })
     })
