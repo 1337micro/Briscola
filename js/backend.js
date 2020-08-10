@@ -2,6 +2,11 @@
 var cloneDeep = require('lodash.clonedeep');
 const database = require('./database.js')
 const express = require('express')
+const pino = require('pino');
+const expressPino = require('express-pino-logger');
+
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+const expressLogger = expressPino({ logger });
 const expressApp = express();
 import { Constants } from './Constants.js'
 
@@ -20,6 +25,8 @@ var session = require("express-session")({
     saveUninitialized: true
 });
 var sharedsession = require("express-socket.io-session");
+
+expressApp.use(expressLogger);
 
 // Use express-session middleware for express
 expressApp.use(session);
@@ -61,7 +68,7 @@ function BackendServer() {
                
             })
         }
-        console.log('a user connected', socket.id);
+        logger.info('a user connected', socket.id);
         let session = socket.handshake.session;
         socket.on(Constants.events.REQUEST_GAME_START, async function(){
             if(socket.handshake.query.gameId)
@@ -89,7 +96,7 @@ function BackendServer() {
                 game.players[playerIndex].socketId = socket.id;
                 game.playerForClientSide = game.players[playerIndex]
     
-                database.saveGame(game)
+                await database.saveGame(game)
                 if(game.players[0].socketId && game.players[1].socketId)
                 {
                     const isPlayer1Connected = isSocketConnected(game.players[0].socketId)
@@ -97,7 +104,7 @@ function BackendServer() {
                     if(isPlayer1Connected && isPlayer2Connected)
                     {
                         game.started = true;
-                        database.saveGame(game)
+                        await database.saveGame(game)
                         emitGetGame(game)
                     }
                     else
@@ -105,13 +112,13 @@ function BackendServer() {
                         if(!isPlayer1Connected)
                         {
                             //player 1 left
-                            console.log("Player 1 left before game could be started.. Resetting player 1", game._id)
+                            logger.info("Player 1 left before game could be started.. Resetting player 1", game._id)
                             game.players[0].socketId = undefined//waits for another player
                         }
                         if(!isPlayer2Connected)
                         {
                             //player 2 left
-                            console.log("Player 2 left before game could be started.. Resetting player 2", game._id)
+                            logger.info("Player 2 left before game could be started.. Resetting player 2", game._id)
                             game.players[1].socketId = undefined//waits for another player
                         }
                     }
@@ -169,7 +176,7 @@ function BackendServer() {
                     game.currentPlayerToActByIndex = winningPlayerIndex
                     game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
                     winningPlayer.pile.addCards(game.middlePile.cards)
-                    game.middlePile.reset()
+                    
                     if(game.isLastDeal())
                     {
                         emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
@@ -179,7 +186,7 @@ function BackendServer() {
                         game.dealNextCardToAllPlayers()
                     }
 
-
+                    game.middlePile.reset()//reset only after dealing the next cards
                     if(game.isGameOver())
                     {
                         game.players[0].points = game.players[0].pile.countPoints()
@@ -191,14 +198,15 @@ function BackendServer() {
                 }
                 socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
                 emitEvent(game,Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
+                await database.saveGame(game)//wait for the game object to update before we emit the update
                 emitUpdateGame(game)
-                database.saveGame(game)
+                
                 
             }
             else
             {
                 socket.emit(Constants.events.CARD_PLAYED_REJECTED)
-                console.log("Card could not be played: ", cardPlayed)
+                logger.info("Card could not be played: ", cardPlayed)
             }
             function emitGameOver(game)
             {
@@ -240,7 +248,7 @@ function BackendServer() {
             
         })
         socket.on('disconnect', async function(){
-            console.log('user with socket id ' + socket.id + 'has disconnected');
+            logger.info('user with socket id ' + socket.id + 'has disconnected');
             const socketIdOfPlayerWhoDisconnected = socket.id
             if(socketIdOfPlayerWhoDisconnected != undefined)
             {
@@ -252,7 +260,7 @@ function BackendServer() {
                             const playerSocketId = player.socketId
                             if(isSocketConnected(playerSocketId))
                             {
-                                console.log("Notified player "+ playerSocketId+ " that their opponent has disconnected")
+                                logger.info("Notified player "+ playerSocketId+ " that their opponent has disconnected")
                                 getSocketBySocketId(playerSocketId).emit(Constants.events.PLAYER_LEFT, socketIdOfPlayerWhoDisconnected)
                             }
                         })
@@ -269,9 +277,9 @@ function BackendServer() {
         database.insertNewGame(game).then((confirmation)=>{
             if(confirmation && confirmation.insertedId)
             {
-                console.log(confirmation.insertedId)
+                logger.info(confirmation.insertedId)
             }
-            else console.log("Confirmation was undefined")
+            else logger.info("Confirmation was undefined")
             redirectToNewGamePage(res, confirmation.insertedId.toString())
         })
     })
@@ -282,7 +290,7 @@ function BackendServer() {
         }
     }
     http.listen(3000, function () {
-        console.log('listening on *:3000');
+        logger.info('listening on *:3000');
     });
 }
 

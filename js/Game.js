@@ -97,11 +97,15 @@ function gameLogicController(state)
         },
         dealNextCardToAllPlayers : function()
         {
-            state.players.forEach((player)=>
-            {
+            const winningPlayerIndex = state.getWinningPlayerIndex()
+
+            let indexOfPlayerToGetNextCard = winningPlayerIndex
+            do{
                 let nextCard = state.deck.drawCard()
-                player.hand.addCard(nextCard)
-            })
+                state.players[indexOfPlayerToGetNextCard].hand.addCard(nextCard)
+                indexOfPlayerToGetNextCard = (indexOfPlayerToGetNextCard + 1) % Constants.gameConstants.NUMBER_OF_PLAYERS
+            }
+            while(indexOfPlayerToGetNextCard != winningPlayerIndex)
         },
         addCardToHistory : function(card,playerIndex)
         {

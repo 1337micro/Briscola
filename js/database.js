@@ -1,5 +1,7 @@
 "use strict";
 require('dotenv').config()
+const pino = require('pino');
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID
 const uri = process.env.DB_HOST_PREFIX + process.env.DB_USER +":" + process.env.DB_PASS+ "@" + process.env.DB_HOST_SUFFIX;
@@ -7,7 +9,7 @@ const uri = process.env.DB_HOST_PREFIX + process.env.DB_USER +":" + process.env.
 const client = newMongoClient().connect()
 function newMongoClient()
 {
-    console.log(uri)
+    logger.info(uri)
     return new MongoClient(uri, { useNewUrlParser: true })
 }
 /**
@@ -26,7 +28,7 @@ async function getGame(id)
             return collection.findOne({_id: id})
         })
         .catch(reason => {
-            console.error(reason)
+            logger.error(reason)
         })
 }
 /**
@@ -42,7 +44,7 @@ async function getGamesByPlayerSocketId(socketId)
             return collection.find({players: {$elemMatch:{socketId:socketId}}})
         })
         .catch(reason => {
-            console.error(reason)
+            logger.error(reason)
         })
 }
 /**
@@ -58,7 +60,7 @@ function insertNewGame(game)
             const collection = client.db(process.env.DB_GAMES_DATABASE_NAME).collection(process.env.DB_GAMES_COLLECTION_NAME)
             return collection.insertOne(game)
         })
-        .catch(reason => console.error(reason))
+        .catch(reason => logger.error(reason))
 
 }
 /**
@@ -75,7 +77,7 @@ async function insertNewGameString(game)
             const savedDocumentConfirmation = await collection.insertOne(game) //should await if id necessary
             return savedDocumentConfirmation.insertedId
         })
-        .catch(reason => console.error(reason))
+        .catch(reason => logger.error(reason))
 
 }
 
@@ -106,7 +108,7 @@ async function saveGame(game)
             }, {upsert:true} )
             return savedDocumentConfirmation;
         })
-        .catch(reason => console.error(reason))
+        .catch(reason => logger.error(reason))
 }
 
 
