@@ -289,7 +289,7 @@ function BackendServer() {
             res.redirect("../game.html?gameId="+gameId)
         }
     }
-    http.listen(3000, function () {
+    http.listen(3000, 'backend', function () {
         console.log('listening on *:3000');
         logger.info('listening on *:3000');
     });
