@@ -1,12 +1,14 @@
 version: "3.9"
 services:
   nginx:
+    restart: always
     build:
       context: .
       dockerfile: NginxDockerfile
     ports:
       - "80:80"
   backend:
+    restart: always
     build:
       context: .
       dockerfile: BackendDockerfile
