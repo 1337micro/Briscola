@@ -1,6 +1,6 @@
-import {HandEmptyError, HandFullError, HandDoesNotContainCardError} from "./errors/HandErrors";
+import {HandEmptyError, HandFullError, HandDoesNotContainCardError} from "./errors/HandErrors.js";
 import { Constants } from './Constants.js'
-import {CardList} from "./CardList";
+import {CardList} from "./CardList.js";
 
 function Hand(handState = {})
 {

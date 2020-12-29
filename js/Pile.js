@@ -1,6 +1,6 @@
 "use strict";
-import { CardList } from "./CardList";
-import { Constants } from "./Constants";
+import { CardList } from "./CardList.js";
+import { Constants } from "./Constants.js";
 
 /**
  * A super-class pile. Represents the cards won by some player. For the middlePile of cards in the middle, see MiddlePile.js

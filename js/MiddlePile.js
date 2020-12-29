@@ -2,7 +2,7 @@
 import {MiddlePileIncompleteError , MiddlePileFullError} from './errors/PileErrors.js'
 import { Constants } from './Constants.js'
 import { Pile } from './Pile.js'
-import {CardList} from "./CardList";
+import {CardList} from "./CardList.js";
 /**
  * Represents the middlePile of Cards in the middle
  * @param cards An array of Card objects. ORDER MATTERS! The first card should be the first one that was played
