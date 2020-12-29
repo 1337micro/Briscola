@@ -1,6 +1,6 @@
 "use strict";
-import {Pile} from "./Pile";
-import {Hand} from "./Hand";
+import {Pile} from "./Pile.js";
+import {Hand} from "./Hand.js";
 
 function Player(playerState = {})
 {

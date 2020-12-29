@@ -1,5 +1,5 @@
 "use strict";
-import {BriscolaError} from "./BriscolaError";
+import {BriscolaError} from "./BriscolaError.js";
 
 class MiddlePileIncompleteError extends BriscolaError {
     constructor(message = "MiddlePile is not complete.There is at least 1 player that has not played their card yet. " +

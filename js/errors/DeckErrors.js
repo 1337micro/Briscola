@@ -1,5 +1,5 @@
 "use strict";
-import {BriscolaError} from "./BriscolaError";
+import {BriscolaError} from "./BriscolaError.js";
 
 class DeckEmptyError extends BriscolaError
 {

@@ -1,7 +1,7 @@
 import { Card } from './Card.js'
 import { suits } from './Suits.js'
-import {CardList} from "./CardList";
-import {DeckEmptyError} from "./errors/DeckErrors";
+import {CardList} from "./CardList.js";
+import {DeckEmptyError} from "./errors/DeckErrors.js";
 function Deck(deckState = {}) {
     let state = {
         cards: deckState.cards

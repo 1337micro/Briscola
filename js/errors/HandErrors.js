@@ -1,5 +1,5 @@
 "use strict";
-import {BriscolaError} from "./BriscolaError";
+import {BriscolaError} from "./BriscolaError.js";
 
 class HandFullError extends BriscolaError {
     constructor(message = "This player's hand is full, cannot add new cards")

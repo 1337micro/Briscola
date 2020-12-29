@@ -119,6 +119,11 @@ function gameLogicController(state)
             }
             
         },
+        computerMove: function(computerPlayer = state.player2){
+            const playedCard = computerPlayer.hand.cards.pop()
+            state.middlePile.addCard(playedCard)
+            return playedCard
+        },
         //play a round at random for testing
         _playRound : function()
         {

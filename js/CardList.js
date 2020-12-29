@@ -1,7 +1,7 @@
 "use strict";
-import {Card} from './Card'
-import { CardNotInCardListError} from "./errors/CardListErrors";
-import {HandDoesNotContainCardError, HandEmptyError} from "./errors/HandErrors";
+import {Card} from './Card.js'
+import { CardNotInCardListError} from "./errors/CardListErrors.js";
+import {HandDoesNotContainCardError, HandEmptyError} from "./errors/HandErrors.js";
 
 function CardList(cardState = {})
 {
