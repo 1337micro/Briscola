@@ -168,25 +168,27 @@ function BackendServer() {
                 middlePile.addCard(cardPlayed)//add card to middle pile
 
                 game.next()
-
                 if(game.isRoundOver())
                 {
                     let winningPlayer = game.getWinningPlayer()
-                    let winningPlayerIndex =  game.getWinningPlayerIndex()
-                    game.currentPlayerToActByIndex = winningPlayerIndex
-                    game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
                     winningPlayer.pile.addCards(game.middlePile.cards)
                     
-                    if(game.isLastDeal())
-                    {
-                        emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
-                    }
                     if(!game.isDeckEmpty())
                     {
                         game.dealNextCardToAllPlayers()
                     }
 
+                    let winningPlayerIndex =  game.getWinningPlayerIndex()
+                    game.currentPlayerToActByIndex = winningPlayerIndex
+                    game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
+
                     game.middlePile.reset()//reset only after dealing the next cards
+
+                    if(game.isLastDeal())
+                    {
+                        emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
+                    }
+                   
                     if(game.isGameOver())
                     {
                         game.players[0].points = game.players[0].pile.countPoints()

@@ -100,6 +100,7 @@ function gameLogicController(state)
             const winningPlayerIndex = state.getWinningPlayerIndex()
 
             let indexOfPlayerToGetNextCard = winningPlayerIndex
+            console.log('winningPlayerIndex', winningPlayerIndex)
             do{
                 let nextCard = state.deck.drawCard()
                 state.players[indexOfPlayerToGetNextCard].hand.addCard(nextCard)
