@@ -173,6 +173,10 @@ function BackendServer() {
                     let winningPlayer = game.getWinningPlayer()
                     winningPlayer.pile.addCards(game.middlePile.cards)
                     
+                    if(game.isLastDeal())
+                    {
+                        emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
+                    }
                     if(!game.isDeckEmpty())
                     {
                         game.dealNextCardToAllPlayers()
@@ -183,11 +187,6 @@ function BackendServer() {
                     game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
 
                     game.middlePile.reset()//reset only after dealing the next cards
-
-                    if(game.isLastDeal())
-                    {
-                        emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
-                    }
                    
                     if(game.isGameOver())
                     {
