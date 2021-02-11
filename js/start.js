@@ -7,7 +7,6 @@ import { scaleToWindow } from './utils/scaleWindow.js'
 
 const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD] });
 const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS] });
-
 function hideGreeting()
 {
   const greetingElement = document.getElementById("greeting");
@@ -39,6 +38,9 @@ async function start()
   let playerToActText = generatePlayerToActText(game)
   app.stage.addChild(playerToActText)
 
+  let deckCountText = generateDeckCount(game);
+  app.stage.addChild(deckCountText)
+
   let middlePileCardSprites = []
   onGameUpdate((newGameObj)=>
   {
@@ -49,6 +51,11 @@ async function start()
       removePlayerToActText(playerToActText)
       playerToActText = generatePlayerToActText(game)
       app.stage.addChild(playerToActText)
+
+      removeDeckCountSprite(deckCountText)
+      deckCountText = generateDeckCount(game);
+      app.stage.addChild(deckCountText)
+
   })
   onCardPlayed((cardPlayed)=>
   {
@@ -73,7 +80,7 @@ async function start()
         middlePileCardSprites.length = 0;
       }
     }
-    setTimeout(removePileCards, 1000)
+    setTimeout(removePileCards, 3000)
   })
   onLastDeal(()=>{
     if(trumpCardSprite)
@@ -110,6 +117,10 @@ async function start()
       //I win
       winningText = new PIXI.Text("You win.", gameOverStyle)
     }
+    else if(myPlayerObject.points === opponentPlayer.points)
+    {
+      winningText = new PIXI.Text("Tie game.", gameOverStyle)
+    }
     else
     {
       winningText = new PIXI.Text("Opponent wins.", gameOverStyle)
@@ -117,8 +128,6 @@ async function start()
 
     winningText.x = textPositionX
     winningText.y = textPositionY
-    textPositionY = textPositionY + textFontSize + 5;
-    textPositionY = textPositionY + textFontSize + 5;
     app.stage.addChild(gameOverText)
     app.stage.addChild(pointsText)
     app.stage.addChild(winningText)
@@ -187,6 +196,10 @@ function removePlayerToActText(playerToActText)
 {
   playerToActText.parent.removeChild(playerToActText)
 }
+function removeDeckCountSprite(deckCountText)
+{
+  deckCountText.parent.removeChild(deckCountText)
+}
 function generatePlayerToActText(game)
 {
   const playerMoveTextStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
@@ -204,6 +217,15 @@ function generatePlayerToActText(game)
   playerToActText.y = Constants.height - 135;
 
   return  playerToActText
+}
+function generateDeckCount(game)
+{
+  const numCardsInDeck = game.deck.cards.length;
+  const numCardsInDeckText =  new PIXI.Text(numCardsInDeck, {fontSize: 48, align : 'center', fill: '#00FF00'});
+  numCardsInDeckText.x = Constants.width / 2 + 50
+  numCardsInDeckText.y = Constants.height / 2 + 125
+
+  return numCardsInDeckText;
 }
 function isMyTurnToAct(game)
 {
@@ -415,10 +437,7 @@ function _positionCardSprites(cardSprites)
   function removeAllSpritesOnScreen()
   {
     app.stage.children.forEach((childSprite)=>{
-      if(childSprite.parent && childSprite.parent.removeChild)
-      {
-        childSprite.parent.removeChild(childSprite)
-      }
+      app.stage.removeChild(childSprite)
     })
   }
 function gameLoop(delta)

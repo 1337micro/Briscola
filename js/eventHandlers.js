@@ -29,7 +29,6 @@ function awaitOpponent()
         socket.on(Constants.events.PLAYER_JOINED, function(player)
         {
             resolve(player)
-            console.log(player)
         })
     })
 }
@@ -64,7 +63,6 @@ function getTrumpCard()
     {
         socket.on(Constants.events.TRUMP_CARD, function(card)
         {
-            console.log("Trump card recieved", card)
             resolve(card)
         })
     })
@@ -75,7 +73,6 @@ function onGameUpdate(cb)
 {
     socket.on(Constants.events.UPDATE_GAME, function(game)
     {
-        console.log("Game updated", game)
         cb(game)
     })
 }
@@ -83,49 +80,42 @@ function onCardPlayed(cb)
 {
     socket.on(Constants.events.CARD_PLAYED, function(cardPlayed)
     {
-        console.log("cardPlayed", cardPlayed)
         cb(cardPlayed)
     })
 }
 function onRoundOver(cb)
 {
     socket.on(Constants.events.ROUND_OVER, function(winningPlayer){
-        console.log("round over", winningPlayer)
         cb(winningPlayer)
     })
 }
 function onLastDeal(cb)
 {
     socket.on(Constants.events.LAST_DEAL, function(){
-        console.log("Last round")
         cb()
     })
 }
 function onGameOver(cb)
 {
     socket.on(Constants.events.GAME_OVER, function(game){
-        console.log("game over")
         cb(game)
     })
 }
 function onServerConnectionLost(cb)
 {
     socket.on('disconnect', function(reason){
-        console.log("Server connection lost", reason)
         cb(reason)
     })
 }
 function onOpponentLeft(cb)
 {
     socket.on(Constants.events.PLAYER_LEFT, function(leavingPlayerSocketId){
-        console.log("Opponent left", leavingPlayerSocketId)
         cb(leavingPlayerSocketId)
     })
 }
 function onRedirect(cb)
 {
     socket.on(Constants.events.REDIRECT, function(newUrl){
-        console.log("redirecting to new URL ", newUrl)
         cb(newUrl)
     })
 }
