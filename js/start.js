@@ -1,7 +1,7 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
-import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate, 
+import { _onCardPress, getGame, gameStart, requestGameStart, requestSinglePlayerGameStart, onGameUpdate, 
   onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
@@ -16,15 +16,20 @@ function hideGreeting()
   }
 }
 
-let game;
+function isSinglePlayer(){
+  let params = (new URL(document.location)).searchParams;
+  let singlePlayer = params.get('singlePlayer');
+  return singlePlayer;
+}
 
+let game;
 async function start()
 {
   onRedirect((newUrl)=>{
     window.location.assign(newUrl)
   })
 
-  requestGameStart();
+  isSinglePlayer() ? requestSinglePlayerGameStart() : requestGameStart();
   game = await getGame().catch( (error)=> {
     console.error(error)
     redirectToNewGame()
@@ -440,6 +445,7 @@ function _positionCardSprites(cardSprites)
       app.stage.removeChild(childSprite)
     })
   }
+
 function gameLoop(delta)
 {
  scaleToWindow(app.renderer.view)

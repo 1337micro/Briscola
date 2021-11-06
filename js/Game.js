@@ -20,6 +20,7 @@ function Game(gameState = {})
     state.playerForClientSide = gameState.playerForClientSide
     state.history = gameState.history
     state.started = gameState.started
+    state.singlePlayer = gameState.singlePlayer
     let game = Object.assign(state,
         gameLogicController(state)
     )

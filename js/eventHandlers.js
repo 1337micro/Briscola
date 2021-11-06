@@ -57,6 +57,10 @@ function requestGameStart()
 {
     socket.emit(Constants.events.REQUEST_GAME_START)
 }
+function requestSinglePlayerGameStart()
+{
+    socket.emit(Constants.events.REQUEST_SINGLE_PLAYER_GAME_START)
+}
 function getTrumpCard()
 {
     return new Promise(function(resolve, reject)
@@ -119,5 +123,5 @@ function onRedirect(cb)
         cb(newUrl)
     })
 }
-export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, onGameUpdate, 
+export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, requestSinglePlayerGameStart, onGameUpdate, 
     onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect}
