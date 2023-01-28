@@ -121,10 +121,62 @@ function gameLogicController(state)
             }
             
         },
-        computerMove: function(computerPlayer = state.player2){
-            const playedCard = computerPlayer.hand.cards.pop()
-            state.middlePile.addCard(playedCard)
-            return playedCard
+        computerMove: function(){
+            if(state.singlePlayer) {
+                let playerIndex = state.currentPlayerToActByIndex;
+                let player = state.players[playerIndex];
+                let playerHand = player.hand;
+                const card = state.computerAI(playerHand)
+                if (player.socketId == null && card != null) {
+                    //the current player to act is the computer and has some cards to play
+                    state.addCardToHistory(card, playerIndex);
+                    playerHand.removeCard(card)//remove card from player's hand
+                    let middlePile = state.middlePile
+                    middlePile.addCard(card)//add card to middle pile
+                    state.next()
+                    return card;
+                }
+            }
+        },
+        computerAI: function (playerHand) {
+            //player hand sorted ascending in rank
+            playerHand = playerHand.cards.sort((cardA, cardB) => cardA.rank - cardB.rank);
+            const cardWithLowestRank = playerHand[0]
+
+            const cardsInMiddle = state.middlePile.cards
+            const trumpCard = state.middlePile.trumpCard
+
+            if(cardsInMiddle.length === 0) {
+                return cardWithLowestRank
+            }
+            else {
+                const cardAlreadyPlayedInMiddle = cardsInMiddle[0]
+                const suitOfCardInMiddle = cardAlreadyPlayedInMiddle.suit;
+                const ourCardsOfSameSuit = playerHand.filter(card => card.suit === suitOfCardInMiddle);
+                if(ourCardsOfSameSuit.length === 0) {
+                    //no cards of same suit
+                    const middleCardValue = Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[cardAlreadyPlayedInMiddle.rank];
+                    if(middleCardValue == undefined) {
+                        return cardWithLowestRank
+                    }
+                    else {
+                        const ourTrumpCards = playerHand.filter(card => card.suit === trumpCard.suit)
+                        if(ourTrumpCards.length > 0) {
+                            //play lowest trump card
+                            return ourTrumpCards[0]
+                        }
+                        else {
+                            //return leech
+                            return cardWithLowestRank;
+                        }
+                    }
+
+                }
+                else {
+                    //play highest card of same suit
+                    return ourCardsOfSameSuit[ourCardsOfSameSuit.length-1]
+                }
+            }
         },
         //play a round at random for testing
         _playRound : function()

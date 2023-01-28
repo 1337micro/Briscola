@@ -256,22 +256,12 @@ function BackendServer() {
                 logger.info("Card could not be played: ", cardPlayed)
             }
             function computerMove(game, event) {
-                if(game.singlePlayer){
-                    //computer move
-                    let playerIndex = game.currentPlayerToActByIndex;
-                    let player = game.players[playerIndex];
-                    let playerHand = player.hand;
-                    const card = playerHand.cards[0];
-                    if(player.socketId == null && card != null) {
-                        //the current player to act is the computer and has some cards to play
-                        game.addCardToHistory(card,playerIndex);
-                        playerHand.removeCard(card)//remove card from player's hand
-                        let middlePile = game.middlePile
-                        middlePile.addCard(card)//add card to middle pile
-                        game.next()
-                        emitEvent(game, event, card)//tell client that a computer card was played so that it will get displayed
-                    }
+                const card = game.computerMove();
+                if(card != null) {
+                    //a card was played
+                    emitEvent(game, event, card)//tell client that a computer card was played so that it will get displayed
                 }
+
             }
             function emitGameOver(game)
             {
