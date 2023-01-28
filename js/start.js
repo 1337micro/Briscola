@@ -1,8 +1,22 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
-import { _onCardPress, getGame, gameStart, requestGameStart, requestSinglePlayerGameStart, onGameUpdate, 
-  onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect } from './eventHandlers.js'
+import {
+  _onCardPress,
+  getGame,
+  gameStart,
+  requestGameStart,
+  requestSinglePlayerGameStart,
+  onGameUpdate,
+  onCardPlayed,
+  onRoundOver,
+  onLastDeal,
+  onGameOver,
+  onServerConnectionLost,
+  onOpponentLeft,
+  onRedirect,
+  onComputerCardPlayed, onFirstToActComputerCardPlayed
+} from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD] });
@@ -70,6 +84,27 @@ async function start()
       removePlayerToActText(playerToActText)
       playerToActText = generatePlayerToActText(game)
       app.stage.addChild(playerToActText)
+  })
+  onComputerCardPlayed((cardPlayed)=>
+  {
+    setTimeout(()=>{
+      //add the card to the middlePile
+      PLAY_CARD_SOUND.play()
+      addPileCard(cardPlayed)
+      removePlayerToActText(playerToActText)
+      playerToActText = generatePlayerToActText(game)
+      app.stage.addChild(playerToActText)
+    }, 1000)
+  })
+  onFirstToActComputerCardPlayed((cardPlayed)=>{
+    setTimeout(()=>{
+      //add the card to the middlePile
+      PLAY_CARD_SOUND.play()
+      addPileCard(cardPlayed)
+      removePlayerToActText(playerToActText)
+      playerToActText = generatePlayerToActText(game)
+      app.stage.addChild(playerToActText)
+    }, 2000)
   })
   onRoundOver((winningPlayer)=>
   {

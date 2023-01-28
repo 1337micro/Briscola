@@ -87,6 +87,22 @@ function onCardPlayed(cb)
         cb(cardPlayed)
     })
 }
+function onComputerCardPlayed(cb)
+{
+    socket.on(Constants.events.COMPUTER_CARD_PLAYED, function(cardPlayed)
+    {
+        cb(cardPlayed)
+    })
+}
+
+function onFirstToActComputerCardPlayed(cb)
+{
+    socket.on(Constants.events.FIRST_TO_ACT_COMPUTER_CARD_PLAYED, function(cardPlayed)
+    {
+        cb(cardPlayed)
+    })
+}
+
 function onRoundOver(cb)
 {
     socket.on(Constants.events.ROUND_OVER, function(winningPlayer){
@@ -124,4 +140,4 @@ function onRedirect(cb)
     })
 }
 export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, requestSinglePlayerGameStart, onGameUpdate, 
-    onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect}
+    onCardPlayed, onComputerCardPlayed, onFirstToActComputerCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect}

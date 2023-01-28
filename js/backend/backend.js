@@ -154,11 +154,11 @@ function BackendServer() {
                 if(game.started)
                 {
                     //this game already started. The user refreshed the page on an existing game. Redirecting to new game
-                    socket.emit(Constants.events.REDIRECT, "/")
+                    socket.emit(Constants.events.REDIRECT, "/newAgainstComputer")
                     return;
                 }
                 let playerIndex = 0;
-               
+                game.player1.socketId = socket.id
                 session.playerIndex = playerIndex
                 session.gameId = game._id
     
@@ -211,18 +211,8 @@ function BackendServer() {
                 middlePile.addCard(cardPlayed)//add card to middle pile
 
                 game.next()
-                if(game.singlePlayer){
-                    //computer move
-                    let playerIndex = game.currentPlayerToActByIndex;
-                    let player = game.players[playerIndex];
-                    let playerHand = player.hand;
-                    const card = playerHand.cards[0];
-                    game.addCardToHistory(card,playerIndex);
-                    playerHand.removeCard(card)//remove card from player's hand
-                    let middlePile = game.middlePile
-                    middlePile.addCard(cardPlayed)//add card to middle pile
-                    socket.emit(game,Constants.events.CARD_PLAYED, card)//tell client that a computer card was played so that it will get displayed
-                }
+                socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
+                computerMove(game, Constants.events.COMPUTER_CARD_PLAYED);
                 if(game.isRoundOver())
                 {
                     let winningPlayer = game.getWinningPlayer()
@@ -252,17 +242,36 @@ function BackendServer() {
                     
                     emitEvent(game, Constants.events.ROUND_OVER, winningPlayer)
                 }
-                socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
+
                 emitEvent(game,Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
+
+                computerMove(game, Constants.events.FIRST_TO_ACT_COMPUTER_CARD_PLAYED)
+
                 await database.saveGame(game)//wait for the game object to update before we emit the update
                 emitUpdateGame(game)
-                
-                
             }
             else
             {
                 socket.emit(Constants.events.CARD_PLAYED_REJECTED)
                 logger.info("Card could not be played: ", cardPlayed)
+            }
+            function computerMove(game, event) {
+                if(game.singlePlayer){
+                    //computer move
+                    let playerIndex = game.currentPlayerToActByIndex;
+                    let player = game.players[playerIndex];
+                    if(player.socketId == null) {
+                        //the current player to act is the computer
+                        let playerHand = player.hand;
+                        const card = playerHand.cards[0];
+                        game.addCardToHistory(card,playerIndex);
+                        playerHand.removeCard(card)//remove card from player's hand
+                        let middlePile = game.middlePile
+                        middlePile.addCard(card)//add card to middle pile
+                        game.next()
+                        emitEvent(game, event, card)//tell client that a computer card was played so that it will get displayed
+                    }
+                }
             }
             function emitGameOver(game)
             {
@@ -352,10 +361,16 @@ function BackendServer() {
                 logger.info(confirmation.insertedId)
             }
             else logger.info("Confirmation was undefined")
-            redirectToNewGamePage(res, confirmation.insertedId.toString())
+            redirectToNewSinglePlayerGamePage(res, confirmation.insertedId.toString())
         })
     }
     function redirectToNewGamePage(res, gameId){
+        if(res && res.redirect)
+        {
+            res.redirect("../game.html?gameId="+gameId)
+        }
+    }
+    function redirectToNewSinglePlayerGamePage(res, gameId){
         if(res && res.redirect)
         {
             res.redirect("../game.html?gameId="+gameId+"&singlePlayer=true")
