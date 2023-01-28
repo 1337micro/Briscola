@@ -2,6 +2,7 @@ import { Card } from './Card.js'
 import { suits } from './Suits.js'
 import {CardList} from "./CardList.js";
 import {DeckEmptyError} from "./errors/DeckErrors.js";
+import {Constants} from "./Constants";
 function Deck(deckState = {}) {
     let state = {
         cards: deckState.cards
@@ -17,7 +18,12 @@ function Deck(deckState = {}) {
                 for(let i = 1; i<=10; i++)
                 {
                     Object.keys(enumSuits).forEach(suit => {
-                        const card = Card({rank:i, suit:enumSuits[suit]})
+                        const rank = i;
+                        const card = Card({
+                            rank:rank,
+                            suit:enumSuits[suit],
+                            points: Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[rank]
+                        })
                         state.cards.push(card)
                     })
                 }
