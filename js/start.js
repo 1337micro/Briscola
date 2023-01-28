@@ -1,8 +1,22 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
-import { _onCardPress, getGame, gameStart, requestGameStart, onGameUpdate, 
-  onCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect } from './eventHandlers.js'
+import {
+  _onCardPress,
+  getGame,
+  gameStart,
+  requestGameStart,
+  requestSinglePlayerGameStart,
+  onGameUpdate,
+  onCardPlayed,
+  onRoundOver,
+  onLastDeal,
+  onGameOver,
+  onServerConnectionLost,
+  onOpponentLeft,
+  onRedirect,
+  onComputerCardPlayed, onFirstToActComputerCardPlayed
+} from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD] });
@@ -16,15 +30,20 @@ function hideGreeting()
   }
 }
 
-let game;
+function isSinglePlayer(){
+  let params = (new URL(document.location)).searchParams;
+  let singlePlayer = params.get('singlePlayer');
+  return singlePlayer;
+}
 
+let game;
 async function start()
 {
   onRedirect((newUrl)=>{
     window.location.assign(newUrl)
   })
 
-  requestGameStart();
+  isSinglePlayer() ? requestSinglePlayerGameStart() : requestGameStart();
   game = await getGame().catch( (error)=> {
     console.error(error)
     redirectToNewGame()
@@ -65,6 +84,27 @@ async function start()
       removePlayerToActText(playerToActText)
       playerToActText = generatePlayerToActText(game)
       app.stage.addChild(playerToActText)
+  })
+  onComputerCardPlayed((cardPlayed)=>
+  {
+    setTimeout(()=>{
+      //add the card to the middlePile
+      PLAY_CARD_SOUND.play()
+      addPileCard(cardPlayed)
+      removePlayerToActText(playerToActText)
+      playerToActText = generatePlayerToActText(game)
+      app.stage.addChild(playerToActText)
+    }, 1000)
+  })
+  onFirstToActComputerCardPlayed((cardPlayed)=>{
+    setTimeout(()=>{
+      //add the card to the middlePile
+      PLAY_CARD_SOUND.play()
+      addPileCard(cardPlayed)
+      removePlayerToActText(playerToActText)
+      playerToActText = generatePlayerToActText(game)
+      app.stage.addChild(playerToActText)
+    }, 2000)
   })
   onRoundOver((winningPlayer)=>
   {
@@ -440,6 +480,7 @@ function _positionCardSprites(cardSprites)
       app.stage.removeChild(childSprite)
     })
   }
+
 function gameLoop(delta)
 {
  scaleToWindow(app.renderer.view)

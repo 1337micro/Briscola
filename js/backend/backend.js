@@ -147,6 +147,49 @@ function BackendServer() {
            
 
         })
+        socket.on(Constants.events.REQUEST_SINGLE_PLAYER_GAME_START, async function(){
+            if(socket.handshake.query.gameId)
+            {
+                let game = await database.getGame(socket.handshake.query.gameId);
+                if(game.started)
+                {
+                    //this game already started. The user refreshed the page on an existing game. Redirecting to new game
+                    socket.emit(Constants.events.REDIRECT, "/newAgainstComputer")
+                    return;
+                }
+                let playerIndex = 0;
+                game.player1.socketId = socket.id
+                session.playerIndex = playerIndex
+                session.gameId = game._id
+    
+                game.players[playerIndex].socketId = socket.id;
+                game.playerForClientSide = game.players[playerIndex]
+        
+                game.started = true;
+                await database.saveGame(game)
+                emitGetGame(game)
+            }
+            function emitGetGame(game)
+            {
+                game.players.forEach(function (player, index) {
+                    const deepCopyGame = cloneDeep(game)
+                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    if(socket.id === player.socketId)
+                    {
+                        //the current player made this request so we have to send it normally with socket.emit()
+                        socket.emit(Constants.events.GET_GAME, deepCopyGame)
+                    }
+                    else
+                    {
+                        //this player is not the current socket, so we can send a message to the default room of this player with .emit()
+                        io.to(player.socketId).emit(Constants.events.GET_GAME, deepCopyGame)
+                    }
+                   
+                })
+            }
+           
+
+        })
         socket.on(Constants.events.CARD_PLAYED, async function(cardPlayed)
         {
             const gameFromDb = await database.getGame(socket.handshake.query.gameId);
@@ -168,6 +211,8 @@ function BackendServer() {
                 middlePile.addCard(cardPlayed)//add card to middle pile
 
                 game.next()
+                socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
+                computerMove(game, Constants.events.COMPUTER_CARD_PLAYED);
                 if(game.isRoundOver())
                 {
                     let winningPlayer = game.getWinningPlayer()
@@ -197,17 +242,26 @@ function BackendServer() {
                     
                     emitEvent(game, Constants.events.ROUND_OVER, winningPlayer)
                 }
-                socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
+
                 emitEvent(game,Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
+
+                computerMove(game, Constants.events.FIRST_TO_ACT_COMPUTER_CARD_PLAYED)
+
                 await database.saveGame(game)//wait for the game object to update before we emit the update
                 emitUpdateGame(game)
-                
-                
             }
             else
             {
                 socket.emit(Constants.events.CARD_PLAYED_REJECTED)
                 logger.info("Card could not be played: ", cardPlayed)
+            }
+            function computerMove(game, event) {
+                const card = game.computerMove();
+                if(card != null) {
+                    //a card was played
+                    emitEvent(game, event, card)//tell client that a computer card was played so that it will get displayed
+                }
+
             }
             function emitGameOver(game)
             {
@@ -224,9 +278,7 @@ function BackendServer() {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
                         io.to(player.socketId).emit(Constants.events.GAME_OVER, deepCopyGame)
                     }
-                   
                 })
-            
             }
             function emitUpdateGame(game)
             {
@@ -243,7 +295,6 @@ function BackendServer() {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
                         io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
                     }
-                   
                 })
             }
             
@@ -271,7 +322,9 @@ function BackendServer() {
            
         });
     });
-    expressApp.get("/new", (req, res)=>{
+    expressApp.get("/new", makeNewGame)
+    expressApp.get("/newAgainstComputer", makeNewSinglePlayerGame)
+    function makeNewGame(req, res) {
         let game = Game()
         game.init()
 
@@ -283,11 +336,31 @@ function BackendServer() {
             else logger.info("Confirmation was undefined")
             redirectToNewGamePage(res, confirmation.insertedId.toString())
         })
-    })
+    }
+    function makeNewSinglePlayerGame(req, res) {
+        let game = Game()
+        game.singlePlayer = true;
+        game.init()
+
+        database.insertNewGame(game).then((confirmation)=>{
+            if(confirmation && confirmation.insertedId)
+            {
+                logger.info(confirmation.insertedId)
+            }
+            else logger.info("Confirmation was undefined")
+            redirectToNewSinglePlayerGamePage(res, confirmation.insertedId.toString())
+        })
+    }
     function redirectToNewGamePage(res, gameId){
         if(res && res.redirect)
         {
             res.redirect("../game.html?gameId="+gameId)
+        }
+    }
+    function redirectToNewSinglePlayerGamePage(res, gameId){
+        if(res && res.redirect)
+        {
+            res.redirect("../game.html?gameId="+gameId+"&singlePlayer=true")
         }
     }
     http.listen(3000, 'backend', function () {

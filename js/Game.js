@@ -20,6 +20,7 @@ function Game(gameState = {})
     state.playerForClientSide = gameState.playerForClientSide
     state.history = gameState.history
     state.started = gameState.started
+    state.singlePlayer = gameState.singlePlayer
     let game = Object.assign(state,
         gameLogicController(state)
     )
@@ -120,10 +121,82 @@ function gameLogicController(state)
             }
             
         },
-        computerMove: function(computerPlayer = state.player2){
-            const playedCard = computerPlayer.hand.cards.pop()
-            state.middlePile.addCard(playedCard)
-            return playedCard
+        computerMove: function(){
+            if(state.singlePlayer) {
+                let playerIndex = state.currentPlayerToActByIndex;
+                let player = state.players[playerIndex];
+                let playerHand = player.hand;
+                if (player.socketId == null && playerHand.cards.length > 0) {
+                    const card = state.computerAI(playerHand)
+                    //the current player to act is the computer and has some cards to play
+                    state.addCardToHistory(card, playerIndex);
+                    playerHand.removeCard(card)//remove card from player's hand
+                    let middlePile = state.middlePile
+                    middlePile.addCard(card)//add card to middle pile
+                    state.next()
+                    return card;
+                }
+            }
+        },
+        computerAI: function (computerHand) {
+            const trumpCard = state.middlePile.trumpCard
+            //player hand sorted ascending in point value
+            const sortedComputerCards = computerHand.cards.sort((cardA, cardB) => cardA.points - cardB.points);
+            const ourTrumpCards = sortedComputerCards.filter(card => card.suit === trumpCard.suit)
+            const ourNonTrumpCards = sortedComputerCards.filter(card => card.suit !== trumpCard.suit)
+            console.log(JSON.stringify(sortedComputerCards))
+            let worstCardInHand;
+            if(ourTrumpCards.length === sortedComputerCards.length) {
+                //all our cards are trump cards, take the lowest trump card as the worst card
+                worstCardInHand = ourTrumpCards[0]
+            } else {
+                //take the lowest non-trump card
+                worstCardInHand = ourNonTrumpCards[0];
+            }
+
+            const cardsInMiddle = state.middlePile.cards
+            if(cardsInMiddle.length === 0) {
+                //Computer is first to act, play leech
+                return worstCardInHand
+            }
+            else {
+                //Computer is second to act
+                const cardAlreadyPlayedInMiddle = cardsInMiddle[0]
+                if(cardAlreadyPlayedInMiddle.suit === trumpCard.suit) {
+                    //player played a trump suit first, give him the lowest points possible
+                    return worstCardInHand;
+                }
+                else {
+                    //player played a non-trump card
+                    const ourCardsOfSameSuit = sortedComputerCards.filter(card => card.suit === cardAlreadyPlayedInMiddle.suit);
+                    if(ourCardsOfSameSuit.length === 0) {
+                        //no cards of same suit
+                        const middleCardValue = cardAlreadyPlayedInMiddle.points;
+                        if(middleCardValue == undefined || middleCardValue < 3) {
+                            //the card in the middle pile is worth nothing, or less than a b**ch, so play your worst card
+                            return worstCardInHand
+                        }
+                        else {
+                            //the card in the middle is worth something meaningful, so we try to take it
+                            const ourTrumpCards = sortedComputerCards.filter(card => card.suit === trumpCard.suit)
+                            if(ourTrumpCards.length > 0) {
+                                //We have some trump cards, so let's play lowest one
+                                return ourTrumpCards[0]
+                            }
+                            else {
+                                //we are unable to take the card, play the worst card in hand
+                                return worstCardInHand;
+                            }
+                        }
+                    }
+                    else {
+                        //play highest card of same suit
+                        return ourCardsOfSameSuit[ourCardsOfSameSuit.length-1]
+                    }
+                }
+
+
+            }
         },
         //play a round at random for testing
         _playRound : function()
