@@ -1,25 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Briscola</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-</head>
-<body>
-<script>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <script>
+      function startGame() {
+        window.location.assign("new");
+      }
+      function startGameAgainstComputer() {
+        window.location.assign("/gameAgainstComputer.html");
+      }
+    </script>
+    <div class="container-fluid home-container">
+      <h1 id="logo">Briscola</h1>
+      <div class="wrap">
+        <div class="buttons">
+          <button
+            style="margin-top: 50px"
+            class="btn btn-primary"
+            onclick="startGame()"
+          >
+            Start Against Online Player
+          </button>
+          <button
+            style="margin-top: 50px"
+            class="btn btn-primary"
+            onclick="startGameAgainstComputer()"
+          >
+            Start Against Computer
+          </button>
+        </div>
 
-    function startGame()
-    {
-        window.location.assign("new")
-    }
-    function startGameAgainstComputer()
-    {
-        window.location.assign("/newAgainstComputer")
-    }
-</script>
-<div class="container-fluid">
-    <button style="margin-top:50px;" class="btn btn-primary" onclick="startGame()">Start Against Online Player</button>
-    <button style="margin-top:50px;" class="btn btn-primary" onclick="startGameAgainstComputer()">Start Against Computer</button>
-</div>
-</body>
+        <div class="cards-img-container">
+          <img class="cards-img" src="images/cards.png" alt="Cards image" />
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
