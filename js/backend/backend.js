@@ -260,10 +260,10 @@ function BackendServer() {
                     //computer move
                     let playerIndex = game.currentPlayerToActByIndex;
                     let player = game.players[playerIndex];
-                    if(player.socketId == null) {
-                        //the current player to act is the computer
-                        let playerHand = player.hand;
-                        const card = playerHand.cards[0];
+                    let playerHand = player.hand;
+                    const card = playerHand.cards[0];
+                    if(player.socketId == null && card != null) {
+                        //the current player to act is the computer and has some cards to play
                         game.addCardToHistory(card,playerIndex);
                         playerHand.removeCard(card)//remove card from player's hand
                         let middlePile = game.middlePile
@@ -288,9 +288,7 @@ function BackendServer() {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
                         io.to(player.socketId).emit(Constants.events.GAME_OVER, deepCopyGame)
                     }
-                   
                 })
-            
             }
             function emitUpdateGame(game)
             {
@@ -307,7 +305,6 @@ function BackendServer() {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
                         io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
                     }
-                   
                 })
             }
             
