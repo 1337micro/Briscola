@@ -25,9 +25,8 @@
     "i18next": "^19.8.7",
     "lodash.clonedeep": "^4.5.0",
     "mongodb": "^3.6.4",
-    "mongoose": "^5.11.15",
     "pino": "^6.11.1",
-    "pixi.js": "^5.3.7",
+    "pixi.js": "^7.1.1",
     "socket.io": "^2.4.1"
   }
 }

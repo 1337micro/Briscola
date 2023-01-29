@@ -18,8 +18,6 @@ let app = new PIXI.Application({
 
 app.renderer.backgroundColor = 0xFFFFFF // white
 
-app.renderer.view.style.position = "absolute";
-app.renderer.view.style.display = "block";
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
 
