@@ -24,9 +24,13 @@ const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS] })
 function hideGreeting()
 {
   const greetingElement = document.getElementById("greeting");
+  const loadingElement = document.getElementById("loading");
   if(greetingElement)
   {
     greetingElement.innerHTML = null;
+  }
+  if(loadingElement) {
+    loadingElement.innerHTML = null;
   }
 }
 

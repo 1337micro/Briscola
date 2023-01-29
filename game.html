@@ -14,7 +14,10 @@
 </head>
 
 <body>
-  <div id="greeting" class="container-fluid">
+  <div id="loading" class="container-fluid" style="visibility: hidden">
+    Loading... Please wait while we redirect you...
+  </div>
+  <div id="greeting" class="container-fluid" style="visibility: hidden">
     <div class="row">
       <div class="col">
       <p>To invite someone to play, give this URL: </p>
@@ -39,7 +42,14 @@
 
 
   <script>
-    var clipboard = new ClipboardJS('.button');
+    const url = window.location.href;
+    if(url.includes('singlePlayer')) {
+      document.getElementById("loading").style.visibility="visible"
+    }
+    else {
+      document.getElementById("greeting").style.visibility="visible"
+      setInputFieldText()
+    }
 
     function setInputFieldText(){
       const inputFieldForUrl = document.getElementById("awaiting_opponent_game_url_input")
@@ -48,7 +58,7 @@
         inputFieldForUrl.value = window.location.href
       }
     }
-    setInputFieldText()
+
   </script>
 
 </body>
