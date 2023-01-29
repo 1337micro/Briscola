@@ -41,6 +41,8 @@ function isSinglePlayer(){
 }
 
 let game;
+let screenWidth = window.innerWidth;
+let screenHeight = window.innerHeight;
 async function start()
 {
   onRedirect((newUrl)=>{
@@ -141,7 +143,7 @@ async function start()
     removeAllSpritesOnScreen()
     let textFontSize = 24
     let textPositionX = 0
-    let textPositionY = Constants.height/2;
+    let textPositionY = screenHeight/2;
 
     const gameOverStyle = {fontFamily : 'Arial', fontSize: textFontSize, align : 'center'}
     const gameOverText = new PIXI.Text('Game over.', gameOverStyle);
@@ -181,8 +183,8 @@ async function start()
     removeAllSpritesOnScreen()
     const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
     const gameOverText = new PIXI.Text('Server connection lost. Game aborted. ', gameOverStyle);
-    gameOverText.x = Constants.width/2
-    gameOverText.y = Constants.height/2
+    gameOverText.x = screenWidth/2
+    gameOverText.y = screenHeight/2
     app.stage.addChild(gameOverText)
 
     showNewGameButton()
@@ -191,8 +193,8 @@ async function start()
     removeAllSpritesOnScreen()
     const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
     const gameOverText = new PIXI.Text('Opponent Left. Game aborted. ', gameOverStyle);
-    gameOverText.x = Constants.width/2
-    gameOverText.y = Constants.height/2
+    gameOverText.x = screenWidth/2
+    gameOverText.y = screenHeight/2
     app.stage.addChild(gameOverText)
 
     showNewGameButton()
@@ -257,8 +259,8 @@ function generatePlayerToActText(game)
   {
     playerToActText = new PIXI.Text("Opponent's move", playerMoveTextStyle);
   }
-  playerToActText.x = 0.05*Constants.width;
-  playerToActText.y = Constants.height - 135;
+  playerToActText.x = 0.05*screenWidth;
+  playerToActText.y = screenHeight - 135;
 
   return  playerToActText
 }
@@ -266,8 +268,8 @@ function generateDeckCount(game)
 {
   const numCardsInDeck = game.deck.cards.length;
   const numCardsInDeckText =  new PIXI.Text(numCardsInDeck, {fontSize: 48, align : 'center', fill: '#00FF00'});
-  numCardsInDeckText.x = Constants.width / 2 + 50
-  numCardsInDeckText.y = Constants.height / 2 + 125
+  numCardsInDeckText.x = screenWidth / 2 + 50
+  numCardsInDeckText.y = screenHeight / 2 + 125
 
   return numCardsInDeckText;
 }
@@ -395,24 +397,24 @@ function _positionCardSprite(cardSprite, x, y)
 function _positionOpponentBackCardSprites(backOfCardSprites)
 {
   backOfCardSprites.forEach((backOfCardSprite, i) =>{
-    _positionCardSprite(backOfCardSprite, Constants.width / 4 + 100*i, 0)
+    _positionCardSprite(backOfCardSprite, screenWidth / 4 + 100*i, 0)
   })
   _rotateCardSprites(backOfCardSprites, false)
 }
 function _positionBackOfCard(backOfCardSprite)
 {
-    _positionCardSprite(backOfCardSprite, Constants.width / 2, Constants.height / 2 - 100)
+    _positionCardSprite(backOfCardSprite, screenWidth - 300, screenHeight / 2 - 100)
 }
 function _positionPileCard(pileCardSprite)
 {
-    _positionCardSprite(pileCardSprite, (Constants.width / 2 - 200 + 100* Math.random()), Constants.height / 2 + 100* Math.random())
+    _positionCardSprite(pileCardSprite, (screenWidth / 2 - 200 + 150* Math.random()), screenHeight / 2)
     pileCardSprite.anchor.x = 0.5
     pileCardSprite.anchor.y = 0.5
     pileCardSprite.rotation = Math.random()/2
 }
 function _positionTrumpCard(trumpCardSprite)
 {
-  _positionCardSprite(trumpCardSprite, Constants.width / 2, Constants.height / 2 - 100)
+  _positionCardSprite(trumpCardSprite, screenWidth - 300, screenHeight / 2 - 100)
   trumpCardSprite.anchor.x = 0.5
   trumpCardSprite.anchor.y = 0.5
   trumpCardSprite.rotation = Math.PI /2
@@ -421,7 +423,7 @@ function _positionTrumpCard(trumpCardSprite)
 function _positionCardSprites(cardSprites)
 {
   cardSprites.forEach((cardSprite, i) => {
-    _positionCardSprite(cardSprite, Constants.width / 4 + 100*i, Constants.height)
+    _positionCardSprite(cardSprite, screenWidth / 4 + 100*i, screenHeight - 100)
   })
 }
   function _rotateCardSprites(cardSprites, yourHand = true)
@@ -487,10 +489,6 @@ function _positionCardSprites(cardSprites)
 
 function gameLoop(delta)
 {
- scaleToWindow(app.renderer.view)
-app.renderer.view.style.position = "absolute";
-app.renderer.view.style.display = "block";
-app.renderer.autoResize = true;
-app.renderer.resize(window.innerWidth, window.innerHeight);
+  scaleToWindow(app.renderer.view)
 }
 export { start };
