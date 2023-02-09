@@ -7,7 +7,7 @@ docker-compose build
 
 docker-compose up
 
-To run locally:
+To run locally (alternative to docker to allow for debugging):
 
 Download nginx
 
