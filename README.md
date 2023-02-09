@@ -1,13 +1,13 @@
-To play the game:
+**To play the game:**
 http://briscola.xyz/
 
-To run with docker:
+**To run with docker:**
 
 docker-compose build
 
 docker-compose up
 
-To run locally (alternative to docker to allow for debugging):
+**To run locally:** (alternative to docker to allow for debugging locally):
 
 Download nginx
 
