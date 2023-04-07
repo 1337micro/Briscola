@@ -1,0 +1,35 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Briscola</title>
+  <meta name="description" content="Briscola">
+  <meta name="author" content="1337micro">
+
+</head>
+
+<body>
+  <h1>Current Lobbies: </h1>
+  <div id="lobbies">
+    
+  </div>
+
+  <script>
+    fetch('join').then(response => {
+     return response.json()
+    })
+    .then( (lobbies) => {
+      console.log(lobbies)
+      if(lobbies) {
+        lobbies.forEach(lobby => {
+          document.getElementById('lobbies').innerHTML += `<a href="game.html?gameId=${lobby._id}"> ${lobby._id} </a> <br/>`
+        })
+      }
+    }).error(console.error)
+ </script>
+
+
+</body>
+</html>
