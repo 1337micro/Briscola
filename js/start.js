@@ -74,6 +74,10 @@ async function start()
       game = newGameObj     
       removeHandCardSprites(cardSprites)
       cardSprites = addPlayerHandSprites(game.playerForClientSide)
+      
+      removeHandCardSprites(opponentBackOfCardSprites)
+      opponentBackOfCardSprites = _generateOpponentCardSprites(game)
+      setUpOpponentBackOfCards(opponentBackOfCardSprites);
 
       removePlayerToActText(playerToActText)
       playerToActText = generatePlayerToActText(game)
@@ -220,6 +224,9 @@ async function start()
   }
 
   let cardSprites = addPlayerHandSprites(game.playerForClientSide)
+  let opponentBackOfCardSprites = _generateOpponentCardSprites(game);
+  setUpOpponentBackOfCards(opponentBackOfCardSprites)
+
   function addPlayerHandSprites(player)
   {
     let cardSprites = _generateCardSprites(player.hand)
@@ -234,8 +241,7 @@ async function start()
   const trumpCardSprite = setUpTrumpCard(game.trumpCard)
   const backOfDeckSprite = setUpBackOfDeck()
 
-  let opponentBackOfCardSprites = _generateOpponentCardSprites();
-  setUpOpponentBackOfCards(opponentBackOfCardSprites)
+
 
   app.ticker.add(delta => gameLoop(delta));
 
@@ -312,7 +318,7 @@ function makeSpritesInteractive(sprites, game)
 
 function setUpOpponentBackOfCards(opponentBackOfCardSprites)
 {
-  for (let i = 0; i<3; i++)
+  for (let i = 0; i<opponentBackOfCardSprites.length; i++)
   {
     let backOfDeckSprite = opponentBackOfCardSprites[i]
     _scaleSpriteDownTo(0.5, backOfDeckSprite)
@@ -373,10 +379,11 @@ function removeHandCardSprites(handCardSprites)
 {
   _removeSprites(handCardSprites)
 }
-function _generateOpponentCardSprites()
+function _generateOpponentCardSprites(game)
 {
+  const opponentPlayer = getOpponentPlayer(game);
   let cardSprites = []
-  for (let i = 0; i<3; i++)
+  for (let i = 0; i<opponentPlayer.hand.cards.length; i++)
   {
     let cardSprite = new PIXI.Sprite(
       PIXI.loader.resources[`../images/backOfCard.png`].texture
