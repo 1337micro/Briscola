@@ -16,6 +16,9 @@
       function startGame() {
         window.location.assign("new");
       }
+      function showLobbies() {
+        window.location.assign("lobbies.html");
+      }
       function startGameAgainstComputer() {
         window.location.assign("/newAgainstComputer");
       }
@@ -29,14 +32,21 @@
             class="btn btn-primary"
             onclick="startGame()"
           >
-            Start Against Online Player
+            Create Game
+          </button>
+          <button
+            style="margin-top: 50px"
+            class="btn btn-primary"
+            onclick="showLobbies()"
+          >
+            Show Lobbies
           </button>
           <button
             style="margin-top: 50px"
             class="btn btn-primary"
             onclick="startGameAgainstComputer()"
           >
-            Start Against Computer
+            Play Against Computer
           </button>
         </div>
 

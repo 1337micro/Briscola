@@ -9,6 +9,7 @@ const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 const expressLogger = expressPino({ logger });
 const expressApp = express();
 import { Constants } from '../Constants.js'
+import Lobbies  from './Lobbies'
 
 const http = require('http').createServer(expressApp);
 
@@ -42,16 +43,18 @@ io.use(sharedsession(session, {
 function BackendServer() {
     expressApp.use(express.static(__dirname))
 
+    const lobbies = new Lobbies(io);
+
+    function getSocketBySocketId(socketId)
+    {
+        return io.sockets.connected[socketId]
+    }
+    function isSocketConnected(socketId)
+    {
+        const connectedSocket = getSocketBySocketId(socketId)
+        return (connectedSocket != undefined)
+    }
     io.on('connection', function (socket) {
-        function getSocketBySocketId(socketId)
-        {
-            return io.sockets.connected[socketId]
-        }
-        function isSocketConnected(socketId)
-        {
-            const connectedSocket = getSocketBySocketId(socketId)
-            return (connectedSocket != undefined)
-        }
         function emitEvent(game, event, data)
         {
             game.players.forEach(function (player, index) {
@@ -97,6 +100,7 @@ function BackendServer() {
                 game.playerForClientSide = game.players[playerIndex]
     
                 await database.saveGame(game)
+                lobbies.addLobby(game);
                 if(game.players[0].socketId && game.players[1].socketId)
                 {
                     const isPlayer1Connected = isSocketConnected(game.players[0].socketId)
@@ -106,6 +110,7 @@ function BackendServer() {
                         game.started = true;
                         await database.saveGame(game)
                         emitGetGame(game)
+                        lobbies.removeLobby(game);
                     }
                     else
                     {
@@ -322,8 +327,13 @@ function BackendServer() {
            
         });
     });
+    expressApp.get("/join", listActiveLobbies)
     expressApp.get("/new", makeNewGame)
     expressApp.get("/newAgainstComputer", makeNewSinglePlayerGame)
+    function listActiveLobbies(req, res) {
+        lobbies.purgeEmptyLobbies();
+        res.json(lobbies.getLobbies())
+    }
     function makeNewGame(req, res) {
         let game = Game()
         game.init()
