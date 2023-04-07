@@ -4,7 +4,6 @@ import { Constants } from './Constants.js'
 import {
   _onCardPress,
   getGame,
-  gameStart,
   requestGameStart,
   requestSinglePlayerGameStart,
   onGameUpdate,
@@ -15,12 +14,13 @@ import {
   onServerConnectionLost,
   onOpponentLeft,
   onRedirect,
-  onComputerCardPlayed, onFirstToActComputerCardPlayed
+  onComputerCardPlayed, 
+  onFirstToActComputerCardPlayed
 } from './eventHandlers.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
-const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD] });
-const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS] });
+const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD], volume: 0.35 });
+const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS], volume: 0.25 });
 function hideGreeting()
 {
   const greetingElement = document.getElementById("greeting");
@@ -64,7 +64,9 @@ async function start()
   app.stage.addChild(playerToActText)
 
   let deckCountText = generateDeckCount(game);
+  let trumpSuitText = generateTrumpSuitTextSprite(game.trumpCard);
   app.stage.addChild(deckCountText)
+  app.stage.addChild(trumpSuitText)
 
   let middlePileCardSprites = []
   onGameUpdate((newGameObj)=>
@@ -217,7 +219,6 @@ async function start()
     app.stage.addChild(refreshPageForNewGame)
   }
 
-  //let trumpCard = await getTrumpCard()
   let cardSprites = addPlayerHandSprites(game.playerForClientSide)
   function addPlayerHandSprites(player)
   {
@@ -260,16 +261,17 @@ function generatePlayerToActText(game)
     playerToActText = new PIXI.Text("Opponent's move", playerMoveTextStyle);
   }
   playerToActText.x = 0.05*screenWidth;
-  playerToActText.y = screenHeight - 135;
+  playerToActText.y = screenHeight - 300;
 
   return  playerToActText
 }
 function generateDeckCount(game)
 {
   const numCardsInDeck = game.deck.cards.length;
-  const numCardsInDeckText =  new PIXI.Text(numCardsInDeck, {fontSize: 48, align : 'center', fill: '#00FF00'});
-  numCardsInDeckText.x = screenWidth / 2 + 50
-  numCardsInDeckText.y = screenHeight / 2 + 125
+  const numCardsInDeckText =  new PIXI.Text(`Deck: ${numCardsInDeck}`, {fontSize: 24, align : 'center'});
+
+  numCardsInDeckText.x =  screenWidth - 300
+  numCardsInDeckText.y = screenHeight / 2 + 140
 
   return numCardsInDeckText;
 }
@@ -325,6 +327,14 @@ function addPileCard(pileCard)
     _positionPileCard(pileCardSprite)
     _scaleSpriteDownTo(0.5, pileCardSprite)
     addCardSpriteToStage(pileCardSprite)
+}
+function generateTrumpSuitTextSprite(trumpCard){
+  const trumpSuitString = Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[trumpCard.suit];
+  const trumpSuitText = new PIXI.Text(`Trump Suit: ${trumpSuitString}`, {fontSize: 24, align : 'center'});
+ 
+  trumpSuitText.x = screenWidth - 300
+  trumpSuitText.y = screenHeight / 2 + 180
+  return trumpSuitText;
 }
 function setUpTrumpCard(trumpCard){
   let trumpCardSprite = _generateCardSprite(`../images/${trumpCard.rank + trumpCard.suit}.png`)
@@ -407,7 +417,8 @@ function _positionBackOfCard(backOfCardSprite)
 }
 function _positionPileCard(pileCardSprite)
 {
-    _positionCardSprite(pileCardSprite, (screenWidth / 2 - 200 + 150* Math.random()), screenHeight / 2)
+    const randomDisplacement = 185 * Math.random(); 
+    _positionCardSprite(pileCardSprite, (screenWidth / 2 - 200) + randomDisplacement, screenHeight / 2)
     pileCardSprite.anchor.x = 0.5
     pileCardSprite.anchor.y = 0.5
     pileCardSprite.rotation = Math.random()/2

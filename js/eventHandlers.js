@@ -43,16 +43,7 @@ function getGame()
         })
     })
 }
-function gameStart()
-{
-    return new Promise(function(resolve, reject)
-    {
-        socket.on(Constants.events.GAME_START, function()
-        {            
-            resolve()
-        })
-    })
-}
+
 function requestGameStart()
 {
     socket.emit(Constants.events.REQUEST_GAME_START)
@@ -61,17 +52,6 @@ function requestSinglePlayerGameStart()
 {
     socket.emit(Constants.events.REQUEST_SINGLE_PLAYER_GAME_START)
 }
-function getTrumpCard()
-{
-    return new Promise(function(resolve, reject)
-    {
-        socket.on(Constants.events.TRUMP_CARD, function(card)
-        {
-            resolve(card)
-        })
-    })
-}
-
 
 function onGameUpdate(cb)
 {
@@ -139,5 +119,20 @@ function onRedirect(cb)
         cb(newUrl)
     })
 }
-export { _onCardPress, awaitOpponent, getGame,gameStart,  requestGameStart, requestSinglePlayerGameStart, onGameUpdate, 
-    onCardPlayed, onComputerCardPlayed, onFirstToActComputerCardPlayed, onRoundOver, onLastDeal, onGameOver, onServerConnectionLost, onOpponentLeft, onRedirect}
+export {
+    _onCardPress, 
+    awaitOpponent, 
+    getGame,  
+    requestGameStart, 
+    requestSinglePlayerGameStart, 
+    onGameUpdate, 
+    onCardPlayed, 
+    onComputerCardPlayed, 
+    onFirstToActComputerCardPlayed, 
+    onRoundOver, 
+    onLastDeal, 
+    onGameOver, 
+    onServerConnectionLost, 
+    onOpponentLeft, 
+    onRedirect
+}

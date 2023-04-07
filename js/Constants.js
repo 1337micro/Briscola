@@ -37,7 +37,13 @@ const Constants = {
             9: 3,
             8: 2
           },
-          MAX_NUMBER_CARDS_IN_HAND: 3
+          MAX_NUMBER_CARDS_IN_HAND: 3,
+          MAP_ABBREVIATION_TO_SUITS : {
+            s :"Spade",
+            c :"Coppe",
+            d :"Denari",
+            b :"Bastoni"
+          }
       }
 }
 export { Constants };
