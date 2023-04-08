@@ -73,17 +73,17 @@ function BackendServer() {
         }
         logger.info('a user connected', socket.id);
         let session = socket.handshake.session;
-        socket.on(Constants.events.REQUEST_GAME_START, async function(){
+        socket.on(Constants.events.REQUEST_GAME_START, async function(playerName){
             if(socket.handshake.query.gameId)
             {
                 let game = await database.getGame(socket.handshake.query.gameId);
                 if(game.started)
                 {
                     //this game already started. The user refreshed the page on an existing game. Redirecting to new game
-                    socket.emit(Constants.events.REDIRECT, "/new")
+                    socket.emit(Constants.events.REDIRECT, "/new?name=playerName")
                     return;
                 }
-                let playerIndex;
+                let playerIndex = 0;
                 if (game.players[0].socketId == undefined) {
                     playerIndex = 0;
                     game.player1.socketId = socket.id
@@ -97,6 +97,7 @@ function BackendServer() {
                 session.gameId = game._id
     
                 game.players[playerIndex].socketId = socket.id;
+                game.players[playerIndex].name = playerName;
                 game.playerForClientSide = game.players[playerIndex]
     
                 await database.saveGame(game)
@@ -337,14 +338,16 @@ function BackendServer() {
     function makeNewGame(req, res) {
         let game = Game()
         game.init()
-
+        
         database.insertNewGame(game).then((confirmation)=>{
             if(confirmation && confirmation.insertedId)
             {
                 logger.info(confirmation.insertedId)
             }
             else logger.info("Confirmation was undefined")
-            redirectToNewGamePage(res, confirmation.insertedId.toString())
+
+            const playerName = req.query.name
+            redirectToNewGamePage(res, confirmation.insertedId.toString(), playerName)
         })
     }
     function makeNewSinglePlayerGame(req, res) {
@@ -361,10 +364,10 @@ function BackendServer() {
             redirectToNewSinglePlayerGamePage(res, confirmation.insertedId.toString())
         })
     }
-    function redirectToNewGamePage(res, gameId){
+    function redirectToNewGamePage(res, gameId, playerName){
         if(res && res.redirect)
         {
-            res.redirect("../game.html?gameId="+gameId)
+            res.redirect("../game.html?gameId="+gameId+"&name="+playerName)
         }
     }
     function redirectToNewSinglePlayerGamePage(res, gameId){
