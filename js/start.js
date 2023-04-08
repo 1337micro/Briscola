@@ -40,6 +40,12 @@ function isSinglePlayer(){
   return singlePlayer;
 }
 
+function getPlayerName(){
+  let params = (new URL(document.location)).searchParams;
+  let name = params.get('name');
+  return name;
+}
+
 let game;
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
@@ -49,7 +55,7 @@ async function start()
     window.location.assign(newUrl)
   })
 
-  isSinglePlayer() ? requestSinglePlayerGameStart() : requestGameStart();
+  isSinglePlayer() ? requestSinglePlayerGameStart() : requestGameStart(getPlayerName());
   game = await getGame().catch( (error)=> {
     console.error(error)
     redirectToNewGame()
@@ -62,6 +68,9 @@ async function start()
   
   let playerToActText = generatePlayerToActText(game)
   app.stage.addChild(playerToActText)
+
+  let yourNameText = generateYourPlayerNameText(game)
+  app.stage.addChild(yourNameText)
 
   let deckCountText = generateDeckCount(game);
   let trumpSuitText = generateTrumpSuitTextSprite(game.trumpCard);
@@ -270,6 +279,17 @@ function generatePlayerToActText(game)
   playerToActText.y = screenHeight - 300;
 
   return  playerToActText
+}
+function generateYourPlayerNameText(game)
+{
+  const nameTextStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center', fill: "#ff0000"}
+
+  let yourNameText = new PIXI.Text(game.playerForClientSide.name, nameTextStyle)
+  
+  yourNameText.x = screenWidth - 300;
+  yourNameText.y = screenHeight - 100;
+
+  return  yourNameText
 }
 function generateDeckCount(game)
 {

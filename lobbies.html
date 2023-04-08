@@ -11,7 +11,7 @@
 </head>
 
 <body>
-  <h1>Current Lobbies: </h1>
+  
   <div id="lobbies">
     
   </div>
@@ -21,13 +21,17 @@
      return response.json()
     })
     .then( (lobbies) => {
-      console.log(lobbies)
-      if(lobbies) {
+      if(lobbies && lobbies.length > 0) {
+        document.getElementById('lobbies').innerHTML += '<h1>Current Lobbies: </h1>'
         lobbies.forEach(lobby => {
-          document.getElementById('lobbies').innerHTML += `<a href="game.html?gameId=${lobby._id}"> ${lobby._id} </a> <br/>`
+          const lobbyName = lobby.players[0].name || 'Anonymous';
+          document.getElementById('lobbies').innerHTML += `<a href="game.html?gameId=${lobby._id}">Click to join ${lobbyName}'s lobby</a> <br/>`
         })
       }
-    }).error(console.error)
+      else {
+        document.getElementById('lobbies').innerHTML += '<h1>No Active Lobbies... Please create a game instead.</h1>'
+      }
+    }).catch(console.error)
  </script>
 
 

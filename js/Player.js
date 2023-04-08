@@ -7,7 +7,8 @@ function Player(playerState = {})
   let state = Object.assign({
     hand: Hand(playerState.hand),
     socketId: playerState.socketId,
-    pile: Pile(playerState.pile)
+    pile: Pile(playerState.pile),
+    name: playerState.name
   })
   return Object.assign(state)
 }

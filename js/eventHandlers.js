@@ -44,9 +44,9 @@ function getGame()
     })
 }
 
-function requestGameStart()
+function requestGameStart(playerName)
 {
-    socket.emit(Constants.events.REQUEST_GAME_START)
+    socket.emit(Constants.events.REQUEST_GAME_START, playerName)
 }
 function requestSinglePlayerGameStart()
 {

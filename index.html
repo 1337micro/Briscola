@@ -13,8 +13,11 @@
   </head>
   <body>
     <script>
+      function getPlayerName() {
+        return document.getElementById('name').value
+      }
       function startGame() {
-        window.location.assign("new");
+        window.location.assign(`new?name=${getPlayerName()}`);
       }
       function showLobbies() {
         window.location.assign("lobbies.html");
@@ -26,6 +29,9 @@
     <div class="container-fluid home-container">
       <h1 id="logo">Briscola</h1>
       <div class="wrap">
+        <div class="buttons">
+          <input id="name" type="text" placeholder="Enter a player name"/>
+        </div>
         <div class="buttons">
           <button
             style="margin-top: 50px"
