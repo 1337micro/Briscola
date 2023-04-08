@@ -17,34 +17,36 @@ import {
   onComputerCardPlayed, 
   onFirstToActComputerCardPlayed
 } from './eventHandlers.js'
+import {
+  _rotateCardSprites,
+  _scaleSpriteDownTo,
+  _scaleSpritesDownTo,
+  makeSpritesInteractive,
+  _positionCardSprite,
+  _positionOpponentBackCardSprites,
+  _positionBackOfCard,
+  _positionPileCard,
+  _positionTrumpCard,
+  _positionCardSprites,
+  _generateOpponentCardSprites,
+  _generateCardSprites,
+  _generateCardSprite,
+  _removeSprite,
+_removeSprites,
+removeMiddlePileCardSprites,
+removeHandCardSprites
+} from './utils/sprites.js'
+import {
+  generatePlayerToActText, 
+  generateYourPlayerNameText, 
+  generateDeckCount, 
+  generateTrumpSuitTextSprite
+} from './utils/generators.js'
+import {hideGreeting, isSinglePlayer, getPlayerName, getMyPlayerObject, getOpponentPlayer} from './utils/general.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD], volume: 0.35 });
 const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS], volume: 0.25 });
-function hideGreeting()
-{
-  const greetingElement = document.getElementById("greeting");
-  const loadingElement = document.getElementById("loading");
-  if(greetingElement)
-  {
-    greetingElement.innerHTML = null;
-  }
-  if(loadingElement) {
-    loadingElement.innerHTML = null;
-  }
-}
-
-function isSinglePlayer(){
-  let params = (new URL(document.location)).searchParams;
-  let singlePlayer = params.get('singlePlayer');
-  return singlePlayer;
-}
-
-function getPlayerName(){
-  let params = (new URL(document.location)).searchParams;
-  let name = params.get('name');
-  return name;
-}
 
 let game;
 let screenWidth = window.innerWidth;
@@ -192,7 +194,6 @@ async function start()
     app.stage.addChild(gameOverText)
     app.stage.addChild(pointsText)
     app.stage.addChild(winningText)
-    showNewGameButton()
   })
   onServerConnectionLost((reason)=>{
     removeAllSpritesOnScreen()
@@ -201,8 +202,6 @@ async function start()
     gameOverText.x = screenWidth/2
     gameOverText.y = screenHeight/2
     app.stage.addChild(gameOverText)
-
-    showNewGameButton()
   })
   onOpponentLeft((reason)=>{
     removeAllSpritesOnScreen()
@@ -211,25 +210,10 @@ async function start()
     gameOverText.x = screenWidth/2
     gameOverText.y = screenHeight/2
     app.stage.addChild(gameOverText)
-
-    showNewGameButton()
   })
   function redirectToNewGame()
   {
     window.location.assign("/new")
-  }
-  function showNewGameButton()
-  {
-    const gameOverStyle = {fontFamily : 'Arial', fontSize: textFontSize, align : 'center'}
-    const refreshPageForNewGame = new PIXI.Text('CLICK HERE FOR A NEW GAME', gameOverStyle);
-    refreshPageForNewGame.buttonMode = true
-    refreshPageForNewGame.interactive = true
-    refreshPageForNewGame.backgroundColor = 0x000000
-    refreshPageForNewGame.x = textPositionX
-    refreshPageForNewGame.y = textPositionY
-    refreshPageForNewGame.tap = redirectToNewGame
-    refreshPageForNewGame.click = redirectToNewGame
-    app.stage.addChild(refreshPageForNewGame)
   }
 
   let cardSprites = addPlayerHandSprites(game.playerForClientSide)
@@ -250,8 +234,6 @@ async function start()
   const trumpCardSprite = setUpTrumpCard(game.trumpCard)
   const backOfDeckSprite = setUpBackOfDeck()
 
-
-
   app.ticker.add(delta => gameLoop(delta));
 
 function removePlayerToActText(playerToActText)
@@ -261,79 +243,6 @@ function removePlayerToActText(playerToActText)
 function removeDeckCountSprite(deckCountText)
 {
   deckCountText.parent.removeChild(deckCountText)
-}
-function generatePlayerToActText(game)
-{
-  const playerMoveTextStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
-
-  let playerToActText;
-  if(isMyTurnToAct(game))
-  {
-    playerToActText = new PIXI.Text('Your move', playerMoveTextStyle);
-  }
-  else
-  {
-    playerToActText = new PIXI.Text("Opponent's move", playerMoveTextStyle);
-  }
-  playerToActText.x = 0.05*screenWidth;
-  playerToActText.y = screenHeight - 300;
-
-  return  playerToActText
-}
-function generateYourPlayerNameText(game)
-{
-  const nameTextStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center', fill: "#ff0000"}
-
-  let yourNameText = new PIXI.Text(game.playerForClientSide.name, nameTextStyle)
-  
-  yourNameText.x = screenWidth - 300;
-  yourNameText.y = screenHeight - 100;
-
-  return  yourNameText
-}
-function generateDeckCount(game)
-{
-  const numCardsInDeck = game.deck.cards.length;
-  const numCardsInDeckText =  new PIXI.Text(`Deck: ${numCardsInDeck}`, {fontSize: 24, align : 'center'});
-
-  numCardsInDeckText.x =  screenWidth - 300
-  numCardsInDeckText.y = screenHeight / 2 + 140
-
-  return numCardsInDeckText;
-}
-function isMyTurnToAct(game)
-{
-  const playerToAct = game.players[game.currentPlayerToActByIndex]
-  const myPlayerObject = game.playerForClientSide
-  return playerToAct && myPlayerObject && playerToAct.socketId === myPlayerObject.socketId
-}
-function getMyPlayerObject(game)
-{
-  const myPlayerObject = game.playerForClientSide
-  if(game.players[0].socketId === myPlayerObject.socketId)
-  {
-    return game.players[0]
-  }
-  else return game.players[1]
-}
-
-function getOpponentPlayer(game)
-{
-  const myPlayerObject = game.playerForClientSide
-  if(game.players[0].socketId === myPlayerObject.socketId)
-  {
-    return game.players[1]
-  }
-  else return game.players[0]
-}
-function makeSpritesInteractive(sprites, game)
-{
-  sprites.forEach(sprite =>
-    {
-      sprite.interactive = true
-      sprite.tap = (arg) => _onCardPress(arg, game)
-      sprite.click = (arg) => _onCardPress(arg, game)
-    })
 }
 
 function setUpOpponentBackOfCards(opponentBackOfCardSprites)
@@ -354,14 +263,7 @@ function addPileCard(pileCard)
     _scaleSpriteDownTo(0.5, pileCardSprite)
     addCardSpriteToStage(pileCardSprite)
 }
-function generateTrumpSuitTextSprite(trumpCard){
-  const trumpSuitString = Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[trumpCard.suit];
-  const trumpSuitText = new PIXI.Text(`Trump Suit: ${trumpSuitString}`, {fontSize: 24, align : 'center'});
- 
-  trumpSuitText.x = screenWidth - 300
-  trumpSuitText.y = screenHeight / 2 + 180
-  return trumpSuitText;
-}
+
 function setUpTrumpCard(trumpCard){
   let trumpCardSprite = _generateCardSprite(`../images/${trumpCard.rank + trumpCard.suit}.png`)
   _positionTrumpCard(trumpCardSprite)
@@ -377,128 +279,7 @@ function setUpBackOfDeck()
   addCardSpriteToStage(backOfDeckSprite)
   return backOfDeckSprite
 }
-function _removeSprite(sprite)
-{
-  if(sprite.parent && sprite.parent.removeChild)
-  {
-    sprite.parent.removeChild(sprite)
-  }
-}
-function _removeSprites(sprites)
-{
-  sprites.forEach((sprite)=>{
-    _removeSprite(sprite)
-  })
-}
-function removeMiddlePileCardSprites(middlePileCardSprites)
-{
-  // remove only the last 2 cards
-  _removeSprites(middlePileCardSprites.slice(0, Constants.gameConstants.NUMBER_OF_PLAYERS))
-}
-function removeHandCardSprites(handCardSprites)
-{
-  _removeSprites(handCardSprites)
-}
-function _generateOpponentCardSprites(game)
-{
-  const opponentPlayer = getOpponentPlayer(game);
-  let cardSprites = []
-  for (let i = 0; i<opponentPlayer.hand.cards.length; i++)
-  {
-    let cardSprite = new PIXI.Sprite(
-      PIXI.loader.resources[`../images/backOfCard.png`].texture
-    );
-    cardSprites.push(cardSprite)
-  }
-  return cardSprites
-}
-function _generateCardSprites(hand)
-{
-  let cardSprites = []
-  for (let i = 0; i<hand.cards.length; i++)
-  {
-    let cardSprite = new PIXI.Sprite(
-      PIXI.loader.resources[`../images/${hand.cards[i].rank + hand.cards[i].suit}.png`].texture
-    );
-    cardSprite.card = hand.cards[i]
-    cardSprites.push(cardSprite)
-  }
-  return cardSprites
-}
-
-function _positionCardSprite(cardSprite, x, y)
-{
-  cardSprite.x = x
-  cardSprite.y = y
-}
-function _positionOpponentBackCardSprites(backOfCardSprites)
-{
-  backOfCardSprites.forEach((backOfCardSprite, i) =>{
-    _positionCardSprite(backOfCardSprite, screenWidth / 4 + 100*i, 0)
-  })
-  _rotateCardSprites(backOfCardSprites, false)
-}
-function _positionBackOfCard(backOfCardSprite)
-{
-    _positionCardSprite(backOfCardSprite, screenWidth - 300, screenHeight / 2 - 100)
-}
-function _positionPileCard(pileCardSprite)
-{
-    const randomDisplacement = 185 * Math.random(); 
-    _positionCardSprite(pileCardSprite, (screenWidth / 2 - 200) + randomDisplacement, screenHeight / 2)
-    pileCardSprite.anchor.x = 0.5
-    pileCardSprite.anchor.y = 0.5
-    pileCardSprite.rotation = Math.random()/2
-}
-function _positionTrumpCard(trumpCardSprite)
-{
-  _positionCardSprite(trumpCardSprite, screenWidth - 300, screenHeight / 2 - 100)
-  trumpCardSprite.anchor.x = 0.5
-  trumpCardSprite.anchor.y = 0.5
-  trumpCardSprite.rotation = Math.PI /2
-}
-//for hand
-function _positionCardSprites(cardSprites)
-{
-  cardSprites.forEach((cardSprite, i) => {
-    _positionCardSprite(cardSprite, screenWidth / 4 + 100*i, screenHeight - 100)
-  })
-}
-  function _rotateCardSprites(cardSprites, yourHand = true)
-  {
-    cardSprites.forEach((cardSprite) =>{
-      cardSprite.anchor.x = 0.5
-      cardSprite.anchor.y = 0.5
-    })
-    let factor = yourHand ? 1 : -1;
-    let displacement = 15
-    let leftCard = cardSprites[0]
-    let middleCard = cardSprites[1]
-    let rightCard = cardSprites[2]
-    if(leftCard)
-    {
-      leftCard.rotation = -0.2 * factor
-      leftCard.y = leftCard.y - displacement * factor
-    }
-    if(middleCard)
-    {
-      middleCard.y =  middleCard.y - 2*(displacement * factor)
-    }
-    if(rightCard)
-    {
-      rightCard.y = rightCard.y - displacement * factor
-      rightCard.rotation = 0.2 *factor
-    }
-
-  }
-  function _scaleSpriteDownTo(percent, sprite)
-  {
-    sprite.scale.set(percent)
-  }
-  function _scaleSpritesDownTo(percent, sprites)
-  {
-    sprites.forEach(sprite => _scaleSpriteDownTo(percent, sprite))
-  }
+  
   function addCardSpriteToStage(cardSprite)
   {
     app.stage.addChild(cardSprite);
@@ -509,21 +290,13 @@ function _positionCardSprites(cardSprites)
       addCardSpriteToStage(cardSprite);
     })
   }
-
-  function _generateCardSprite(path)
-  {
-    let cardSprite = new PIXI.Sprite(
-      PIXI.loader.resources[path].texture
-    );
-    return cardSprite
-  }
-}
   function removeAllSpritesOnScreen()
   {
     app.stage.children.forEach((childSprite)=>{
       app.stage.removeChild(childSprite)
     })
   }
+}
 
 function gameLoop(delta)
 {
