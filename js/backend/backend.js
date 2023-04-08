@@ -80,7 +80,7 @@ function BackendServer() {
                 if(game.started)
                 {
                     //this game already started. The user refreshed the page on an existing game. Redirecting to new game
-                    socket.emit(Constants.events.REDIRECT, "/new?name=playerName")
+                    socket.emit(Constants.events.REDIRECT, `/new?name=${playerName}`)
                     return;
                 }
                 let playerIndex = 0;
