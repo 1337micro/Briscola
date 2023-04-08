@@ -22,17 +22,6 @@ function _onCardPress(arg, game)
     }
 }
 
-function awaitOpponent()
-{
-    return new Promise(function(resolve, reject)
-    {
-        socket.on(Constants.events.PLAYER_JOINED, function(player)
-        {
-            resolve(player)
-        })
-    })
-}
-
 function getGame()
 {
     return new Promise(function(resolve, reject)
@@ -120,8 +109,7 @@ function onRedirect(cb)
     })
 }
 export {
-    _onCardPress, 
-    awaitOpponent, 
+    _onCardPress,
     getGame,  
     requestGameStart, 
     requestSinglePlayerGameStart, 
