@@ -7,32 +7,26 @@ import { Constants } from "./Constants.js";
  * @param cards an array of card objects
  * @constructor
  */
-function Pile(pileState = {})
-{
-    let state = {
-        cards:pileState.cards
+class Pile {
+    constructor(pileState = {}) {
+        this.cards = new CardList(pileState)
     }
-    return Object.assign(state, new CardList(state), pointCounter(state))
-}
-function pointCounter(state)
-{
-    return {
-        countPoints: function()
+
+    countPoints()
+    {
+        if(this.cards)
         {
-            if(state.cards)
-            {
-                return state.cards.reduce((sumOfPoints, card)=>{
-                    let numPointsForThisCard = Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[card.rank]
-                    if(numPointsForThisCard && numPointsForThisCard>0)
-                    {
-                        return sumOfPoints + numPointsForThisCard
-                    }
-                    else return sumOfPoints;
-                }, 0)
-            }
-            else {
-                return 0;
-            }
+            return this.cards.reduce((sumOfPoints, card)=>{
+                let numPointsForThisCard = Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[card.rank]
+                if(numPointsForThisCard && numPointsForThisCard>0)
+                {
+                    return sumOfPoints + numPointsForThisCard
+                }
+                else return sumOfPoints;
+            }, 0)
+        }
+        else {
+            return 0;
         }
     }
 }

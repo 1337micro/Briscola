@@ -27,7 +27,22 @@ class Hand {
         }
         else
         {
-            this.cards.push(card)
+            this.cards.addCard(card)
+        }
+    }
+    //overwrites addCards from CardList because we need custom logic for the hand to check if hand is full
+    addCards(cards)
+    {
+        if(this.cards.length + cards.length === Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND)
+        {
+            throw new HandFullError();
+        }
+        else
+        {
+            this.cards.addCards((card)=>{
+                this.addCard(card)
+            })
+            this.cards.addCards(card)
         }
     }
 }

@@ -9,7 +9,7 @@ function Game(gameState = {})
 {
     let state = {}
     state._id = gameState._id //game id
-    state.middlePile = MiddlePile(gameState.middlePile)
+    state.middlePile = new MiddlePile(gameState.middlePile)
     state.deck = Deck(gameState.deck)
     state.player1 = Player(gameState.player1)
     state.player2 = Player(gameState.player2)
@@ -37,9 +37,9 @@ function gameLogicController(state)
             state.deck = Deck()
             state.deck.generateDeck();
             state.deck.shuffle();
-            const hand1 = Hand()
+            const hand1 = new Hand()
             hand1.addCards([state.deck.drawCard(), state.deck.drawCard(), state.deck.drawCard()])
-            const hand2 = Hand()
+            const hand2 = new Hand()
             hand2.addCards([state.deck.drawCard(), state.deck.drawCard(), state.deck.drawCard()])
             state.player1 = Player()
             state.player1.hand = hand1
@@ -47,7 +47,7 @@ function gameLogicController(state)
             state.player2.hand = hand2
             state.players = [state.player1, state.player2]
             state.trumpCard = state.deck.drawTrumpCard()
-            state.middlePile = MiddlePile({trumpCard:state.trumpCard})
+            state.middlePile = new MiddlePile({trumpCard:state.trumpCard})
 
             state.firstPlayerToActByIndex = 0
             state.currentPlayerToActByIndex = state.firstPlayerToActByIndex
@@ -206,7 +206,7 @@ function gameLogicController(state)
             const currentPlayerToAct = state.players[currentPlayerToActByIndex]
             const otherPlayer = state.players[otherPlayerToActByIndex]
 
-            state.middlePile = MiddlePile(state.middlePile)
+            state.middlePile = new MiddlePile(state.middlePile)
             const firstCardPlayed = currentPlayerToAct.hand.cards.pop()
             state.addCardToHistory(firstCardPlayed, currentPlayerToActByIndex)
             const secondCardPlayed = otherPlayer.hand.cards.pop()
