@@ -12,7 +12,7 @@ function Pile(pileState = {})
     let state = {
         cards:pileState.cards
     }
-    return Object.assign(state, CardList(state), pointCounter(state))
+    return Object.assign(state, new CardList(state), pointCounter(state))
 }
 function pointCounter(state)
 {

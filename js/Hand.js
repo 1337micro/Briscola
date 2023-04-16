@@ -7,7 +7,7 @@ function Hand(handState = {})
     let state={
         cards: handState.cards || []
     }
-  return Object.assign(state, CardList(state), handAdder(state))
+  return Object.assign(state, new CardList(state), handAdder(state))
 }
 function equals(state)
 {

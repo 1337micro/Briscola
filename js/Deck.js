@@ -7,7 +7,7 @@ function Deck(deckState = {}) {
     let state = {
         cards: deckState.cards
     };
-    return Object.assign(state, CardList(state), generator(state), shuffler(state), drawer(state), drawerForTrumpCard(state))
+    return Object.assign(state, new CardList(state), generator(state), shuffler(state), drawer(state), drawerForTrumpCard(state))
 }
     function generator(state)
     {

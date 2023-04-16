@@ -3,86 +3,66 @@ import {Card} from './Card.js'
 import { CardNotInCardListError} from "./errors/CardListErrors.js";
 import {HandDoesNotContainCardError, HandEmptyError} from "./errors/HandErrors.js";
 
-function CardList(cardState = {})
-{
-    if(cardState.cards)
-    {
-        cardState.cards = cardState.cards.map((card)=>{
-            return new Card({rank: card.rank, suit:card.suit, points: card.points})
-        })
-    }
-    let state =
-    {
-        cards: cardState.cards || []
-    }
-
-    return Object.assign(state, indexer(state), remover(state), adder(state), reseter(state))
-}
-function indexer(state)
-{
-    return {
-        indexOfCard: function(card)
+class CardList {
+    constructor(cardthis = {}) {
+        if(cardthis.cards)
         {
-            for(let i = 0; i<state.cards.length; i++)
+            cardthis.cards = cardthis.cards.map((card)=>{
+                return Card({rank: card.rank, suit:card.suit, points: card.points})
+            })
+        }
+
+        this.cards = cardthis.cards || []
+    }    
+
+    indexOfCard(card)
+    {
+            for(let i = 0; i<this.cards.length; i++)
             {
-                let currentCard = state.cards[i];
+                let currentCard = this.cards[i];
                 if(currentCard.suit === card.suit && currentCard.rank === card.rank)
                 {
                     return i;
                 }
             }
             throw new CardNotInCardListError()
-        }
     }
-}
-function remover(state)
-{
-    return {
-        removeCard: function(card)
+
+    removeCard(card)
+    {
+        if(this.cards.length === 0)
         {
-            if(state.cards.length === 0)
+            throw new HandEmptyError();
+        }
+        else
+        {
+            let indexOfCardInHand = this.indexOfCard.call(this, card);
+            if(indexOfCardInHand === -1)
             {
-                throw new HandEmptyError();
+                throw new HandDoesNotContainCardError();
             }
             else
             {
-                let indexOfCardInHand = state.indexOfCard.call(state, card);
-                if(indexOfCardInHand === -1)
-                {
-                    throw new HandDoesNotContainCardError();
-                }
-                else
-                {
-                    state.cards.splice(indexOfCardInHand, 1);
-                }
+                this.cards.splice(indexOfCardInHand, 1);
             }
         }
+    }    
+
+    addCard(card)
+    {
+        this.cards.push(card)
+    }
+    addCards(cards)
+    {
+        cards.forEach((card)=>{
+            this.addCard(card)
+        })
     }
 
-}
-function adder(state)
-{
-    return{
-        addCard:function(card)
-        {
-            state.cards.push(card)
-        },
-        addCards:function(cards)
-        {
-            cards.forEach((card)=>{
-                state.addCard(card)
-            })
-        }
+    reset() {
+        this.cards.clear()
     }
 }
-function reseter(state)
-{
-    return{
-        reset: function()
-        {
-            state.cards.clear()
-        }
-    }
-}
+
 
 export { CardList };
