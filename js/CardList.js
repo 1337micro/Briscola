@@ -4,15 +4,15 @@ import { CardNotInCardListError} from "./errors/CardListErrors.js";
 import {HandDoesNotContainCardError, HandEmptyError} from "./errors/HandErrors.js";
 
 class CardList {
-    constructor(cardthis = {}) {
-        if(cardthis.cards)
+    constructor(cardState = {}) {
+        if(cardState.cards)
         {
-            cardthis.cards = cardthis.cards.map((card)=>{
+            cardState.cards = cardState.cards.map((card)=>{
                 return Card({rank: card.rank, suit:card.suit, points: card.points})
             })
         }
 
-        this.cards = cardthis.cards || []
+        this.cards = cardState.cards || []
     }    
 
     indexOfCard(card)
