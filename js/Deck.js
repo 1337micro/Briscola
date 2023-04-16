@@ -19,7 +19,7 @@ function Deck(deckState = {}) {
                 {
                     Object.keys(enumSuits).forEach(suit => {
                         const rank = i;
-                        const card = Card({
+                        const card = new Card({
                             rank:rank,
                             suit:enumSuits[suit],
                             points: Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[rank]

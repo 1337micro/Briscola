@@ -8,7 +8,7 @@ function CardList(cardState = {})
     if(cardState.cards)
     {
         cardState.cards = cardState.cards.map((card)=>{
-            return Card({rank: card.rank, suit:card.suit, points: card.points})
+            return new Card({rank: card.rank, suit:card.suit, points: card.points})
         })
     }
     let state =
