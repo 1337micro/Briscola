@@ -6,7 +6,7 @@ const database = require("../../js/database");
 (async function(){
 while(true)
 {
-    let game = Game()
+    let game = new Game()
     game.init()
     while(!game.isGameOver())
     {
