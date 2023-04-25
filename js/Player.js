@@ -2,15 +2,13 @@
 import {Pile} from "./Pile.js";
 import {Hand} from "./Hand.js";
 
-function Player(playerState = {})
-{
-  let state = Object.assign({
-    hand: Hand(playerState.hand),
-    socketId: playerState.socketId,
-    pile: Pile(playerState.pile),
-    name: playerState.name
-  })
-  return Object.assign(state)
+class Player {
+    constructor(playerState = {}) {
+        this.hand = new Hand(playerState.hand)
+        this.socketId = playerState.socketId
+        this.pile = new Pile(playerState.pile)
+        this.name = playerState.name
+    }
 }
 
-export { Player }
+export {Player}

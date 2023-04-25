@@ -206,7 +206,7 @@ function BackendServer() {
             if(gameFromDb.currentPlayerToActByIndex === session.playerIndex)
             {
                 //player is allowed to act (backend check)
-                let game = Game(gameFromDb);
+                let game = new Game(gameFromDb);
                 let playerIndex = session.playerIndex;
                 let player = game.players[playerIndex];
                 game.playerForClientSide = player
@@ -336,7 +336,7 @@ function BackendServer() {
         res.json(lobbies.getLobbies())
     }
     function makeNewGame(req, res) {
-        let game = Game()
+        let game = new Game()
         game.init()
         
         database.insertNewGame(game).then((confirmation)=>{
@@ -351,7 +351,7 @@ function BackendServer() {
         })
     }
     function makeNewSinglePlayerGame(req, res) {
-        let game = Game()
+        let game = new Game()
         game.singlePlayer = true;
         game.init()
 
