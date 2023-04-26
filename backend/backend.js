@@ -1,6 +1,6 @@
 "use strict";
 var cloneDeep = require('lodash.clonedeep');
-const database = require('../database.js')
+const database = require('./database.js')
 const express = require('express')
 const pino = require('pino');
 const expressPino = require('express-pino-logger');
@@ -8,7 +8,7 @@ const expressPino = require('express-pino-logger');
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 const expressLogger = expressPino({ logger });
 const expressApp = express();
-import { Constants } from '../Constants.js'
+import { Constants } from '../briscola/js/Constants.js'
 import Lobbies  from './Lobbies'
 
 const http = require('http').createServer(expressApp);
@@ -18,7 +18,7 @@ const io = Server(http, {pingTimeout: 10000});
 
 
 
-import { Game } from "../Game.js"
+import { Game } from "../briscola/js/Game.js"
 
 var session = require("express-session")({
     secret: "my-secret",

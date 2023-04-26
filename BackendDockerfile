@@ -1,8 +1,8 @@
 FROM node:12 as build
 WORKDIR /app
-COPY ./package.json /app/package.json
-COPY ./package-lock.json /app/package-lock.json
+COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
 RUN npm install
 COPY . .
 EXPOSE 3000
-CMD ["node", "js/backend/backendloader.js"]
+CMD ["node", "backend/backendloader.js"]

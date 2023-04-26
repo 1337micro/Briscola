@@ -1,7 +1,7 @@
 "use strict";
 
 import { Game } from "../../js/Game.js";
-const database = require("../../js/database");
+const database = require("../../../backend/database");
 
 (async function(){
 while(true)
