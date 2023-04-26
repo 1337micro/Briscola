@@ -5,7 +5,7 @@ const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID
 const uri = process.env.DB_HOST_PREFIX + process.env.DB_USER +":" + process.env.DB_PASS+ "@" + process.env.DB_HOST_SUFFIX;
-
+console.log(uri)
 const client = newMongoClient().connect()
 function newMongoClient()
 {
