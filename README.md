@@ -11,16 +11,17 @@ docker-compose up --build
 
 Ask for the .env file and add it to the project root
 
-Download nginx
+Download nginx and extract it into a folder named nginx/
 
-Replace nginx.conf with the one in infra/nginx.conf
+Replace nginx.conf file in nginx folder with the one in infra/nginx.conf in the project
 
-In that nginx.conf, change all paths labeled "root" with the root directory of this project on your system
+In the nginx.conf file in nginx folder, change all paths labeled "root" with {path_to_project}\Briscola\briscola;
 
-In your C:\Windows\System32\drivers\etc\hosts file, add: ***127.0.0.1 backend***
+In your C:\Windows\System32\drivers\etc\hosts file (open the file as an administrator), and add: ***127.0.0.1 backend***
 
-npm install
+open a terminal and cd into the root directory
+run **npm install**
+run **node backend/backendloader.js**
 
-start nginx
-
-node backendloader.js
+open a terminal and cd into your nginx/ directory
+run **start nginx**
