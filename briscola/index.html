@@ -1,65 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Briscola</title>
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-      crossorigin="anonymous"
-    />
-    <link rel="stylesheet" href="css/styles.css" />
-  </head>
-  <body>
-    <script>
-      function getPlayerName() {
+<head>
+  <meta charset="UTF-8"/>
+  <title>Briscola</title>
+  <link
+    rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+<script>
+    function getPlayerName() {
         return document.getElementById('name').value
-      }
-      function startGame() {
-        window.location.assign(`new?name=${getPlayerName()}`);
-      }
-      function showLobbies() {
-        window.location.assign("lobbies.html");
-      }
-      function startGameAgainstComputer() {
-        window.location.assign("/newAgainstComputer");
-      }
-    </script>
-    <div class="container-fluid home-container">
-      <h1 id="logo">Briscola</h1>
-      <div class="wrap">
-        <div class="buttons">
-          <input id="name" type="text" placeholder="Enter a player name"/>
-        </div>
-        <div class="buttons">
-          <button
-            style="margin-top: 50px"
-            class="btn btn-primary"
-            onclick="startGame()"
-          >
-            Create Game
-          </button>
-          <button
-            style="margin-top: 50px"
-            class="btn btn-primary"
-            onclick="showLobbies()"
-          >
-            Show Lobbies
-          </button>
-          <button
-            style="margin-top: 50px"
-            class="btn btn-primary"
-            onclick="startGameAgainstComputer()"
-          >
-            Play Against Computer
-          </button>
-        </div>
+    }
 
-        <div class="cards-img-container">
-          <img class="cards-img" src="images/cards.png" alt="Cards image" />
-        </div>
-      </div>
+    function startGame() {
+        window.location.assign(`new?name=${getPlayerName()}`);
+    }
+
+    function startGameAgainstComputer() {
+        window.location.assign("/newAgainstComputer");
+    }
+</script>
+<div class="container-fluid home-container">
+  <div class="wrap">
+    <h1 id="logo">Briscola</h1>
+    <div class="buttons">
+      <input id="name" type="text" placeholder="Enter a player name"/>
     </div>
-  </body>
+
+    <div class="buttons">
+      <button
+        style="margin-top: 50px"
+        class="btn btn-primary"
+        onclick="startGame()"
+      >
+        Create Game
+      </button>
+      <button
+        style="margin-top: 50px"
+        class="btn btn-primary"
+        onclick="startGameAgainstComputer()"
+      >
+        Play Against Computer
+      </button>
+    </div>
+
+    <div style="height:100%;margin-top:20px">
+      <iframe
+        id="lobbiesIframe"
+        title="lobbiesIframe"
+        style="height:100%;width:550px;border:none;overflow: hidden"
+        src="http://localhost:5173/"
+      />
+    </div>
+
+
+    <div class="cards-img-container">
+      <img class="cards-img" src="images/cards.png" alt="Cards image"/>
+    </div>
+  </div>
+</div>
+
+
+</body>
 </html>
