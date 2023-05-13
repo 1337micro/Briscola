@@ -32,6 +32,17 @@ button.btn.btn-primary{
   margin-right: 20px;
 }
 
+
+
+.modal-btn-container{
+  width: 100%;
+}
+
+button.btn.btn-primary.modal-btn{
+  width: 150px;
+  float: right;
+}
+
 .wrap{
   display: flex;
   align-items: center;
@@ -49,4 +60,60 @@ button.btn.btn-primary{
 
 .cards-img-container{
   margin-top: 8%;
+}
+
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4); 
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 20% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 60%;
+}
+
+.close {
+  position: absolute;
+  color: #8a8a8a;
+  right: 20px;
+  top: 20px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-title{
+  font-size: 2rem;
+}
+
+
+input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #2D5837;
+  box-shadow: 0 0 5px #2D5837;
 }

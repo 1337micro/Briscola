@@ -12,31 +12,17 @@
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
-    <script>
-      function getPlayerName() {
-        return document.getElementById('name').value
-      }
-      function startGame() {
-        window.location.assign(`new?name=${getPlayerName()}`);
-      }
-      function showLobbies() {
-        window.location.assign("lobbies.html");
-      }
-      function startGameAgainstComputer() {
-        window.location.assign("/newAgainstComputer");
-      }
-    </script>
     <div class="container-fluid home-container">
       <h1 id="logo">Briscola</h1>
       <div class="wrap">
         <div class="buttons">
-          <input id="name" type="text" placeholder="Enter a player name"/>
+          <!-- <input id="name" type="text" placeholder="Enter a player name" /> -->
         </div>
         <div class="buttons">
           <button
             style="margin-top: 50px"
             class="btn btn-primary"
-            onclick="startGame()"
+            id="modal-btn"
           >
             Create Game
           </button>
@@ -56,10 +42,63 @@
           </button>
         </div>
 
+        <div id="create-game-modal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h1 class="modal-title">Game Options</h1>
+            <input id="name" type="text" placeholder="Enter a player name" />
+            <p style="color: red" id="errorMessage" class="error-message"></p>
+            <div class="modal-btn-container">
+              <button class="btn btn-primary modal-btn" onclick="startGame()">
+                Play
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="cards-img-container">
           <img class="cards-img" src="images/cards.png" alt="Cards image" />
         </div>
       </div>
     </div>
+    <script>
+      function getPlayerName() {
+        return document.getElementById("name").value;
+      }
+      function startGame() {
+        const errorMessage = document.getElementById("errorMessage");
+        if (getPlayerName() != "") {
+          window.location.assign(`new?name=${getPlayerName()}`);
+        } else {
+          errorMessage.textContent = "Please enter a player name.";
+        }
+      }
+      function showLobbies() {
+        window.location.assign("lobbies.html");
+      }
+      function startGameAgainstComputer() {
+        window.location.assign("/newAgainstComputer");
+      }
+
+      var modal = document.getElementById("create-game-modal");
+
+      var btn = document.getElementById("modal-btn");
+
+      var span = document.getElementsByClassName("close")[0];
+
+      btn.onclick = function () {
+        modal.style.display = "block";
+      };
+
+      span.onclick = function () {
+        modal.style.display = "none";
+      };
+
+      window.onclick = function (event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      };
+    </script>
   </body>
 </html>
