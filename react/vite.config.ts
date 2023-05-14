@@ -10,10 +10,6 @@ export default defineConfig({
         target: 'http://backend:3000/join',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/lobbies/, ''),
-      },
-      '/game': {
-        target: 'http://localhost:3000/game.html',
-        changeOrigin: true
       }
     }
     }

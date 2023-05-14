@@ -40,7 +40,7 @@ function Index() {
         <Lobbies/>
         <div className='wrap'>
           <div className='cards-img-container'>
-            <img src="../../public/cards.png" alt="Cards image"/>
+            <img src="./cards.png" alt="Cards image"/>
           </div>
         </div>
       </Col>
