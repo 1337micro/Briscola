@@ -7,6 +7,14 @@ import './Index.css'
 function Index() {
   const playerName = 'Anonymous' // add antd Modal which will take playerName input
 
+  function handleCreateGame() {
+    window.open(`http://${window.location.hostname}:80/new?name=${playerName}`, '_top');
+  }
+
+  function handlePlayAgainstComputer() {
+    window.open(`http://${window.location.hostname}:80/newAgainstComputer`, '_top');
+  }
+
   return (
     <Row className='Index' justify='center'>
       <Col>
@@ -22,8 +30,9 @@ function Index() {
               type="link"
               className='primary-button'
               size='large'
+              onClick={handleCreateGame}
             >
-              <a href={`http://${window.location.hostname}:80/new?name=${playerName}`} target='_top'>Create Game</a>
+              Create Game
             </Button>
           </Col>
           <Col>
@@ -31,8 +40,9 @@ function Index() {
               type="link"
               className='primary-button'
               size='large'
+              onClick={handlePlayAgainstComputer}
             >
-              <a href={`http://${window.location.hostname}:80/newAgainstComputer`} target='_top'>Play Against Computer</a>
+              Play Against Computer
             </Button>
           </Col>
         </Row>
