@@ -14,5 +14,12 @@ services:
       dockerfile: BackendDockerfile
     ports:
       - "3000:3000"
+  react:
+    restart: always
+    build:
+      context: .
+      dockerfile: ReactDockerfile
+    ports:
+      - "5173:5173"
   
 

@@ -15,7 +15,7 @@ function Lobbies() {
       .then(setLobbies)
   }, [])
 
-  const dataSource = lobbies.map(lobby => {
+  const dataSource = lobbies.map( (lobby:any) => {
     console.log(lobby)
     const playerName = lobby.players[0].name || 'Anonymous';
     return {key: lobby._id, playerName: playerName, lobbyDescription: `Click to join ${playerName}'s lobby`}
@@ -31,7 +31,7 @@ function Lobbies() {
       title: 'Lobby',
       dataIndex: 'playerName',
       key: 'key',
-      render: (playerName, lobby) => {
+      render: (playerName:any, lobby:any) => {
         return <a
           href={`http://${window.location.hostname}:80/game.html?gameId=${lobby.key}`}
           target='_top'
