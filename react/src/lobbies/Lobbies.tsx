@@ -32,7 +32,12 @@ function Lobbies() {
       dataIndex: 'playerName',
       key: 'key',
       render: (playerName, lobby) => {
-        return <a href={`http://localhost/game.html?gameId=${lobby.key}`}>Click to join {playerName}'s lobby</a>
+        return <a
+          href={`http://${window.location.hostname}:80/game.html?gameId=${lobby.key}`}
+          target='_top'
+        >
+          Click to join {playerName}'s lobby
+        </a>
       }
     }
   ];
