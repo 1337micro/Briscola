@@ -5,7 +5,7 @@ import './Index.css'
 
 
 function Index() {
-  const playerName = 'William' // add antd Modal which will take playerName input
+  const playerName = 'Anonymous' // add antd Modal which will take playerName input
 
   return (
     <Row className='Index' justify='center'>
