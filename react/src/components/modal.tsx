@@ -3,11 +3,11 @@ import { Button, Form, Input, Modal } from "antd";
 
 import "./modal.css";
 
-interface CustomModalProps {
+interface CreateButtonProps {
   onOk: () => void;
 }
 
-const CustomModal: React.FC<CustomModalProps> = ({ onOk }) => {
+const CreateButton : React.FC<CreateButtonProps> = ({ onOk }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
 
@@ -28,7 +28,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ onOk }) => {
   };
 
   return (
-    <>
+    <div className="createButton">
       <Button
         className="primary-button"
         size="large"
@@ -52,7 +52,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ onOk }) => {
           </Button>,
           <Button key="ok" onClick={handleOk} className="custom-ok-button">
             Play
-          </Button>,
+          </Button>
         ]}
       >
         <Form form={form} layout="vertical">
@@ -64,8 +64,8 @@ const CustomModal: React.FC<CustomModalProps> = ({ onOk }) => {
           </Form.Item>
         </Form>
       </Modal>
-    </>
+    </div>
   );
 };
 
-export default CustomModal;
+export default CreateButton ;
