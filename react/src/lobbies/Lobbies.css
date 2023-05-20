@@ -1,0 +1,19 @@
+a{
+    color: #2d5837;
+}
+
+a:hover{
+    color: #399331;
+}
+
+.css-dev-only-do-not-override-yp8pcc.ant-table-wrapper .ant-table-pagination-right {
+    justify-content: center;
+}
+
+.css-dev-only-do-not-override-yp8pcc.ant-pagination .ant-pagination-item-active a {
+    color: #2d5837;
+}
+
+.css-dev-only-do-not-override-yp8pcc.ant-pagination .ant-pagination-item-active{
+    border: none;
+}

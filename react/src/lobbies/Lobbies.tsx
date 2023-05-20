@@ -2,6 +2,8 @@ import {Table} from "antd";
 import axios from "axios";
 import {useEffect, useState} from "react";
 
+import './Lobbies.css'
+
 function Lobbies() {
 
   const [lobbies, setLobbies] = useState([]);
