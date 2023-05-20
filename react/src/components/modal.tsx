@@ -7,7 +7,7 @@ interface CreateButtonProps {
   onOk: () => void;
 }
 
-const CreateButton : React.FC<CreateButtonProps> = ({ onOk }) => {
+const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
 
@@ -28,7 +28,7 @@ const CreateButton : React.FC<CreateButtonProps> = ({ onOk }) => {
   };
 
   return (
-    <div className="createButton">
+    <>
       <Button
         className="primary-button"
         size="large"
@@ -38,6 +38,7 @@ const CreateButton : React.FC<CreateButtonProps> = ({ onOk }) => {
         Create Game
       </Button>
       <Modal
+        className="custsomModal"
         title="Game Options"
         open={isModalOpen}
         onCancel={handleCancel}
@@ -52,7 +53,7 @@ const CreateButton : React.FC<CreateButtonProps> = ({ onOk }) => {
           </Button>,
           <Button key="ok" onClick={handleOk} className="custom-ok-button">
             Play
-          </Button>
+          </Button>,
         ]}
       >
         <Form form={form} layout="vertical">
@@ -64,8 +65,8 @@ const CreateButton : React.FC<CreateButtonProps> = ({ onOk }) => {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 };
 
-export default CreateButton ;
+export default CreateButton;

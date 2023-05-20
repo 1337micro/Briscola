@@ -1,9 +1,9 @@
-.createButton.css-dev-only-do-not-override-yp8pcc.ant-modal .ant-modal-title{
+.custsomModal .ant-modal-header .ant-modal-title{
     font-size: 2rem;
 }
 
-.createButton.custom-cancel-button,
-.createButton.custom-ok-button {
+.custsomModal .custom-cancel-button,
+.custsomModal .custom-ok-button {
   color: #2d5837;
   font-weight: bolder;
   border-radius: 20px;
@@ -12,16 +12,16 @@
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
 
-.createButton.ant-input.css-dev-only-do-not-override-yp8pcc:hover,
-.createButton.ant-input.css-dev-only-do-not-override-yp8pcc:focus{
+.custsomModal .ant-input.css-dev-only-do-not-override-yp8pcc:hover,
+.custsomModal .ant-input.css-dev-only-do-not-override-yp8pcc:focus{
   border-color: #2d5837;
 }
 
-.createButton.css-dev-only-do-not-override-yp8pcc.ant-btn-default:not(:disabled):hover {
+.custsomModal .css-dev-only-do-not-override-yp8pcc.ant-btn-default:not(:disabled):hover {
     color: white;
 }
 
-.createButton.custom-cancel-button:hover,
-.createButton.custom-ok-button:hover {
+.custsomModal .custom-cancel-button:hover,
+.custsomModal .custom-ok-button:hover {
   background-color: #2d5837;
 }
