@@ -1,0 +1,27 @@
+.custsomModal .ant-modal-header .ant-modal-title{
+    font-size: 2rem;
+}
+
+.custsomModal .custom-cancel-button,
+.custsomModal .custom-ok-button {
+  color: #2d5837;
+  font-weight: bolder;
+  border-radius: 20px;
+  padding: 0 25px;
+  border: none;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+}
+
+.custsomModal .ant-input.css-dev-only-do-not-override-yp8pcc:hover,
+.custsomModal .ant-input.css-dev-only-do-not-override-yp8pcc:focus{
+  border-color: #2d5837;
+}
+
+.custsomModal .css-dev-only-do-not-override-yp8pcc.ant-btn-default:not(:disabled):hover {
+    color: white;
+}
+
+.custsomModal .custom-cancel-button:hover,
+.custsomModal .custom-ok-button:hover {
+  background-color: #2d5837;
+}

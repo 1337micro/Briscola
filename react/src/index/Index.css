@@ -1,0 +1,40 @@
+* {padding: 0; margin: 0}
+
+html, body{
+  height: 100%;
+}
+
+.Index {
+  background-color: #399331;
+  height: 100%;
+  display: flex;
+}
+.Index .logo {
+  color: white;
+  font-weight: bold;
+  margin-bottom: 24px;
+}
+
+.Index .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-direction: column;
+}
+
+.Index .cards-img-container {
+  margin-top: 8%;
+}
+
+.Index .primary-button {
+  background-color: white;
+  color: #2D5837;
+  font-weight: bolder;
+  border-radius: 20px;
+  padding: 0 30px;
+  border: none;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+  margin-right: 20px;
+
+}
