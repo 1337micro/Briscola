@@ -2,6 +2,7 @@ import {Row, Col, Button} from 'antd';
 import Lobbies from "../lobbies/Lobbies";
 
 import './Index.css'
+import CustomModal from '../components/modal';
 
 
 function Index() {
@@ -26,14 +27,17 @@ function Index() {
 
         <Row style={{marginBottom: 40}} justify='center'>
           <Col>
-            <Button
+            {/* <Button
               type="link"
               className='primary-button'
               size='large'
               onClick={handleCreateGame}
             >
               Create Game
-            </Button>
+            </Button> */}
+          </Col>
+          <Col>
+          <CustomModal onOk={handleCreateGame}></CustomModal>
           </Col>
           <Col>
             <Button
