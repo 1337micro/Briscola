@@ -1,26 +1,29 @@
-**To play the game:**
+# To play the game:
 http://briscola.xyz/
+</br>
+## To run with docker:
 
-**To run with docker:**
+- Ask for the .env file and add it to the project root
 
-Ask for the .env file and add it to the project root
+- ```docker-compose up --build```
 
-docker-compose up --build
+## To run locally: *<font color="red">(alternative to docker to allow for debugging locally)</font>*:
 
-**To run locally:** (alternative to docker to allow for debugging locally):
+- Ask for the *.env* file and add it to the project root
 
-Ask for the .env file and add it to the project root
+- Download *[nginx](http://nginx.org/en/download.html)* and extract it into a folder named *nginx/*
 
-Download nginx
+- Replace *nginx.conf* file in *nginx* folder with the one in *infra/nginx.conf* in the project
 
-Replace nginx.conf with the one in infra/nginx.conf
+- In the *nginx.conf* file in *nginx* folder, change all paths labeled "root" with {path_to_project}\Briscola\briscola;
 
-In that nginx.conf, change all paths labeled "root" with the root directory of this project on your system
+- In your *C:\Windows\System32\drivers\etc\hosts* file (open the file as an administrator), and add: 
+</br>127.0.0.1 backend
 
-In your C:\Windows\System32\drivers\etc\hosts file, add: ***127.0.0.1 backend***
 
-npm install
+- open a terminal and cd into the root directory run </br>
+```npm install``` </br>
+```node backend/backendloader.js```
 
-start nginx
-
-node backendloader.js
+- open a terminal and cd into your nginx/ directory run</br>
+```start nginx```
