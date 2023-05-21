@@ -38,3 +38,9 @@ html, body{
   margin-right: 20px;
 
 }
+
+.Index .primary-button:hover {
+  background-color: #2D5837;
+  color: white;
+
+}

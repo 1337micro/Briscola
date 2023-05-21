@@ -8,6 +8,7 @@ interface CreateButtonProps {
 }
 
 const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
 
@@ -53,7 +54,7 @@ const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
           </Button>,
           <Button key="ok" onClick={handleOk} className="custom-ok-button">
             Play
-          </Button>,
+          </Button>
         ]}
       >
         <Form form={form} layout="vertical">
@@ -70,3 +71,4 @@ const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
 };
 
 export default CreateButton;
+
