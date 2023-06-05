@@ -1,6 +1,5 @@
 import { Row, Col, Button } from "antd";
 import Lobbies from "../lobbies/Lobbies";
-import {useState} from "react";
 
 import "./Index.css";
 import CreateButton from "../components/modal";
