@@ -35,7 +35,7 @@ function Lobbies() {
       key: 'key',
       render: (playerName:any, lobby:any) => {
         return <a
-          href={`http://${window.location.hostname}:80/game.html?gameId=${lobby.key}`}
+          href={`http://${window.location.hostname}:80/game.html?gameId=${lobby.key}&name=${playerName}`}
           target='_top'
         >
           Click to join {playerName}'s lobby

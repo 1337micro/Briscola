@@ -1,13 +1,13 @@
 import { Row, Col, Button } from "antd";
 import Lobbies from "../lobbies/Lobbies";
+import {useState} from "react";
 
 import "./Index.css";
 import CreateButton from "../components/modal";
 
 function Index() {
-  const playerName = "Anonymous"; // add antd Modal which will take playerName input
 
-  function handleCreateGame() {
+  function handleCreateGame(playerName: string) {
     window.open(
       `http://${window.location.hostname}:80/new?name=${playerName}`,
       "_top"
@@ -58,3 +58,4 @@ function Index() {
 }
 
 export default Index;
+

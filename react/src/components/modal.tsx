@@ -4,7 +4,7 @@ import { Button, Form, Input, Modal } from "antd";
 import "./modal.css";
 
 interface CreateButtonProps {
-  onOk: () => void;
+  onOk: (playerName: string) => void;
 }
 
 const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
@@ -22,7 +22,8 @@ const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
 
   const handleOk = () => {
     form.validateFields().then(() => {
-      onOk();
+      const playerName = form.getFieldValue("playerName");
+      onOk(playerName);
       setIsModalOpen(false);
       form.resetFields();
     });
