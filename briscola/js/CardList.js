@@ -24,15 +24,23 @@ class CardList {
         throw new CardNotInCardListError()
     }
 
+    cardIsInHand(card) {
+        try{
+           this.indexOfCard(card);
+        } catch (e) {
+            return false
+        }
+        return true;
+    }
+
     removeCard(card) {
         if (this.cards.length === 0) {
             throw new HandEmptyError();
         } else {
-            let indexOfCardInHand = this.indexOfCard.call(this, card);
-            if (indexOfCardInHand === -1) {
+            if (!this.cardIsInHand(card)) {
                 throw new HandDoesNotContainCardError();
             } else {
-                this.cards.splice(indexOfCardInHand, 1);
+                this.cards.splice(this.indexOfCard(card), 1);
             }
         }
     }

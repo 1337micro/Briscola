@@ -5,6 +5,8 @@ import {Card} from './Card.js'
 import {MiddlePile} from './MiddlePile.js'
 import {Constants} from './Constants.js'
 import {BriscolaError} from './errors/BriscolaError.js'
+import Node from "../../backend/ai/Node";
+import MC from "../../backend/ai/MC";
 
 class Game {
     constructor(gameState = {}) {
@@ -45,6 +47,72 @@ class Game {
         this.playerForClientSide;
         this.history = "";
         this.started = false;
+    }
+
+    repr() {
+        return `
+            Deck: ${this.deck.repr()}
+            Player1 hand: ${this.player1.hand.repr()}
+            Player2 hand: ${this.player2.hand.repr()}
+            
+            Player To Act: ${this.currentPlayerToActByIndex}
+        `
+    }
+
+    getPlayerWaitingIndex() {
+        return (this.currentPlayerToActByIndex + 1) % Constants.gameConstants.NUMBER_OF_PLAYERS
+    }
+
+    getPlayerWaiting() {
+        return this.players[this.getPlayerWaitingIndex()];
+    }
+
+    getPlayerToAct() {
+        return this.players[this.getPlayerIndexToAct()]
+    }
+
+    getPlayerIndexToAct() {
+        return this.currentPlayerToActByIndex;
+    }
+
+    playCard(card, playerIndex) {
+        let game = this;
+        //let playerIndex = session.playerIndex;
+        let player = game.players[playerIndex];
+        game.playerForClientSide = player
+        let playerHand = player.hand;
+        game.addCardToHistory(card, playerIndex);
+        playerHand.removeCard(card)//remove card from player's hand
+        let middlePile = game.middlePile
+        middlePile.addCard(card)//add card to middle pile
+
+        game.next()
+        //socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
+        //computerMove(game, Constants.events.COMPUTER_CARD_PLAYED);
+        if (game.isRoundOver()) {
+            let winningPlayer = game.getWinningPlayer()
+            winningPlayer.pile.addCards(game.middlePile.cards)
+
+            if (game.isLastDeal()) {
+                //emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
+            }
+            if (!game.isDeckEmpty()) {
+                game.dealNextCardToAllPlayers()
+            }
+
+            let winningPlayerIndex = game.getWinningPlayerIndex()
+            game.currentPlayerToActByIndex = winningPlayerIndex
+            game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
+
+            game.middlePile.reset()//reset only after dealing the next cards
+
+            if (game.isGameOver()) {
+                game.players[0].points = game.players[0].pile.countPoints()
+                game.players[1].points = game.players[1].pile.countPoints()
+                //emitGameOver(game)
+            }
+
+        }
     }
 
     next() {
@@ -114,7 +182,10 @@ class Game {
             let player = this.players[playerIndex];
             let playerHand = player.hand;
             if (player.socketId == null && playerHand.cards.length > 0) {
-                const card = this.computerAI(playerHand)
+                const rootNode = new Node({game: this});
+                const monteCarlo = MC(rootNode)
+                monteCarlo.buildTree(rootNode);
+                const card = monteCarlo.getNextCardToPlay();
                 //the current player to act is the computer and has some cards to play
                 this.addCardToHistory(card, playerIndex);
                 playerHand.removeCard(card)//remove card from player's hand
@@ -126,7 +197,7 @@ class Game {
         }
     }
 
-    computerAI(computerHand) {
+    computerAIDecisionBranch(computerHand) {
         const trumpCard = this.middlePile.trumpCard
         //player hand sorted ascending in point value
         const sortedComputerCards = computerHand.cards.sort((cardA, cardB) => cardA.points - cardB.points);
