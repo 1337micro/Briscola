@@ -9,6 +9,10 @@ class Player {
         this.pile = new Pile(playerState.pile)
         this.name = playerState.name
     }
+
+    hasCard(card){
+        return this.hand.cardIsInHand(card);
+    }
 }
 
 export {Player}
