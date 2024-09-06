@@ -25,5 +25,8 @@ http://briscola.xyz/
 ```npm install``` </br>
 ```node backend/backendloader.js```
 
+- open a terminal and cd into the react/ directory run </br>
+```node node_modules\vite\bin\vite.js```
+
 - open a terminal and cd into your nginx/ directory run</br>
 ```start nginx```
