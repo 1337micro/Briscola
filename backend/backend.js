@@ -203,58 +203,56 @@ function BackendServer() {
             {
                 console.error("Undefined game?")
             }
-            if(gameFromDb.currentPlayerToActByIndex === session.playerIndex)
-            {
-                //player is allowed to act (backend check)
+            //player is allowed to act (backend check)
+            if(gameFromDb.currentPlayerToActByIndex === session.playerIndex) {
                 let game = new Game(gameFromDb);
                 let playerIndex = session.playerIndex;
                 let player = game.players[playerIndex];
-                game.playerForClientSide = player
-                let playerHand = player.hand;
-                game.addCardToHistory(cardPlayed,playerIndex);
-                playerHand.removeCard(cardPlayed)//remove card from player's hand
-                let middlePile = game.middlePile
-                middlePile.addCard(cardPlayed)//add card to middle pile
 
-                game.next()
-                socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
-                computerMove(game, Constants.events.COMPUTER_CARD_PLAYED);
-                if(game.isRoundOver())
-                {
-                    let winningPlayer = game.getWinningPlayer()
-                    winningPlayer.pile.addCards(game.middlePile.cards)
-                    
-                    if(game.isLastDeal())
-                    {
-                        emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
-                    }
-                    if(!game.isDeckEmpty())
-                    {
-                        game.dealNextCardToAllPlayers()
+                if (player.hasCard(cardPlayed)) {
+                    game.playerForClientSide = player
+                    let playerHand = player.hand;
+                    game.addCardToHistory(cardPlayed, playerIndex);
+                    playerHand.removeCard(cardPlayed)//remove card from player's hand
+                    let middlePile = game.middlePile
+                    middlePile.addCard(cardPlayed)//add card to middle pile
+
+                    game.next()
+                    socket.emit(Constants.events.CARD_PLAYED_CONFIRMED, cardPlayed)//notify client to remove the card from his hand
+                    computerMove(game, Constants.events.COMPUTER_CARD_PLAYED);
+                    if (game.isRoundOver()) {
+                        let winningPlayer = game.getWinningPlayer()
+                        winningPlayer.pile.addCards(game.middlePile.cards)
+
+                        if (game.isLastDeal()) {
+                            emitEvent(game, Constants.events.LAST_DEAL)//should be a condition to only send this event once
+                        }
+                        if (!game.isDeckEmpty()) {
+                            game.dealNextCardToAllPlayers()
+                        }
+
+                        let winningPlayerIndex = game.getWinningPlayerIndex()
+                        game.currentPlayerToActByIndex = winningPlayerIndex
+                        game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
+
+                        game.middlePile.reset()//reset only after dealing the next cards
+
+                        if (game.isGameOver()) {
+                            game.players[0].points = game.players[0].pile.countPoints()
+                            game.players[1].points = game.players[1].pile.countPoints()
+                            emitGameOver(game)
+                        }
+
+                        emitEvent(game, Constants.events.ROUND_OVER, winningPlayer)
                     }
 
-                    let winningPlayerIndex =  game.getWinningPlayerIndex()
-                    game.currentPlayerToActByIndex = winningPlayerIndex
-                    game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
+                    emitEvent(game, Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
 
-                    game.middlePile.reset()//reset only after dealing the next cards
-                   
-                    if(game.isGameOver())
-                    {
-                        game.players[0].points = game.players[0].pile.countPoints()
-                        game.players[1].points = game.players[1].pile.countPoints()
-                        emitGameOver(game)
-                    }
-                    
-                    emitEvent(game, Constants.events.ROUND_OVER, winningPlayer)
+                    computerMove(game, Constants.events.FIRST_TO_ACT_COMPUTER_CARD_PLAYED)
+
+                    await database.saveGame(game)//wait for the game object to update before we emit the update
+                    emitUpdateGame(game)
                 }
-
-                emitEvent(game,Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
-
-                computerMove(game, Constants.events.FIRST_TO_ACT_COMPUTER_CARD_PLAYED)
-
-                await database.saveGame(game)//wait for the game object to update before we emit the update
-                emitUpdateGame(game)
             }
             else
             {
