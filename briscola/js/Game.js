@@ -15,7 +15,7 @@ class Game {
         this.player1 = new Player(gameState.player1)
         this.player2 = new Player(gameState.player2)
         this.players = [this.player1, this.player2]
-        this.trumpCard = new Card(gameState.trumpCard)
+        this.trumpCard = gameState.trumpCard ? new Card(gameState.trumpCard) : null
         this.trumpSuit = gameState.trumpSuit // For Briscola 500 when trump is declared
         this.trumpDeclared = gameState.trumpDeclared || false // Track if trump has been declared
         this.firstPlayerToActByIndex = gameState.firstPlayerToActByIndex
