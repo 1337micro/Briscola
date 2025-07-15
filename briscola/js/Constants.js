@@ -18,8 +18,10 @@ const Constants = {
         GAME_START: "GAME_START",
         GET_GAME:"GET_GAME",
         TRUMP_CARD: "TRUMP_CARD",
-
-        REDIRECT: "REDIRECT"
+        REDIRECT: "REDIRECT",
+        DECLARE_TRUMP: "DECLARE_TRUMP",
+        TRUMP_DECLARED: "TRUMP_DECLARED",
+        TRUMP_DECLARATION_REJECTED: "TRUMP_DECLARATION_REJECTED"
     },
     soundUrl:
     {
@@ -55,6 +57,10 @@ const Constants = {
             briscola500: {
                 CARDS_PER_HAND: 5
             }
+          },
+          RANKS: {
+            KING: 10,
+            HORSE: 9
           }
       }
 }

@@ -305,6 +305,46 @@ function BackendServer() {
             }
             
         })
+        
+        socket.on(Constants.events.DECLARE_TRUMP, async function(trumpSuit) {
+            const gameFromDb = await database.getGame(socket.handshake.query.gameId);
+            if(gameFromDb == undefined) {
+                console.error("Undefined game?")
+                return;
+            }
+            
+            if(gameFromDb.currentPlayerToActByIndex === session.playerIndex) {
+                let game = new Game(gameFromDb);
+                let playerIndex = session.playerIndex;
+                
+                // Validate trump declaration
+                if(game.declareTrump(playerIndex, trumpSuit)) {
+                    // Trump declaration successful
+                    socket.emit(Constants.events.TRUMP_DECLARED, { suit: trumpSuit, playerIndex: playerIndex });
+                    emitEvent(game, Constants.events.TRUMP_DECLARED, { suit: trumpSuit, playerIndex: playerIndex });
+                    
+                    await database.saveGame(game);
+                    emitUpdateGame(game);
+                } else {
+                    // Trump declaration failed
+                    socket.emit(Constants.events.TRUMP_DECLARATION_REJECTED, "Cannot declare trump with this suit");
+                }
+            } else {
+                socket.emit(Constants.events.TRUMP_DECLARATION_REJECTED, "Not your turn");
+            }
+            
+            function emitUpdateGame(game) {
+                game.players.forEach(function (player, index) {
+                    const deepCopyGame = cloneDeep(game)
+                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    if(socket.id === player.socketId) {
+                        socket.emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    } else {
+                        io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    }
+                })
+            }
+        })
         socket.on('disconnect', async function(){
             logger.info('user with socket id ' + socket.id + 'has disconnected');
             const socketIdOfPlayerWhoDisconnected = socket.id

@@ -16,6 +16,8 @@ class Game {
         this.player2 = new Player(gameState.player2)
         this.players = [this.player1, this.player2]
         this.trumpCard = new Card(gameState.trumpCard)
+        this.trumpSuit = gameState.trumpSuit // For Briscola 500 when trump is declared
+        this.trumpDeclared = gameState.trumpDeclared || false // Track if trump has been declared
         this.firstPlayerToActByIndex = gameState.firstPlayerToActByIndex
         this.currentPlayerToActByIndex = gameState.currentPlayerToActByIndex
         this.playerForClientSide = gameState.playerForClientSide
@@ -50,8 +52,18 @@ class Game {
         this.player2 = new Player()
         this.player2.hand = hand2
         this.players = [this.player1, this.player2]
-        this.trumpCard = this.deck.drawTrumpCard()
-        this.middlePile = new MiddlePile({trumpCard: this.trumpCard})
+        
+        // For traditional variant, draw trump card. For Briscola 500, no initial trump
+        if (this.gameVariant === Constants.gameVariants.TRADITIONAL) {
+            this.trumpCard = this.deck.drawTrumpCard()
+            this.middlePile = new MiddlePile({trumpCard: this.trumpCard})
+        } else {
+            // Briscola 500: no initial trump card
+            this.trumpCard = null
+            this.trumpSuit = null
+            this.trumpDeclared = false
+            this.middlePile = new MiddlePile({trumpCard: null})
+        }
 
         this.firstPlayerToActByIndex = 0
         this.currentPlayerToActByIndex = this.firstPlayerToActByIndex
@@ -225,6 +237,71 @@ class Game {
         if (!this.isDeckEmpty()) {
             this.dealNextCardToAllPlayersStartingWith(winningPlayerIndex)
         }
+    }
+
+    // Get the current trump suit (either from trump card or declared trump)
+    getTrumpSuit() {
+        if (this.gameVariant === Constants.gameVariants.TRADITIONAL) {
+            return this.trumpCard ? this.trumpCard.suit : null;
+        } else {
+            // Briscola 500
+            return this.trumpSuit;
+        }
+    }
+
+    // Check if a player can declare trump with king+horse combination
+    canDeclareTrump(playerIndex, suit) {
+        if (this.gameVariant !== Constants.gameVariants.BRISCOLA_500) {
+            return false; // Only for Briscola 500
+        }
+        
+        if (this.trumpDeclared) {
+            return false; // Trump already declared
+        }
+
+        const player = this.players[playerIndex];
+        const playerCards = player.hand.cards;
+        
+        // Check if player has both king and horse of the specified suit
+        const hasKing = playerCards.some(card => card.rank === Constants.gameConstants.RANKS.KING && card.suit === suit);
+        const hasHorse = playerCards.some(card => card.rank === Constants.gameConstants.RANKS.HORSE && card.suit === suit);
+        
+        return hasKing && hasHorse;
+    }
+
+    // Declare trump suit for Briscola 500
+    declareTrump(playerIndex, suit) {
+        if (!this.canDeclareTrump(playerIndex, suit)) {
+            return false;
+        }
+
+        this.trumpSuit = suit;
+        this.trumpDeclared = true;
+        
+        // Update middle pile with the new trump suit
+        this.middlePile.trumpSuit = suit;
+        
+        return true;
+    }
+
+    // Get available trump declarations for a player
+    getAvailableTrumpDeclarations(playerIndex) {
+        if (this.gameVariant !== Constants.gameVariants.BRISCOLA_500 || this.trumpDeclared) {
+            return [];
+        }
+
+        const player = this.players[playerIndex];
+        const playerCards = player.hand.cards;
+        const suits = ['s', 'c', 'd', 'b']; // spade, coppe, denari, bastoni
+        const availableDeclarations = [];
+
+        suits.forEach(suit => {
+            if (this.canDeclareTrump(playerIndex, suit)) {
+                availableDeclarations.push(suit);
+            }
+        });
+
+        return availableDeclarations;
     }
 }
 
