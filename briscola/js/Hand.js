@@ -3,8 +3,18 @@ import {Constants} from './Constants.js'
 import {CardList} from "./CardList.js";
 
 class Hand extends CardList {
-    constructor(handState = {}) {
-        super(handState)
+    constructor(gameVariantOrHandState = Constants.gameVariants.TRADITIONAL, handState = {}) {
+        // Handle backward compatibility: if first parameter is an object, it's the old handState parameter
+        if (typeof gameVariantOrHandState === 'object' && gameVariantOrHandState !== null) {
+            super(gameVariantOrHandState)
+            this.gameVariant = Constants.gameVariants.TRADITIONAL
+            this.maxCards = Constants.gameConstants.VARIANT_CONFIG[this.gameVariant].CARDS_PER_HAND
+        } else {
+            // New signature: gameVariant as first parameter
+            super(handState)
+            this.gameVariant = gameVariantOrHandState
+            this.maxCards = Constants.gameConstants.VARIANT_CONFIG[this.gameVariant].CARDS_PER_HAND
+        }
     }
 
     equals(otherHand) {
@@ -18,7 +28,7 @@ class Hand extends CardList {
 
     //overwrites addCard from CardList because we need custom logic for the hand to check if hand is full
     addCard(card) {
-        if (this.cards.length === Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND) {
+        if (this.cards.length === this.maxCards) {
             throw new HandFullError();
         } else {
             super.addCard(card)
@@ -27,7 +37,7 @@ class Hand extends CardList {
 
     //overwrites addCards from CardList because we need custom logic for the hand to check if hand is full
     addCards(cards) {
-        if (this.cards.length + cards.length > Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND) {
+        if (this.cards.length + cards.length > this.maxCards) {
             throw new HandFullError();
         } else {
             super.addCards(cards)

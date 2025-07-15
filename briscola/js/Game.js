@@ -9,6 +9,7 @@ import {BriscolaError} from './errors/BriscolaError.js'
 class Game {
     constructor(gameState = {}) {
         this._id = gameState._id //game id
+        this.gameVariant = gameState.gameVariant || Constants.gameVariants.TRADITIONAL
         this.middlePile = new MiddlePile(gameState.middlePile)
         this.deck = new Deck(gameState.deck)
         this.player1 = new Player(gameState.player1)
@@ -24,14 +25,26 @@ class Game {
     }
 
     init() {
-
         this.deck = new Deck()
         this.deck.generateDeck();
         this.deck.shuffle();
-        const hand1 = new Hand()
-        hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
-        const hand2 = new Hand()
-        hand2.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
+        
+        const cardsPerHand = Constants.gameConstants.VARIANT_CONFIG[this.gameVariant].CARDS_PER_HAND;
+        
+        const hand1 = new Hand(this.gameVariant)
+        const cardsForPlayer1 = [];
+        for (let i = 0; i < cardsPerHand; i++) {
+            cardsForPlayer1.push(this.deck.drawCard());
+        }
+        hand1.addCards(cardsForPlayer1);
+        
+        const hand2 = new Hand(this.gameVariant)
+        const cardsForPlayer2 = [];
+        for (let i = 0; i < cardsPerHand; i++) {
+            cardsForPlayer2.push(this.deck.drawCard());
+        }
+        hand2.addCards(cardsForPlayer2);
+        
         this.player1 = new Player()
         this.player1.hand = hand1
         this.player2 = new Player()
@@ -89,7 +102,10 @@ class Game {
 
     dealNextCardToAllPlayers() {
         const winningPlayerIndex = this.getWinningPlayerIndex()
+        this.dealNextCardToAllPlayersStartingWith(winningPlayerIndex)
+    }
 
+    dealNextCardToAllPlayersStartingWith(winningPlayerIndex) {
         let indexOfPlayerToGetNextCard = winningPlayerIndex
         do {
             let nextCard = this.deck.drawCard()
@@ -207,7 +223,7 @@ class Game {
         this.middlePile.reset()
 
         if (!this.isDeckEmpty()) {
-            this.dealNextCardToAllPlayers()
+            this.dealNextCardToAllPlayersStartingWith(winningPlayerIndex)
         }
     }
 }

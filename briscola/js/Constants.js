@@ -26,6 +26,10 @@ const Constants = {
       SHUFFLE_CARDS: "sound/cardShuffle.wav",
       PLAY_CARD: "sound/playCard.wav"
     },
+    gameVariants: {
+        TRADITIONAL: "traditional",
+        BRISCOLA_500: "briscola500"
+    },
       gameConstants:
       {
           NUMBER_OF_PLAYERS : 2,
@@ -37,12 +41,20 @@ const Constants = {
             9: 3,
             8: 2
           },
-          MAX_NUMBER_CARDS_IN_HAND: 3,
+          MAX_NUMBER_CARDS_IN_HAND: 3, // Default for traditional variant
           MAP_ABBREVIATION_TO_SUITS : {
             s :"Spade",
             c :"Coppe",
             d :"Denari",
             b :"Bastoni"
+          },
+          VARIANT_CONFIG: {
+            traditional: {
+                CARDS_PER_HAND: 3
+            },
+            briscola500: {
+                CARDS_PER_HAND: 5
+            }
           }
       }
 }
