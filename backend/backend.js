@@ -331,6 +331,8 @@ function BackendServer() {
     expressApp.get("/join", listActiveLobbies)
     expressApp.get("/new", makeNewGame)
     expressApp.get("/newAgainstComputer", makeNewSinglePlayerGame)
+    expressApp.get("/newBriscola500", makeNewBriscola500Game)
+    expressApp.get("/newBriscola500AgainstComputer", makeNewBriscola500SinglePlayerGame)
     function listActiveLobbies(req, res) {
         lobbies.purgeEmptyLobbies();
         res.json(lobbies.getLobbies())
@@ -352,6 +354,35 @@ function BackendServer() {
     }
     function makeNewSinglePlayerGame(req, res) {
         let game = new Game()
+        game.singlePlayer = true;
+        game.init()
+
+        database.insertNewGame(game).then((confirmation)=>{
+            if(confirmation && confirmation.insertedId)
+            {
+                logger.info(confirmation.insertedId)
+            }
+            else logger.info("Confirmation was undefined")
+            redirectToNewSinglePlayerGamePage(res, confirmation.insertedId.toString())
+        })
+    }
+    function makeNewBriscola500Game(req, res) {
+        let game = new Game({ gameVariant: Constants.gameVariants.BRISCOLA_500 })
+        game.init()
+        
+        database.insertNewGame(game).then((confirmation)=>{
+            if(confirmation && confirmation.insertedId)
+            {
+                logger.info(confirmation.insertedId)
+            }
+            else logger.info("Confirmation was undefined")
+
+            const playerName = req.query.name
+            redirectToNewGamePage(res, confirmation.insertedId.toString(), playerName)
+        })
+    }
+    function makeNewBriscola500SinglePlayerGame(req, res) {
+        let game = new Game({ gameVariant: Constants.gameVariants.BRISCOLA_500 })
         game.singlePlayer = true;
         game.init()
 
