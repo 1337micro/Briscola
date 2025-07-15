@@ -1,6 +1,7 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
+import { Game } from './Game.js'
 import {
   _onCardPress,
   getGame,
@@ -102,6 +103,14 @@ async function start()
       removeDeckCountSprite(deckCountText)
       deckCountText = generateDeckCount(game);
       app.stage.addChild(deckCountText)
+      
+      // Update trump suit text if trump has been declared
+      if (game.trumpSuit && !trumpSuitText) {
+        trumpSuitText = generateTrumpSuitTextSprite(game.trumpSuit)
+        if (trumpSuitText) {
+          app.stage.addChild(trumpSuitText)
+        }
+      }
       
       // Update trump declaration buttons
       updateTrumpDeclarationButtons(game)
@@ -372,16 +381,28 @@ function setUpBackOfDeck()
   
   function updateTrumpDeclarationButtons(game) {
     if (game.gameVariant === Constants.gameVariants.BRISCOLA_500 && 
-        !game.trumpDeclared && 
-        game.currentPlayerToActByIndex === game.playerForClientSide.index) {
+        !game.trumpDeclared) {
       
-      // Get available trump declarations for current player
-      const playerIndex = game.playerForClientSide.index || 0
-      const availableDeclarations = game.getAvailableTrumpDeclarations ? 
-        game.getAvailableTrumpDeclarations(playerIndex) : []
+      // Check if it's the current player's turn
+      const myPlayerObject = getMyPlayerObject(game)
+      const currentPlayerToAct = game.players[game.currentPlayerToActByIndex]
+      const isMyTurn = myPlayerObject.socketId === currentPlayerToAct.socketId
       
-      if (availableDeclarations.length > 0) {
-        createTrumpDeclarationButtons(availableDeclarations)
+      if (isMyTurn) {
+        // Get player index
+        const playerIndex = game.players[0].socketId === myPlayerObject.socketId ? 0 : 1
+        
+        // Create a proper Game instance to access methods
+        const gameInstance = new Game(game)
+        
+        // Get available trump declarations for current player
+        const availableDeclarations = gameInstance.getAvailableTrumpDeclarations(playerIndex)
+        
+        if (availableDeclarations.length > 0) {
+          createTrumpDeclarationButtons(availableDeclarations)
+        } else {
+          removeTrumpDeclarationButtons()
+        }
       } else {
         removeTrumpDeclarationButtons()
       }
