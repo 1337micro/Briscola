@@ -5,6 +5,7 @@ import {Card} from './Card.js'
 import {MiddlePile} from './MiddlePile.js'
 import {Constants} from './Constants.js'
 import {BriscolaError} from './errors/BriscolaError.js'
+import {DRLAgent} from './ai/DRLAgent.js'
 
 class Game {
     constructor(gameState = {}) {
@@ -21,6 +22,15 @@ class Game {
         this.history = gameState.history
         this.started = gameState.started
         this.singlePlayer = gameState.singlePlayer
+        
+        // AI configuration
+        this.aiType = gameState.aiType || 'rule-based'; // 'rule-based' or 'drl'
+        this.drlAgent = null;
+        
+        // Initialize DRL agent if needed
+        if (this.aiType === 'drl') {
+            this.initializeDRLAgent();
+        }
     }
 
     init() {
@@ -45,6 +55,38 @@ class Game {
         this.playerForClientSide;
         this.history = "";
         this.started = false;
+        
+        // Initialize DRL agent if using DRL AI
+        if (this.aiType === 'drl' && !this.drlAgent) {
+            this.initializeDRLAgent();
+        }
+    }
+    
+    /**
+     * Initialize the DRL agent
+     */
+    initializeDRLAgent() {
+        try {
+            this.drlAgent = new DRLAgent({
+                epsilon: 0.1, // Low exploration for gameplay
+                isTraining: false
+            });
+            console.log('DRL Agent initialized successfully');
+        } catch (error) {
+            console.warn('Failed to initialize DRL Agent, falling back to rule-based AI:', error);
+            this.aiType = 'rule-based';
+        }
+    }
+    
+    /**
+     * Set AI type
+     * @param {string} type - 'rule-based' or 'drl'
+     */
+    setAIType(type) {
+        this.aiType = type;
+        if (type === 'drl' && !this.drlAgent) {
+            this.initializeDRLAgent();
+        }
     }
 
     next() {
@@ -114,7 +156,20 @@ class Game {
             let player = this.players[playerIndex];
             let playerHand = player.hand;
             if (player.socketId == null && playerHand.cards.length > 0) {
-                const card = this.computerAI(playerHand)
+                let card;
+                
+                // Choose AI based on configuration
+                if (this.aiType === 'drl' && this.drlAgent) {
+                    try {
+                        card = this.drlAgent.selectAction(this, playerIndex);
+                    } catch (error) {
+                        console.warn('DRL AI failed, falling back to rule-based:', error);
+                        card = this.computerAI(playerHand);
+                    }
+                } else {
+                    card = this.computerAI(playerHand);
+                }
+                
                 //the current player to act is the computer and has some cards to play
                 this.addCardToHistory(card, playerIndex);
                 playerHand.removeCard(card)//remove card from player's hand

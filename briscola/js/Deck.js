@@ -2,7 +2,7 @@ import {Card} from './Card.js'
 import {suits} from './Suits.js'
 import {CardList} from "./CardList.js";
 import {DeckEmptyError} from "./errors/DeckErrors.js";
-import {Constants} from "./Constants";
+import {Constants} from "./Constants.js";
 
 class Deck extends CardList {
     constructor(deckState = {}) {
