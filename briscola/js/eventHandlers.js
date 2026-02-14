@@ -108,6 +108,22 @@ function onRedirect(cb)
         cb(newUrl)
     })
 }
+
+function declareTrump(suit) {
+    socket.emit(Constants.events.DECLARE_TRUMP, suit)
+}
+
+function onTrumpDeclared(cb) {
+    socket.on(Constants.events.TRUMP_DECLARED, function(trumpDeclaration) {
+        cb(trumpDeclaration)
+    })
+}
+
+function onTrumpDeclarationRejected(cb) {
+    socket.on(Constants.events.TRUMP_DECLARATION_REJECTED, function(reason) {
+        cb(reason)
+    })
+}
 export {
     _onCardPress,
     getGame,  
@@ -122,5 +138,8 @@ export {
     onGameOver, 
     onServerConnectionLost, 
     onOpponentLeft, 
-    onRedirect
+    onRedirect,
+    declareTrump,
+    onTrumpDeclared,
+    onTrumpDeclarationRejected
 }

@@ -305,6 +305,46 @@ function BackendServer() {
             }
             
         })
+        
+        socket.on(Constants.events.DECLARE_TRUMP, async function(trumpSuit) {
+            const gameFromDb = await database.getGame(socket.handshake.query.gameId);
+            if(gameFromDb == undefined) {
+                console.error("Undefined game?")
+                return;
+            }
+            
+            if(gameFromDb.currentPlayerToActByIndex === session.playerIndex) {
+                let game = new Game(gameFromDb);
+                let playerIndex = session.playerIndex;
+                
+                // Validate trump declaration
+                if(game.declareTrump(playerIndex, trumpSuit)) {
+                    // Trump declaration successful
+                    socket.emit(Constants.events.TRUMP_DECLARED, { suit: trumpSuit, playerIndex: playerIndex });
+                    emitEvent(game, Constants.events.TRUMP_DECLARED, { suit: trumpSuit, playerIndex: playerIndex });
+                    
+                    await database.saveGame(game);
+                    emitUpdateGame(game);
+                } else {
+                    // Trump declaration failed
+                    socket.emit(Constants.events.TRUMP_DECLARATION_REJECTED, "Cannot declare trump with this suit");
+                }
+            } else {
+                socket.emit(Constants.events.TRUMP_DECLARATION_REJECTED, "Not your turn");
+            }
+            
+            function emitUpdateGame(game) {
+                game.players.forEach(function (player, index) {
+                    const deepCopyGame = cloneDeep(game)
+                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    if(socket.id === player.socketId) {
+                        socket.emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    } else {
+                        io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    }
+                })
+            }
+        })
         socket.on('disconnect', async function(){
             logger.info('user with socket id ' + socket.id + 'has disconnected');
             const socketIdOfPlayerWhoDisconnected = socket.id
@@ -331,6 +371,8 @@ function BackendServer() {
     expressApp.get("/join", listActiveLobbies)
     expressApp.get("/new", makeNewGame)
     expressApp.get("/newAgainstComputer", makeNewSinglePlayerGame)
+    expressApp.get("/newBriscola500", makeNewBriscola500Game)
+    expressApp.get("/newBriscola500AgainstComputer", makeNewBriscola500SinglePlayerGame)
     function listActiveLobbies(req, res) {
         lobbies.purgeEmptyLobbies();
         res.json(lobbies.getLobbies())
@@ -352,6 +394,35 @@ function BackendServer() {
     }
     function makeNewSinglePlayerGame(req, res) {
         let game = new Game()
+        game.singlePlayer = true;
+        game.init()
+
+        database.insertNewGame(game).then((confirmation)=>{
+            if(confirmation && confirmation.insertedId)
+            {
+                logger.info(confirmation.insertedId)
+            }
+            else logger.info("Confirmation was undefined")
+            redirectToNewSinglePlayerGamePage(res, confirmation.insertedId.toString())
+        })
+    }
+    function makeNewBriscola500Game(req, res) {
+        let game = new Game({ gameVariant: Constants.gameVariants.BRISCOLA_500 })
+        game.init()
+        
+        database.insertNewGame(game).then((confirmation)=>{
+            if(confirmation && confirmation.insertedId)
+            {
+                logger.info(confirmation.insertedId)
+            }
+            else logger.info("Confirmation was undefined")
+
+            const playerName = req.query.name
+            redirectToNewGamePage(res, confirmation.insertedId.toString(), playerName)
+        })
+    }
+    function makeNewBriscola500SinglePlayerGame(req, res) {
+        let game = new Game({ gameVariant: Constants.gameVariants.BRISCOLA_500 })
         game.singlePlayer = true;
         game.init()
 

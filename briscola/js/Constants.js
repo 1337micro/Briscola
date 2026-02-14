@@ -18,13 +18,19 @@ const Constants = {
         GAME_START: "GAME_START",
         GET_GAME:"GET_GAME",
         TRUMP_CARD: "TRUMP_CARD",
-
-        REDIRECT: "REDIRECT"
+        REDIRECT: "REDIRECT",
+        DECLARE_TRUMP: "DECLARE_TRUMP",
+        TRUMP_DECLARED: "TRUMP_DECLARED",
+        TRUMP_DECLARATION_REJECTED: "TRUMP_DECLARATION_REJECTED"
     },
     soundUrl:
     {
       SHUFFLE_CARDS: "sound/cardShuffle.wav",
       PLAY_CARD: "sound/playCard.wav"
+    },
+    gameVariants: {
+        TRADITIONAL: "traditional",
+        BRISCOLA_500: "briscola500"
     },
       gameConstants:
       {
@@ -37,12 +43,24 @@ const Constants = {
             9: 3,
             8: 2
           },
-          MAX_NUMBER_CARDS_IN_HAND: 3,
+          MAX_NUMBER_CARDS_IN_HAND: 3, // Default for traditional variant
           MAP_ABBREVIATION_TO_SUITS : {
             s :"Spade",
             c :"Coppe",
             d :"Denari",
             b :"Bastoni"
+          },
+          VARIANT_CONFIG: {
+            traditional: {
+                CARDS_PER_HAND: 3
+            },
+            briscola500: {
+                CARDS_PER_HAND: 5
+            }
+          },
+          RANKS: {
+            KING: 10,
+            HORSE: 9
           }
       }
 }

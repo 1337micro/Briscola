@@ -50,8 +50,23 @@ export function generateDeckCount(game)
   return numCardsInDeckText;
 }
 
-export function generateTrumpSuitTextSprite(trumpCard){
-  const trumpSuitString = Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[trumpCard.suit];
+export function generateTrumpSuitTextSprite(trumpCardOrSuit){
+  if (!trumpCardOrSuit) {
+    return null; // No trump card or suit available
+  }
+  
+  let trumpSuit;
+  if (typeof trumpCardOrSuit === 'string') {
+    // Direct suit string
+    trumpSuit = trumpCardOrSuit;
+  } else if (trumpCardOrSuit.suit) {
+    // Trump card object
+    trumpSuit = trumpCardOrSuit.suit;
+  } else {
+    return null;
+  }
+  
+  const trumpSuitString = Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[trumpSuit];
   const trumpSuitText = new PIXI.Text(`Trump Suit: ${trumpSuitString}`, {fontSize: 24, align : 'center'});
  
   trumpSuitText.x = screenWidth - 300

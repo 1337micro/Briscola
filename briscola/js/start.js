@@ -1,6 +1,7 @@
 "use strict";
 import { app } from './app.js'
 import { Constants } from './Constants.js'
+import { Game } from './Game.js'
 import {
   _onCardPress,
   getGame,
@@ -15,7 +16,10 @@ import {
   onOpponentLeft,
   onRedirect,
   onComputerCardPlayed, 
-  onFirstToActComputerCardPlayed
+  onFirstToActComputerCardPlayed,
+  declareTrump,
+  onTrumpDeclared,
+  onTrumpDeclarationRejected
 } from './eventHandlers.js'
 import {
   _rotateCardSprites,
@@ -75,9 +79,11 @@ async function start()
   app.stage.addChild(yourNameText)
 
   let deckCountText = generateDeckCount(game);
-  let trumpSuitText = generateTrumpSuitTextSprite(game.trumpCard);
+  let trumpSuitText = generateTrumpSuitTextSprite(game.trumpCard || game.trumpSuit);
   app.stage.addChild(deckCountText)
-  app.stage.addChild(trumpSuitText)
+  if (trumpSuitText) {
+    app.stage.addChild(trumpSuitText)
+  }
 
   let middlePileCardSprites = []
   onGameUpdate((newGameObj)=>
@@ -97,6 +103,17 @@ async function start()
       removeDeckCountSprite(deckCountText)
       deckCountText = generateDeckCount(game);
       app.stage.addChild(deckCountText)
+      
+      // Update trump suit text if trump has been declared
+      if (game.trumpSuit && !trumpSuitText) {
+        trumpSuitText = generateTrumpSuitTextSprite(game.trumpSuit)
+        if (trumpSuitText) {
+          app.stage.addChild(trumpSuitText)
+        }
+      }
+      
+      // Update trump declaration buttons
+      updateTrumpDeclarationButtons(game)
 
   })
   onCardPlayed((cardPlayed)=>
@@ -211,6 +228,25 @@ async function start()
     gameOverText.y = screenHeight/2
     app.stage.addChild(gameOverText)
   })
+
+  let trumpDeclarationButtons = []
+  
+  onTrumpDeclared((trumpDeclaration) => {
+    // Remove trump declaration buttons when trump is declared
+    removeTrumpDeclarationButtons()
+    
+    // Add trump suit text if it doesn't exist yet
+    if (!trumpSuitText && trumpDeclaration.suit) {
+      trumpSuitText = generateTrumpSuitTextSprite(trumpDeclaration.suit)
+      if (trumpSuitText) {
+        app.stage.addChild(trumpSuitText)
+      }
+    }
+  })
+  
+  onTrumpDeclarationRejected((reason) => {
+    console.error("Trump declaration rejected:", reason)
+  })
   function redirectToNewGame()
   {
     window.location.assign("/new")
@@ -219,6 +255,9 @@ async function start()
   let cardSprites = addPlayerHandSprites(game.playerForClientSide)
   let opponentBackOfCardSprites = _generateOpponentCardSprites(game);
   setUpOpponentBackOfCards(opponentBackOfCardSprites)
+  
+  // Initialize trump declaration buttons if needed
+  updateTrumpDeclarationButtons(game)
 
   function addPlayerHandSprites(player)
   {
@@ -231,7 +270,7 @@ async function start()
     return cardSprites
   }
  
-  const trumpCardSprite = setUpTrumpCard(game.trumpCard)
+  const trumpCardSprite = game.trumpCard ? setUpTrumpCard(game.trumpCard) : null;
   const backOfDeckSprite = setUpBackOfDeck()
 
   app.ticker.add(delta => gameLoop(delta));
@@ -295,6 +334,81 @@ function setUpBackOfDeck()
     app.stage.children.forEach((childSprite)=>{
       app.stage.removeChild(childSprite)
     })
+  }
+
+  function createTrumpDeclarationButtons(availableDeclarations) {
+    removeTrumpDeclarationButtons() // Remove existing buttons first
+    
+    const suitNames = {
+      's': 'Spade',
+      'c': 'Coppe', 
+      'd': 'Denari',
+      'b': 'Bastoni'
+    }
+    
+    availableDeclarations.forEach((suit, index) => {
+      const buttonStyle = {
+        fontFamily: 'Arial', 
+        fontSize: 16, 
+        fill: 0x000000,
+        backgroundColor: 0xFFFFFF,
+        padding: 5
+      }
+      
+      const buttonText = new PIXI.Text(`Declare ${suitNames[suit]} Trump`, buttonStyle)
+      buttonText.x = 10
+      buttonText.y = 100 + (index * 30)
+      buttonText.interactive = true
+      buttonText.buttonMode = true
+      
+      buttonText.on('pointerdown', () => {
+        declareTrump(suit)
+      })
+      
+      trumpDeclarationButtons.push(buttonText)
+      app.stage.addChild(buttonText)
+    })
+  }
+  
+  function removeTrumpDeclarationButtons() {
+    trumpDeclarationButtons.forEach(button => {
+      if (button.parent) {
+        button.parent.removeChild(button)
+      }
+    })
+    trumpDeclarationButtons = []
+  }
+  
+  function updateTrumpDeclarationButtons(game) {
+    if (game.gameVariant === Constants.gameVariants.BRISCOLA_500 && 
+        !game.trumpDeclared) {
+      
+      // Check if it's the current player's turn
+      const myPlayerObject = getMyPlayerObject(game)
+      const currentPlayerToAct = game.players[game.currentPlayerToActByIndex]
+      const isMyTurn = myPlayerObject.socketId === currentPlayerToAct.socketId
+      
+      if (isMyTurn) {
+        // Get player index
+        const playerIndex = game.players[0].socketId === myPlayerObject.socketId ? 0 : 1
+        
+        // Create a proper Game instance to access methods
+        const gameInstance = new Game(game)
+        
+        // Get available trump declarations for current player
+        const availableDeclarations = gameInstance.getAvailableTrumpDeclarations(playerIndex)
+        
+        if (availableDeclarations.length > 0) {
+          createTrumpDeclarationButtons(availableDeclarations)
+        } else {
+          removeTrumpDeclarationButtons()
+        }
+      } else {
+        removeTrumpDeclarationButtons()
+      }
+    } else {
+      removeTrumpDeclarationButtons()
+    }
   }
 }
 
