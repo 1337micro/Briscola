@@ -28,6 +28,7 @@ const Constants = {
     },
       gameConstants:
       {
+          BRSICOLA_500: "500",
           NUMBER_OF_PLAYERS : 2,
           LIST_OF_STRENGTHS_BY_RANK: [1, 3, 10, 9, 8, 7, 6,5,4,3,2],
           MAP_RANK_TO_NUMBER_OF_POINTS: {
@@ -38,6 +39,7 @@ const Constants = {
             8: 2
           },
           MAX_NUMBER_CARDS_IN_HAND: 3,
+          MAX_NUMBER_CARDS_IN_HAND_BRISCOLA_500: 5,
           MAP_ABBREVIATION_TO_SUITS : {
             s :"Spade",
             c :"Coppe",

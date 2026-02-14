@@ -5,9 +5,10 @@ import "./modal.css";
 
 interface CreateButtonProps {
   onOk: (playerName: string) => void;
+  buttonText?: string;
 }
 
-const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
+const CreateButton: React.FC<CreateButtonProps> = ({ onOk, buttonText = "Create Game" }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -37,7 +38,7 @@ const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
         type="primary"
         onClick={showModal}
       >
-        Create Game
+        {buttonText}
       </Button>
       <Modal
         className="custsomModal"

@@ -21,6 +21,7 @@ class Game {
         this.history = gameState.history
         this.started = gameState.started
         this.singlePlayer = gameState.singlePlayer
+        this.gameType = gameState.gameType;
     }
 
     init() {
@@ -28,10 +29,15 @@ class Game {
         this.deck = new Deck()
         this.deck.generateDeck();
         this.deck.shuffle();
-        const hand1 = new Hand()
-        hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
-        const hand2 = new Hand()
-        hand2.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
+        const hand1 = new Hand({gameType: this.gameType});
+        this.isBriscola500() ?
+            hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
+            hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
+
+        const hand2 = new Hand({gameType: this.gameType});
+        this.isBriscola500() ?
+            hand2.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
+            hand2.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
         this.player1 = new Player()
         this.player1.hand = hand1
         this.player2 = new Player()
@@ -46,6 +52,11 @@ class Game {
         this.history = "";
         this.started = false;
     }
+
+    isBriscola500() {
+        return this.gameType === Constants.gameConstants.BRSICOLA_500;
+    }
+
 
     next() {
         if (!this.isRoundOver()) {

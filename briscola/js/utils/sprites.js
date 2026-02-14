@@ -76,8 +76,10 @@ export function _generateOpponentCardSprites(game)
   }
   return cardSprites
 }
-export function _generateCardSprites(hand)
+export function _generateCardSprites(game)
 {
+  const hand = game.playerForClientSide.hand
+  console.log(hand)
   let cardSprites = []
   for (let i = 0; i<hand.cards.length; i++)
   {

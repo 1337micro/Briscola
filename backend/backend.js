@@ -336,7 +336,8 @@ function BackendServer() {
         res.json(lobbies.getLobbies())
     }
     function makeNewGame(req, res) {
-        let game = new Game()
+        const gameType = req.query.gameType
+        let game = new Game({gameType: gameType})
         game.init()
         
         database.insertNewGame(game).then((confirmation)=>{
@@ -347,7 +348,7 @@ function BackendServer() {
             else logger.info("Confirmation was undefined")
 
             const playerName = req.query.name
-            redirectToNewGamePage(res, confirmation.insertedId.toString(), playerName)
+            redirectToNewGamePage(res, confirmation.insertedId.toString(), playerName, gameType)
         })
     }
     function makeNewSinglePlayerGame(req, res) {
@@ -364,10 +365,10 @@ function BackendServer() {
             redirectToNewSinglePlayerGamePage(res, confirmation.insertedId.toString())
         })
     }
-    function redirectToNewGamePage(res, gameId, playerName){
+    function redirectToNewGamePage(res, gameId, playerName, gameType){
         if(res && res.redirect)
         {
-            res.redirect("../game.html?gameId="+gameId+"&name="+playerName)
+            res.redirect("../game.html?gameId="+gameId+"&name="+playerName+"&gameType="+gameType)
         }
     }
     function redirectToNewSinglePlayerGamePage(res, gameId){

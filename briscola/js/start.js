@@ -61,6 +61,7 @@ async function start()
     console.error(error)
     redirectToNewGame()
   });
+
   //game starts after this point
   SHUFFLE_CARDS_SOUND.play()
   hideGreeting()
@@ -83,7 +84,7 @@ async function start()
   {
       game = newGameObj     
       removeHandCardSprites(cardSprites)
-      cardSprites = addPlayerHandSprites(game.playerForClientSide)
+      cardSprites = addPlayerHandSprites(game)
       
       removeHandCardSprites(opponentBackOfCardSprites)
       opponentBackOfCardSprites = _generateOpponentCardSprites(game)
@@ -215,13 +216,13 @@ async function start()
     window.location.assign("/new")
   }
 
-  let cardSprites = addPlayerHandSprites(game.playerForClientSide)
+  let cardSprites = addPlayerHandSprites(game)
   let opponentBackOfCardSprites = _generateOpponentCardSprites(game);
   setUpOpponentBackOfCards(opponentBackOfCardSprites)
 
-  function addPlayerHandSprites(player)
+  function addPlayerHandSprites(game)
   {
-    let cardSprites = _generateCardSprites(player.hand)
+    let cardSprites = _generateCardSprites(game)
     makeSpritesInteractive(cardSprites, game)
     _positionCardSprites(cardSprites)
     _scaleSpritesDownTo(0.5, cardSprites)
