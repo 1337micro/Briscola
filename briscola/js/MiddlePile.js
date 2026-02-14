@@ -1,7 +1,7 @@
 "use strict";
 import {MiddlePileIncompleteError, MiddlePileFullError} from './errors/PileErrors.js'
 import {Constants} from './Constants.js'
-import {CardList} from "./CardList";
+import {CardList} from "./CardList.js";
 
 /**
  * Represents the middlePile of Cards in the middle
