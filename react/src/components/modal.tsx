@@ -63,7 +63,7 @@ const CreateButton: React.FC<CreateButtonProps> = ({ onOk }) => {
             name="playerName"
             rules={[{ required: true, message: "Please enter a player name" }]}
           >
-            <Input placeholder="Enter a Player Name" />
+            <Input placeholder="Enter a Lobby Name" />
           </Form.Item>
         </Form>
       </Modal>

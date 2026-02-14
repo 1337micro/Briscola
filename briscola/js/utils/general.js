@@ -24,7 +24,7 @@ export function isSinglePlayer(){
   return singlePlayer;
 }
 
-export function getPlayerName(){
+export function getLobbyName(){
   let params = (new URL(document.location)).searchParams;
   let name = params.get('name');
   return name;

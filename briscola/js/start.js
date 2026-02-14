@@ -42,7 +42,7 @@ import {
   generateDeckCount, 
   generateTrumpSuitTextSprite
 } from './utils/generators.js'
-import {hideGreeting, isSinglePlayer, getPlayerName, getMyPlayerObject, getOpponentPlayer} from './utils/general.js'
+import {hideGreeting, isSinglePlayer, getLobbyName, getMyPlayerObject, getOpponentPlayer} from './utils/general.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD], volume: 0.35 });
@@ -57,7 +57,7 @@ async function start()
     window.location.assign(newUrl)
   })
 
-  isSinglePlayer() ? requestSinglePlayerGameStart() : requestGameStart(getPlayerName());
+  isSinglePlayer() ? requestSinglePlayerGameStart() : requestGameStart(getLobbyName());
   game = await getGame().catch( (error)=> {
     console.error(error)
     redirectToNewGame()
