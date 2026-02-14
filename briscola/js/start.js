@@ -75,7 +75,7 @@ async function start()
   app.stage.addChild(yourNameText)
 
   let deckCountText = generateDeckCount(game);
-  let trumpSuitText = generateTrumpSuitTextSprite(game.trumpCard);
+  let trumpSuitText = generateTrumpSuitTextSprite(game.trumpSuit);
   app.stage.addChild(deckCountText)
   app.stage.addChild(trumpSuitText)
 
@@ -230,7 +230,7 @@ async function start()
     return cardSprites
   }
  
-  const trumpCardSprite = setUpTrumpCard(game.trumpCard)
+  const trumpCardSprite = game.gameType === Constants.gameConstants.BRSICOLA_500 ? null: setUpTrumpCard(game.trumpCard);
   const backOfDeckSprite = setUpBackOfDeck()
 
   app.ticker.add(delta => gameLoop(delta));

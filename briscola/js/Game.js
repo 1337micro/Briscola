@@ -15,6 +15,7 @@ class Game {
         this.player2 = new Player(gameState.player2)
         this.players = [this.player1, this.player2]
         this.trumpCard = new Card(gameState.trumpCard)
+        this.trumpSuit = new Card(gameState.trumpSuit)
         this.firstPlayerToActByIndex = gameState.firstPlayerToActByIndex
         this.currentPlayerToActByIndex = gameState.currentPlayerToActByIndex
         this.playerForClientSide = gameState.playerForClientSide
@@ -43,7 +44,8 @@ class Game {
         this.player2 = new Player()
         this.player2.hand = hand2
         this.players = [this.player1, this.player2]
-        this.trumpCard = this.deck.drawTrumpCard()
+        this.trumpCard = this.isBriscola500() ? null : this.deck.drawTrumpCard();
+        this.trumpSuit = this.isBriscola500() ? null : this.trumpCard.suit;
         this.middlePile = new MiddlePile({trumpCard: this.trumpCard})
 
         this.firstPlayerToActByIndex = 0
