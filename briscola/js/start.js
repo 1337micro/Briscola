@@ -18,7 +18,6 @@ import {
   onFirstToActComputerCardPlayed
 } from './eventHandlers.js'
 import {
-  _rotateCardSprites,
   _scaleSpriteDownTo,
   _scaleSpritesDownTo,
   makeSpritesInteractive,
@@ -225,7 +224,6 @@ async function start()
     let cardSprites = _generateCardSprites(player.hand)
     makeSpritesInteractive(cardSprites, game)
     _positionCardSprites(cardSprites)
-    _rotateCardSprites(cardSprites)
     _scaleSpritesDownTo(0.5, cardSprites)
     addCardSpritesToStage(cardSprites)
     return cardSprites

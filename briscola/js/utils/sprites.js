@@ -7,33 +7,6 @@ import {
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
 
-export function _rotateCardSprites(cardSprites, yourHand = true)
-{
-  cardSprites.forEach((cardSprite) =>{
-    cardSprite.anchor.x = 0.5
-    cardSprite.anchor.y = 0.5
-  })
-  let factor = yourHand ? 1 : -1;
-  let displacement = 15
-  let leftCard = cardSprites[0]
-  let middleCard = cardSprites[1]
-  let rightCard = cardSprites[2]
-  if(leftCard)
-  {
-    leftCard.rotation = -0.2 * factor
-    leftCard.y = leftCard.y - displacement * factor
-  }
-  if(middleCard)
-  {
-    middleCard.y =  middleCard.y - 2*(displacement * factor)
-  }
-  if(rightCard)
-  {
-    rightCard.y = rightCard.y - displacement * factor
-    rightCard.rotation = 0.2 *factor
-  }
-}
-
 export  function _scaleSpriteDownTo(percent, sprite)
 {
   sprite.scale.set(percent)
@@ -62,7 +35,6 @@ export function _positionOpponentBackCardSprites(backOfCardSprites)
   backOfCardSprites.forEach((backOfCardSprite, i) =>{
     _positionCardSprite(backOfCardSprite, screenWidth / 4 + 100*i, 0)
   })
-  _rotateCardSprites(backOfCardSprites, false)
 }
 export function _positionBackOfCard(backOfCardSprite)
 {
@@ -87,7 +59,7 @@ export function _positionTrumpCard(trumpCardSprite)
 export function _positionCardSprites(cardSprites)
 {
   cardSprites.forEach((cardSprite, i) => {
-    _positionCardSprite(cardSprite, screenWidth / 4 + 100*i, screenHeight - 100)
+    _positionCardSprite(cardSprite, screenWidth / 4 + 100*i, screenHeight - 200)
   })
 }
 
