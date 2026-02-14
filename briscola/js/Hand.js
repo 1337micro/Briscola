@@ -5,6 +5,13 @@ import {CardList} from "./CardList.js";
 class Hand extends CardList {
     constructor(handState = {}) {
         super(handState)
+        this.gameType = handState.gameType;
+    }
+
+    getMaxCards() {
+        return this.gameType === Constants.gameConstants.BRSICOLA_500 ?
+            Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND_BRISCOLA_500:
+            Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND;
     }
 
     equals(otherHand) {
@@ -18,7 +25,7 @@ class Hand extends CardList {
 
     //overwrites addCard from CardList because we need custom logic for the hand to check if hand is full
     addCard(card) {
-        if (this.cards.length === Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND) {
+        if (this.cards.length === this.getMaxCards()) {
             throw new HandFullError();
         } else {
             super.addCard(card)
@@ -27,11 +34,21 @@ class Hand extends CardList {
 
     //overwrites addCards from CardList because we need custom logic for the hand to check if hand is full
     addCards(cards) {
-        if (this.cards.length + cards.length > Constants.gameConstants.MAX_NUMBER_CARDS_IN_HAND) {
+        if (this.cards.length + cards.length > this.getMaxCards()) {
             throw new HandFullError();
         } else {
             super.addCards(cards)
         }
+    }
+
+    containsCard(card) {
+        return this.cards.some(cardInHand => {
+            return cardInHand.equals(card)
+        })
+    }
+
+    checkIfHandContainsHorseAndKingOf(suit) {
+        return this.containsCard({rank: 9, suit: suit}) && this.containsCard({rank: 10, suit: suit})
     }
 }
 

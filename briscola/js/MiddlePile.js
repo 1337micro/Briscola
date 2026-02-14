@@ -42,9 +42,9 @@ class MiddlePile extends CardList {
             for (let i = 1; i < this.cards.length; i++) {
                 let otherCard = this.cards[i]
                 //the winning card is a trump suit
-                if (winningCard.suit === this.trumpCard.suit) {
+                if (winningCard.suit === this.trumpSuit) {
                     //the other card is also trump suit
-                    if (otherCard.suit === this.trumpCard.suit) {
+                    if (otherCard.suit === this.trumpSuit) {
                         //the other card is also a trump suit
                         if (Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(otherCard.rank) <
                             Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(winningCard.rank)) {
@@ -56,7 +56,7 @@ class MiddlePile extends CardList {
                     }
                 }
                 //the other card is a trump suit
-                else if (otherCard.suit === this.trumpCard.suit) {
+                else if (otherCard.suit === this.trumpSuit) {
                     //but the winning card isn't,
                     winningCard = otherCard;
                 } else {

@@ -100,6 +100,7 @@ async function saveGame(game)
                     player2: game.player2,
                     players: game.players,
                     trumpCard: game.trumpCard,
+                    trumpSuit: game.trumpSuit,
                     firstPlayerToActByIndex: game.firstPlayerToActByIndex,
                     currentPlayerToActByIndex: game.currentPlayerToActByIndex,
                     history: game.history,

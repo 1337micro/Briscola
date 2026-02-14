@@ -14,13 +14,15 @@ class Game {
         this.player1 = new Player(gameState.player1)
         this.player2 = new Player(gameState.player2)
         this.players = [this.player1, this.player2]
-        this.trumpCard = new Card(gameState.trumpCard)
+        this.trumpCard = gameState.trumpCard === null ? null : new Card(gameState.trumpCard);
+        this.trumpSuit = gameState.trumpSuit
         this.firstPlayerToActByIndex = gameState.firstPlayerToActByIndex
         this.currentPlayerToActByIndex = gameState.currentPlayerToActByIndex
         this.playerForClientSide = gameState.playerForClientSide
         this.history = gameState.history
         this.started = gameState.started
         this.singlePlayer = gameState.singlePlayer
+        this.gameType = gameState.gameType;
     }
 
     init() {
@@ -28,16 +30,22 @@ class Game {
         this.deck = new Deck()
         this.deck.generateDeck();
         this.deck.shuffle();
-        const hand1 = new Hand()
-        hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
-        const hand2 = new Hand()
-        hand2.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
+        const hand1 = new Hand({gameType: this.gameType});
+        this.isBriscola500() ?
+            hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
+            hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
+
+        const hand2 = new Hand({gameType: this.gameType});
+        this.isBriscola500() ?
+            hand2.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
+            hand2.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
         this.player1 = new Player()
         this.player1.hand = hand1
         this.player2 = new Player()
         this.player2.hand = hand2
         this.players = [this.player1, this.player2]
-        this.trumpCard = this.deck.drawTrumpCard()
+        this.trumpCard = this.isBriscola500() ? null : this.deck.drawTrumpCard();
+        this.trumpSuit = this.isBriscola500() ? null : this.trumpCard.suit;
         this.middlePile = new MiddlePile({trumpCard: this.trumpCard})
 
         this.firstPlayerToActByIndex = 0
@@ -46,6 +54,11 @@ class Game {
         this.history = "";
         this.started = false;
     }
+
+    isBriscola500() {
+        return this.gameType === Constants.gameConstants.BRSICOLA_500;
+    }
+
 
     next() {
         if (!this.isRoundOver()) {
@@ -127,11 +140,11 @@ class Game {
     }
 
     computerAI(computerHand) {
-        const trumpCard = this.middlePile.trumpCard
+        const trumpSuit = this.trumpSuit;
         //player hand sorted ascending in point value
         const sortedComputerCards = computerHand.cards.sort((cardA, cardB) => cardA.points - cardB.points);
-        const ourTrumpCards = sortedComputerCards.filter(card => card.suit === trumpCard.suit)
-        const ourNonTrumpCards = sortedComputerCards.filter(card => card.suit !== trumpCard.suit)
+        const ourTrumpCards = sortedComputerCards.filter(card => card.suit === this.trumpSuit)
+        const ourNonTrumpCards = sortedComputerCards.filter(card => card.suit !== this.trumpSuit)
         let worstCardInHand;
         if (ourTrumpCards.length === sortedComputerCards.length) {
             //all our cards are trump cards, take the lowest trump card as the worst card
@@ -148,7 +161,7 @@ class Game {
         } else {
             //Computer is second to act
             const cardAlreadyPlayedInMiddle = cardsInMiddle[0]
-            if (cardAlreadyPlayedInMiddle.suit === trumpCard.suit) {
+            if (cardAlreadyPlayedInMiddle.suit === this.trumpSuit) {
                 //player played a trump suit first, give him the lowest points possible
                 return worstCardInHand;
             } else {
@@ -162,7 +175,7 @@ class Game {
                         return worstCardInHand
                     } else {
                         //the card in the middle is worth something meaningful, so we try to take it
-                        const ourTrumpCards = sortedComputerCards.filter(card => card.suit === trumpCard.suit)
+                        const ourTrumpCards = sortedComputerCards.filter(card => card.suit === this.trumpSuit)
                         if (ourTrumpCards.length > 0) {
                             //We have some trump cards, so let's play lowest one
                             return ourTrumpCards[0]

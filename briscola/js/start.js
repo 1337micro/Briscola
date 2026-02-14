@@ -14,11 +14,10 @@ import {
   onServerConnectionLost,
   onOpponentLeft,
   onRedirect,
-  onComputerCardPlayed, 
-  onFirstToActComputerCardPlayed
+  onComputerCardPlayed,
+  onFirstToActComputerCardPlayed, callBrisk, onBriskCalled
 } from './eventHandlers.js'
 import {
-  _rotateCardSprites,
   _scaleSpriteDownTo,
   _scaleSpritesDownTo,
   makeSpritesInteractive,
@@ -32,21 +31,25 @@ import {
   _generateCardSprites,
   _generateCardSprite,
   _removeSprite,
-_removeSprites,
-removeMiddlePileCardSprites,
-removeHandCardSprites
+  _removeSprites,
+  removeMiddlePileCardSprites,
+  removeHandCardSprites, _positionBriskCalledSprite, _positionBriskCalledText
 } from './utils/sprites.js'
 import {
   generatePlayerToActText, 
   generateYourPlayerNameText, 
   generateDeckCount, 
-  generateTrumpSuitTextSprite
+  generateTrumpSuitTextSprite,
+  isMyTurnToAct
 } from './utils/generators.js'
 import {hideGreeting, isSinglePlayer, getLobbyName, getMyPlayerObject, getOpponentPlayer} from './utils/general.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
 
 const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD], volume: 0.35 });
 const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS], volume: 0.25 });
+
+const HORSE_RANK = 9;
+const KING_RANK = 10;
 
 let game;
 let screenWidth = window.innerWidth;
@@ -62,6 +65,7 @@ async function start()
     console.error(error)
     redirectToNewGame()
   });
+
   //game starts after this point
   SHUFFLE_CARDS_SOUND.play()
   hideGreeting()
@@ -75,16 +79,18 @@ async function start()
   app.stage.addChild(yourNameText)
 
   let deckCountText = generateDeckCount(game);
-  let trumpSuitText = generateTrumpSuitTextSprite(game.trumpCard);
   app.stage.addChild(deckCountText)
+
+  let trumpSuitText = generateTrumpSuitTextSprite(game.trumpSuit);
   app.stage.addChild(trumpSuitText)
 
   let middlePileCardSprites = []
+  let horseKingButtons = []
   onGameUpdate((newGameObj)=>
   {
       game = newGameObj     
       removeHandCardSprites(cardSprites)
-      cardSprites = addPlayerHandSprites(game.playerForClientSide)
+      cardSprites = addPlayerHandSprites(game)
       
       removeHandCardSprites(opponentBackOfCardSprites)
       opponentBackOfCardSprites = _generateOpponentCardSprites(game)
@@ -97,6 +103,12 @@ async function start()
       removeDeckCountSprite(deckCountText)
       deckCountText = generateDeckCount(game);
       app.stage.addChild(deckCountText)
+
+      app.stage.removeChild(trumpSuitText)
+      trumpSuitText = generateTrumpSuitTextSprite(game.trumpSuit);
+      app.stage.addChild(trumpSuitText)
+
+      updateHorseKingButtons(game)
 
   })
   onCardPlayed((cardPlayed)=>
@@ -144,6 +156,33 @@ async function start()
       }
     }
     setTimeout(removePileCards, 3000)
+  })
+  onBriskCalled((suit) => {
+    PLAY_CARD_SOUND.play()
+    PLAY_CARD_SOUND.play()
+
+    let horse = _generateCardSprite(`../images/9${suit}.png`)
+    let king = _generateCardSprite(`../images/10${suit}.png`)
+    const briscolaCalledText = new PIXI.Text(`BRISCOLA of ${Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[suit]} has been called`);
+
+
+    _positionBriskCalledSprite(horse, 0)
+    _positionBriskCalledSprite(king, 1)
+    _positionBriskCalledText(briscolaCalledText)
+
+    _scaleSpriteDownTo(0.5, horse)
+    _scaleSpriteDownTo(0.5, king)
+    addCardSpriteToStage(horse)
+    addCardSpriteToStage(king)
+    addCardSpriteToStage(briscolaCalledText)
+
+    setTimeout(()=>{
+      app.stage.removeChild(horse)
+      app.stage.removeChild(king)
+      app.stage.removeChild(briscolaCalledText)
+    }, 3000)
+
+
   })
   onLastDeal(()=>{
     if(trumpCardSprite)
@@ -216,23 +255,24 @@ async function start()
     window.location.assign("/new")
   }
 
-  let cardSprites = addPlayerHandSprites(game.playerForClientSide)
+  let cardSprites = addPlayerHandSprites(game)
   let opponentBackOfCardSprites = _generateOpponentCardSprites(game);
   setUpOpponentBackOfCards(opponentBackOfCardSprites)
 
-  function addPlayerHandSprites(player)
+  function addPlayerHandSprites(game)
   {
-    let cardSprites = _generateCardSprites(player.hand)
+    let cardSprites = _generateCardSprites(game)
     makeSpritesInteractive(cardSprites, game)
     _positionCardSprites(cardSprites)
-    _rotateCardSprites(cardSprites)
     _scaleSpritesDownTo(0.5, cardSprites)
     addCardSpritesToStage(cardSprites)
     return cardSprites
   }
  
-  const trumpCardSprite = setUpTrumpCard(game.trumpCard)
+  const trumpCardSprite = game.gameType === Constants.gameConstants.BRSICOLA_500 ? null: setUpTrumpCard(game.trumpCard);
   const backOfDeckSprite = setUpBackOfDeck()
+
+  updateHorseKingButtons(game)
 
   app.ticker.add(delta => gameLoop(delta));
 
@@ -295,6 +335,72 @@ function setUpBackOfDeck()
     app.stage.children.forEach((childSprite)=>{
       app.stage.removeChild(childSprite)
     })
+  }
+
+  function findHorseKingSuits(hand) {
+    const suitRanks = {};
+    for (const card of hand.cards) {
+      if (card.rank === HORSE_RANK || card.rank === KING_RANK) {
+        if (!suitRanks[card.suit]) suitRanks[card.suit] = new Set();
+        suitRanks[card.suit].add(card.rank);
+      }
+    }
+    return Object.keys(suitRanks).filter(suit =>
+      suitRanks[suit].has(HORSE_RANK) && suitRanks[suit].has(KING_RANK)
+    );
+  }
+
+  function callBriskButton(suitAbbr, index, enabled) {
+    const suitName = Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[suitAbbr];
+
+    const button = new PIXI.Container();
+
+    const bg = new PIXI.Graphics();
+    bg.beginFill(enabled ? 0x4CAF50 : 0x9E9E9E);
+    bg.drawRoundedRect(0, 0, 200, 36, 8);
+    bg.endFill();
+    button.addChild(bg);
+
+    const text = new PIXI.Text(`Call Briscola of ${suitName}`, {
+      fontFamily: 'Arial',
+      fontSize: 14,
+      fill: 0xFFFFFF,
+      align: 'center'
+    });
+    text.x = 10;
+    text.y = 9;
+    button.addChild(text);
+
+    button.x = 0.05 * screenWidth;
+    button.y = (screenHeight - 260) + (index * 45);
+
+    button.interactive = enabled;
+    button.buttonMode = enabled;
+
+    button.on('pointerdown', () => {
+      callBrisk(suitAbbr)
+    });
+
+    return button;
+  }
+
+  function updateHorseKingButtons(game) {
+    for (const btn of horseKingButtons) {
+      if (btn.parent) btn.parent.removeChild(btn);
+    }
+    if(game.gameType === Constants.gameConstants.BRSICOLA_500 && game.trumpSuit == null) {
+      horseKingButtons = [];
+
+      const hand = game.playerForClientSide.hand;
+      const matchingSuits = findHorseKingSuits(hand);
+      const myTurn = isMyTurnToAct(game);
+
+      matchingSuits.forEach((suit, index) => {
+        const button = callBriskButton(suit, index, myTurn);
+        app.stage.addChild(button);
+        horseKingButtons.push(button);
+      });
+    }
   }
 }
 

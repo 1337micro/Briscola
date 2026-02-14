@@ -13,6 +13,13 @@ function Index() {
     );
   }
 
+  function handleCreateGameBriscola500(playerName: string) {
+    window.open(
+      `http://${window.location.hostname}:80/new?name=${playerName}&gameType=500`,
+      "_top"
+    );
+  }
+
   function handlePlayAgainstComputer() {
     window.open(
       `http://${window.location.hostname}:80/newAgainstComputer`,
@@ -32,6 +39,9 @@ function Index() {
         <Row style={{ marginBottom: 40 }} justify="center">
           <Col>
             <CreateButton onOk={handleCreateGame}/>
+          </Col>
+          <Col>
+            <CreateButton onOk={handleCreateGameBriscola500} buttonText="Create Briscola 500 game"/>
           </Col>
           <Col>
             <Button
