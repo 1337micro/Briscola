@@ -18,6 +18,8 @@ const Constants = {
         GAME_START: "GAME_START",
         GET_GAME:"GET_GAME",
         TRUMP_CARD: "TRUMP_CARD",
+        CALL_BRISK: "CALL_BRISK",
+        BRISK_CALLED: "BRISK_CALLED",
 
         REDIRECT: "REDIRECT"
     },

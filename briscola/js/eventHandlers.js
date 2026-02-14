@@ -42,6 +42,18 @@ function requestSinglePlayerGameStart()
     socket.emit(Constants.events.REQUEST_SINGLE_PLAYER_GAME_START)
 }
 
+function callBrisk(suit)
+{
+    socket.emit(Constants.events.CALL_BRISK, suit)
+}
+function onBriskCalled(cb)
+{
+    socket.on(Constants.events.BRISK_CALLED, function(game)
+    {
+        cb(game)
+    })
+}
+
 function onGameUpdate(cb)
 {
     socket.on(Constants.events.UPDATE_GAME, function(game)
@@ -122,5 +134,7 @@ export {
     onGameOver, 
     onServerConnectionLost, 
     onOpponentLeft, 
-    onRedirect
+    onRedirect,
+    callBrisk,
+    onBriskCalled
 }

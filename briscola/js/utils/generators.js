@@ -3,7 +3,7 @@ import { Constants } from "../Constants.js";
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
 
-function isMyTurnToAct(game)
+export function isMyTurnToAct(game)
 {
   const playerToAct = game.players[game.currentPlayerToActByIndex]
   const myPlayerObject = game.playerForClientSide
@@ -51,7 +51,7 @@ export function generateDeckCount(game)
 }
 
 export function generateTrumpSuitTextSprite(trumpSuit){
-  const trumpSuitString = trumpSuit ? Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[trumpCard.suit]: 'None';
+  const trumpSuitString = trumpSuit ? Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[trumpSuit]: 'None';
   const trumpSuitText = new PIXI.Text(`Trump Suit: ${trumpSuitString}`, {fontSize: 24, align : 'center'});
  
   trumpSuitText.x = screenWidth - 300

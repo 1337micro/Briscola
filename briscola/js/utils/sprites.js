@@ -48,6 +48,19 @@ export function _positionPileCard(pileCardSprite)
     pileCardSprite.anchor.y = 0.5
     pileCardSprite.rotation = Math.random()/2
 }
+export function _positionBriskCalledSprite(pileCardSprite, spriteIndex)
+{
+  const displacement = spriteIndex * 100;
+  _positionCardSprite(pileCardSprite, (screenWidth / 5) + displacement, screenHeight / 1.5)
+  pileCardSprite.anchor.x = 0.5
+  pileCardSprite.anchor.y = 0.5
+}
+export function _positionBriskCalledText(pileCardSprite)
+{
+  _positionCardSprite(pileCardSprite, (screenWidth / 5) + 100, screenHeight / 1.5 + 125)
+  pileCardSprite.anchor.x = 0.5
+  pileCardSprite.anchor.y = 0.5
+}
 export function _positionTrumpCard(trumpCardSprite)
 {
   _positionCardSprite(trumpCardSprite, screenWidth - 300, screenHeight / 2 - 100)

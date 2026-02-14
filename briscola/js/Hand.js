@@ -40,6 +40,16 @@ class Hand extends CardList {
             super.addCards(cards)
         }
     }
+
+    containsCard(card) {
+        return this.cards.some(cardInHand => {
+            return cardInHand.equals(card)
+        })
+    }
+
+    checkIfHandContainsHorseAndKingOf(suit) {
+        return this.containsCard({rank: 9, suit: suit}) && this.containsCard({rank: 10, suit: suit})
+    }
 }
 
 
