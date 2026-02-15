@@ -1,4 +1,5 @@
-import { Row, Col, Button } from "antd";
+import { Button } from "antd";
+import { RobotOutlined, ThunderboltOutlined, TrophyOutlined } from "@ant-design/icons";
 import Lobbies from "../lobbies/Lobbies";
 
 import "./Index.css";
@@ -28,41 +29,62 @@ function Index() {
   }
 
   return (
-    <Row className="Index" justify="center">
-      <Col>
-        <Row justify="center">
-          <Col>
-            <h1 className="logo">Briscola</h1>
-          </Col>
-        </Row>
+    <div className="Index">
+      {/* Hero Section */}
+      <header className="hero">
+        <div className="hero-glow" />
+        <h1 className="logo">
+          <span className="logo-icon">♠</span> Briscola
+        </h1>
+        <p className="tagline">The classic Italian card game — play with friends or challenge the AI</p>
+      </header>
 
-        <Row style={{ marginBottom: 40 }} justify="center">
-          <Col>
-            <CreateButton onOk={handleCreateGame}/>
-          </Col>
-          <Col>
-            <CreateButton onOk={handleCreateGameBriscola500} buttonText="Create Briscola 500 game"/>
-          </Col>
-          <Col>
+      {/* Action Cards */}
+      <section className="actions-section">
+        <div className="action-cards">
+          <div className="action-card">
+            <div className="action-card-icon"><ThunderboltOutlined /></div>
+            <h3>Briscola 300</h3>
+            <p>Classic rules, first to 300 points wins.</p>
+            <CreateButton onOk={handleCreateGame} />
+          </div>
+
+          <div className="action-card">
+            <div className="action-card-icon"><TrophyOutlined /></div>
+            <h3>Briscola 500</h3>
+            <p>Extended game, first to 500 points wins.</p>
+            <CreateButton onOk={handleCreateGameBriscola500} buttonText="Create Briscola 500 Game" />
+          </div>
+
+          <div className="action-card">
+            <div className="action-card-icon"><RobotOutlined /></div>
+            <h3>Play vs AI</h3>
+            <p>Practice against the computer opponent.</p>
             <Button
-              type="link"
+              type="primary"
               className="primary-button"
               size="large"
               onClick={handlePlayAgainstComputer}
             >
-              Play Against Computer
+              Play Against AI
             </Button>
-          </Col>
-        </Row>
-
-        <Lobbies />
-        <div className="wrap">
-          <div className="cards-img-container">
-            <img src="./cards.png" alt="Cards image" />
           </div>
         </div>
-      </Col>
-    </Row>
+      </section>
+
+      {/* Lobbies Section */}
+      <section className="lobbies-section">
+        <h2 className="section-title">Open Lobbies</h2>
+        <div className="lobbies-card">
+          <Lobbies />
+        </div>
+      </section>
+
+      {/* Footer image */}
+      <footer className="footer-art">
+        <img src="./cards.png" alt="Cards" className="cards-img" />
+      </footer>
+    </div>
   );
 }
 
