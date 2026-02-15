@@ -3,31 +3,47 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Briscola</title>
   <meta name="description" content="Briscola">
   <meta name="author" content="1337micro">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 </head>
 
 <body>
-  <div id="loading" class="container-fluid" style="visibility: hidden">
-    <h2>Loading... Please wait while we redirect you...</h2>
+  <!-- Loading screen (single-player redirect) -->
+  <div id="loading" class="waiting-overlay" style="display: none">
+    <div class="waiting-card">
+      <div class="spinner"></div>
+      <h2 class="waiting-title">Setting Up Your Game</h2>
+      <p class="waiting-subtitle">Please wait while we redirect you…</p>
+    </div>
   </div>
-  <div id="greeting" class="container-fluid" style="visibility: hidden">
-    <div class="row">
-      <div class="col">
-      <h3>Waiting for opponent...: </h3>
 
-      <h3>To invite someone to play, give this URL: </h3>
-      <input class="gameUrlInputField" id="awaiting_opponent_game_url_input" type="text" readonly /> 
-      <button class="button buttonMarginTop" data-clipboard-target="#awaiting_opponent_game_url_input">
-        <img src="images/clipboard.png" alt="Copy to clipboard">
-      </button>
+  <!-- Waiting room (multiplayer) -->
+  <div id="greeting" class="waiting-overlay" style="display: none">
+    <div class="waiting-card">
+      <div class="card-icon">♠</div>
+      <h2 class="waiting-title">Waiting for Opponent</h2>
+      <div class="pulse-dots">
+        <span></span><span></span><span></span>
       </div>
+      <p class="waiting-subtitle">Share this link to invite a friend:</p>
+      <div class="url-copy-row">
+        <input class="url-input" id="awaiting_opponent_game_url_input" type="text" readonly />
+        <button class="copy-btn" id="copyBtn" data-clipboard-target="#awaiting_opponent_game_url_input">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span class="copy-label">Copy</span>
+        </button>
+      </div>
+      <p class="copy-feedback" id="copyFeedback">Copied!</p>
     </div>
   </div>
 
@@ -45,17 +61,24 @@
   <script src="js/eventHandlers.js"></script>
 
   <script>
-     new ClipboardJS('button');//instantiate clipboardjs for the copy button
+     var clipboard = new ClipboardJS('#copyBtn');
+     clipboard.on('success', function() {
+       var fb = document.getElementById('copyFeedback');
+       fb.classList.add('show');
+       var label = document.querySelector('.copy-label');
+       label.textContent = 'Copied!';
+       setTimeout(function() { fb.classList.remove('show'); label.textContent = 'Copy'; }, 2000);
+     });
   </script>
 
 
   <script>
     const url = window.location.href;
     if(url.includes('singlePlayer')) {
-      document.getElementById("loading").style.visibility="visible"
+      document.getElementById("loading").style.display="flex"
     }
     else {
-      document.getElementById("greeting").style.visibility="visible"
+      document.getElementById("greeting").style.display="flex"
       setInputFieldText()
     }
 
