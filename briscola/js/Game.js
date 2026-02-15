@@ -5,7 +5,6 @@ import {Card} from './Card.js'
 import {MiddlePile} from './MiddlePile.js'
 import {Constants} from './Constants.js'
 import {BriscolaError} from './errors/BriscolaError.js'
-import {suits} from "./Suits";
 
 class Game {
     constructor(gameState = {}) {
@@ -33,7 +32,7 @@ class Game {
         this.deck.shuffle();
         const hand1 = new Hand({gameType: this.gameType});
         this.isBriscola500() ?
-            hand1.addCards([new Card({rank: 9, suit: suits().bastoni}), new Card({rank: 10, suit: suits().bastoni}), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
+            hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
             hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
 
         const hand2 = new Hand({gameType: this.gameType});
