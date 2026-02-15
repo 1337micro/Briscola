@@ -71,7 +71,40 @@ async function start()
   hideGreeting()
   //Add the canvas that Pixi automatically created for you to the HTML document
   document.body.appendChild(app.view);
-  
+
+  // ─── Felt table background ───
+  const feltBg = new PIXI.Graphics();
+  feltBg.beginFill(0x1a5c2e);
+  feltBg.drawRect(0, 0, screenWidth, screenHeight);
+  feltBg.endFill();
+  app.stage.addChild(feltBg);
+
+  // Subtle radial vignette
+  const vignette = new PIXI.Graphics();
+  vignette.beginFill(0x000000, 0.25);
+  vignette.drawRect(0, 0, screenWidth, screenHeight);
+  vignette.endFill();
+  const vignetteHole = new PIXI.Graphics();
+  vignetteHole.beginFill(0xffffff);
+  vignetteHole.drawEllipse(screenWidth / 2, screenHeight / 2, screenWidth * 0.55, screenHeight * 0.55);
+  vignetteHole.endFill();
+  vignette.mask = null; // will use alpha instead
+  vignette.alpha = 0.15;
+  app.stage.addChild(vignette);
+
+  // Decorative table edge
+  const tableEdge = new PIXI.Graphics();
+  tableEdge.lineStyle(3, 0xffd700, 0.15);
+  tableEdge.drawRoundedRect(20, 20, screenWidth - 40, screenHeight - 40, 30);
+  app.stage.addChild(tableEdge);
+
+  // Center line separator
+  const centerLine = new PIXI.Graphics();
+  centerLine.lineStyle(1, 0xffffff, 0.06);
+  centerLine.moveTo(screenWidth * 0.15, screenHeight / 2 + 60);
+  centerLine.lineTo(screenWidth * 0.65, screenHeight / 2 + 60);
+  app.stage.addChild(centerLine);
+
   let playerToActText = generatePlayerToActText(game)
   app.stage.addChild(playerToActText)
 
@@ -161,10 +194,14 @@ async function start()
     PLAY_CARD_SOUND.play()
     PLAY_CARD_SOUND.play()
 
+    const FONT = 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
     let horse = _generateCardSprite(`../images/9${suit}.png`)
     let king = _generateCardSprite(`../images/10${suit}.png`)
-    const briscolaCalledText = new PIXI.Text(`BRISCOLA of ${Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[suit]} has been called`);
-
+    const briscolaCalledText = new PIXI.Text(
+      `BRISCOLA of ${Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[suit]} called!`,
+      { fontFamily: FONT, fontSize: 20, fontWeight: '700', fill: '#fdd835',
+        dropShadow: true, dropShadowColor: '#000', dropShadowBlur: 4, dropShadowDistance: 2 }
+    );
 
     _positionBriskCalledSprite(horse, 0)
     _positionBriskCalledSprite(king, 1)
@@ -197,59 +234,118 @@ async function start()
   onGameOver((game)=>{
     //remove all elements
     removeAllSpritesOnScreen()
-    let textFontSize = 24
-    let textPositionX = 0
-    let textPositionY = screenHeight/2;
 
-    const gameOverStyle = {fontFamily : 'Arial', fontSize: textFontSize, align : 'center'}
-    const gameOverText = new PIXI.Text('Game over.', gameOverStyle);
-    gameOverText.x = textPositionX
-    gameOverText.y = textPositionY
-    textPositionY = textPositionY + textFontSize + 5;
+    const FONT = 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
     const myPlayerObject = getMyPlayerObject(game);
     const opponentPlayer = getOpponentPlayer(game);
+    const isWin = myPlayerObject.points > opponentPlayer.points;
+    const isTie = myPlayerObject.points === opponentPlayer.points;
 
-    const pointsText = new PIXI.Text('Your points: ' +myPlayerObject.points + ', Opponent points: ' + opponentPlayer.points, gameOverStyle);
-    pointsText.x = textPositionX
-    pointsText.y = textPositionY
-    textPositionY = textPositionY + textFontSize + 5;
-    let winningText;
-    if(myPlayerObject.points>opponentPlayer.points)
-    {
-      //I win
-      winningText = new PIXI.Text("You win.", gameOverStyle)
-    }
-    else if(myPlayerObject.points === opponentPlayer.points)
-    {
-      winningText = new PIXI.Text("Tie game.", gameOverStyle)
-    }
-    else
-    {
-      winningText = new PIXI.Text("Opponent wins.", gameOverStyle)
-    }
+    // Dark overlay
+    const overlay = new PIXI.Graphics();
+    overlay.beginFill(0x000000, 0.55);
+    overlay.drawRect(0, 0, screenWidth, screenHeight);
+    overlay.endFill();
+    app.stage.addChild(overlay);
 
-    winningText.x = textPositionX
-    winningText.y = textPositionY
-    app.stage.addChild(gameOverText)
-    app.stage.addChild(pointsText)
-    app.stage.addChild(winningText)
+    // Card-style modal
+    const modalW = 420, modalH = 300;
+    const modalX = (screenWidth - modalW) / 2;
+    const modalY = (screenHeight - modalH) / 2;
+    const modal = new PIXI.Graphics();
+    modal.beginFill(0x1b5e20, 0.92);
+    modal.drawRoundedRect(0, 0, modalW, modalH, 20);
+    modal.endFill();
+    modal.lineStyle(2, 0xffd700, 0.3);
+    modal.drawRoundedRect(0, 0, modalW, modalH, 20);
+    modal.x = modalX;
+    modal.y = modalY;
+    app.stage.addChild(modal);
+
+    // Result headline
+    const headline = isWin ? '🏆  YOU WIN!' : isTie ? '🤝  TIE GAME' : '😔  YOU LOSE';
+    const headlineText = new PIXI.Text(headline, {
+      fontFamily: FONT, fontSize: 36, fontWeight: '800',
+      fill: isWin ? '#fdd835' : isTie ? '#ffffff' : '#ef9a9a',
+      dropShadow: true, dropShadowColor: '#000', dropShadowBlur: 6, dropShadowDistance: 2
+    });
+    headlineText.anchor.set(0.5);
+    headlineText.x = modalX + modalW / 2;
+    headlineText.y = modalY + 70;
+    app.stage.addChild(headlineText);
+
+    // Divider
+    const divider = new PIXI.Graphics();
+    divider.lineStyle(1, 0xffffff, 0.15);
+    divider.moveTo(modalX + 40, modalY + 120);
+    divider.lineTo(modalX + modalW - 40, modalY + 120);
+    app.stage.addChild(divider);
+
+    // Score
+    const scoreText = new PIXI.Text(
+      `You: ${myPlayerObject.points}   •   Opponent: ${opponentPlayer.points}`,
+      { fontFamily: FONT, fontSize: 22, fontWeight: '600', fill: '#ffffff',
+        dropShadow: true, dropShadowColor: '#000', dropShadowBlur: 4, dropShadowDistance: 1 }
+    );
+    scoreText.anchor.set(0.5);
+    scoreText.x = modalX + modalW / 2;
+    scoreText.y = modalY + 160;
+    app.stage.addChild(scoreText);
+
+    // Subtitle
+    const subText = new PIXI.Text('Game Over', {
+      fontFamily: FONT, fontSize: 14, fill: 'rgba(255,255,255,0.5)', fontWeight: '600', letterSpacing: 3
+    });
+    subText.anchor.set(0.5);
+    subText.x = modalX + modalW / 2;
+    subText.y = modalY + 30;
+    app.stage.addChild(subText);
+
+    // Play again hint
+    const hintText = new PIXI.Text('Refresh to play again', {
+      fontFamily: FONT, fontSize: 14, fill: 'rgba(255,255,255,0.4)', fontStyle: 'italic'
+    });
+    hintText.anchor.set(0.5);
+    hintText.x = modalX + modalW / 2;
+    hintText.y = modalY + modalH - 40;
+    app.stage.addChild(hintText);
   })
   onServerConnectionLost((reason)=>{
     removeAllSpritesOnScreen()
-    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
-    const gameOverText = new PIXI.Text('Server connection lost. Game aborted. ', gameOverStyle);
-    gameOverText.x = screenWidth/2
-    gameOverText.y = screenHeight/2
-    app.stage.addChild(gameOverText)
+    _showDisconnectOverlay('Connection Lost', 'Server connection was interrupted. Game aborted.')
   })
   onOpponentLeft((reason)=>{
     removeAllSpritesOnScreen()
-    const gameOverStyle = {fontFamily : 'Arial', fontSize: 24, align : 'center'}
-    const gameOverText = new PIXI.Text('Opponent Left. Game aborted. ', gameOverStyle);
-    gameOverText.x = screenWidth/2
-    gameOverText.y = screenHeight/2
-    app.stage.addChild(gameOverText)
+    _showDisconnectOverlay('Opponent Left', 'Your opponent has disconnected. Game aborted.')
   })
+  function _showDisconnectOverlay(title, subtitle) {
+    const FONT = 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
+    const overlay = new PIXI.Graphics();
+    overlay.beginFill(0x000000, 0.55);
+    overlay.drawRect(0, 0, screenWidth, screenHeight);
+    overlay.endFill();
+    app.stage.addChild(overlay);
+
+    const modalW = 400, modalH = 180;
+    const mx = (screenWidth - modalW) / 2, my = (screenHeight - modalH) / 2;
+    const modal = new PIXI.Graphics();
+    modal.beginFill(0x4e342e, 0.92);
+    modal.drawRoundedRect(0, 0, modalW, modalH, 16);
+    modal.endFill();
+    modal.x = mx; modal.y = my;
+    app.stage.addChild(modal);
+
+    const t = new PIXI.Text(title, { fontFamily: FONT, fontSize: 26, fontWeight: '800', fill: '#ef9a9a',
+      dropShadow: true, dropShadowColor: '#000', dropShadowBlur: 4, dropShadowDistance: 1 });
+    t.anchor.set(0.5);
+    t.x = mx + modalW / 2; t.y = my + 60;
+    app.stage.addChild(t);
+
+    const s = new PIXI.Text(subtitle, { fontFamily: FONT, fontSize: 15, fill: 'rgba(255,255,255,0.6)' });
+    s.anchor.set(0.5);
+    s.x = mx + modalW / 2; s.y = my + 110;
+    app.stage.addChild(s);
+  }
   function redirectToNewGame()
   {
     window.location.assign("/new")
@@ -351,31 +447,46 @@ function setUpBackOfDeck()
   }
 
   function callBriskButton(suitAbbr, index, enabled) {
+    const FONT = 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif';
     const suitName = Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[suitAbbr];
 
     const button = new PIXI.Container();
 
     const bg = new PIXI.Graphics();
-    bg.beginFill(enabled ? 0x4CAF50 : 0x9E9E9E);
-    bg.drawRoundedRect(0, 0, 200, 36, 8);
+    if (enabled) {
+      bg.beginFill(0x2e7d32, 0.9);
+    } else {
+      bg.beginFill(0x555555, 0.5);
+    }
+    bg.drawRoundedRect(0, 0, 220, 40, 20);
     bg.endFill();
+    if (enabled) {
+      bg.lineStyle(1.5, 0x66bb6a, 0.5);
+      bg.drawRoundedRect(0, 0, 220, 40, 20);
+    }
     button.addChild(bg);
 
     const text = new PIXI.Text(`Call Briscola of ${suitName}`, {
-      fontFamily: 'Arial',
+      fontFamily: FONT,
       fontSize: 14,
-      fill: 0xFFFFFF,
+      fontWeight: '600',
+      fill: enabled ? 0xFFFFFF : 0xAAAAAA,
       align: 'center'
     });
-    text.x = 10;
-    text.y = 9;
+    text.x = 18;
+    text.y = 11;
     button.addChild(text);
 
     button.x = 0.05 * screenWidth;
-    button.y = (screenHeight - 260) + (index * 45);
+    button.y = (screenHeight - 260) + (index * 50);
 
     button.interactive = enabled;
     button.buttonMode = enabled;
+
+    if (enabled) {
+      button.on('pointerover', () => { bg.alpha = 0.8; });
+      button.on('pointerout', () => { bg.alpha = 1; });
+    }
 
     button.on('pointerdown', () => {
       callBrisk(suitAbbr)

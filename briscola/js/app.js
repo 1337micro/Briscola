@@ -10,13 +10,13 @@ import { Constants } from './Constants.js'
 let app = new PIXI.Application({
   width: Constants.width,
   height:Constants.height,
-  antialias: true,    // default: false
-    transparent: false, // default: false
-    resolution: 1       // default: 1
+  antialias: true,
+  transparent: false,
+  resolution: window.devicePixelRatio || 1,
+  autoDensity: true
 });
 
-
-app.renderer.backgroundColor = 0xFFFFFF // white
+app.renderer.backgroundColor = 0x1a5c2e; // rich green felt
 
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);

@@ -3,7 +3,12 @@
 html, body{
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #fff;
+  background-color: #0f3d1e;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
 }
 
 /* ─── Waiting Room Overlay ─── */
