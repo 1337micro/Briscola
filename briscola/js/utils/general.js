@@ -36,9 +36,9 @@ export function hideGreeting()
   const loadingElement = document.getElementById("loading");
   if(greetingElement)
   {
-    greetingElement.innerHTML = null;
+    greetingElement.remove();
   }
   if(loadingElement) {
-    loadingElement.innerHTML = null;
+    loadingElement.remove();
   }
 }

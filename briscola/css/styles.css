@@ -1,9 +1,174 @@
-* {padding: 0; margin: 0}
+* {padding: 0; margin: 0; box-sizing: border-box;}
 
 html, body{
   height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #fff;
 }
 
+/* ─── Waiting Room Overlay ─── */
+.waiting-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #1a472a 0%, #2d6b3f 40%, #399331 100%);
+  padding: 24px;
+}
+
+/* ─── Waiting Card ─── */
+.waiting-card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 48px 40px;
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+  animation: subtleBounce 2s ease-in-out infinite;
+}
+
+.waiting-title {
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.waiting-subtitle {
+  color: rgba(255,255,255,0.7);
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 4px;
+}
+
+/* ─── Pulse Dots ─── */
+.pulse-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0 24px;
+}
+
+.pulse-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.pulse-dots span:nth-child(2) { animation-delay: 0.2s; }
+.pulse-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ─── URL Copy Row ─── */
+.url-copy-row {
+  display: flex;
+  margin-top: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.url-input {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-family: 'Inter', monospace;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  color: #1a472a;
+  outline: none;
+  min-width: 0;
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  background: #1a472a;
+  color: #fff;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background: #245a35;
+}
+
+.copy-feedback {
+  color: #a3e635;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.copy-feedback.show {
+  opacity: 1;
+}
+
+/* ─── Loading Spinner ─── */
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ─── Animations ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes subtleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 600px) {
+  .waiting-card { padding: 36px 20px; }
+  .waiting-title { font-size: 1.4rem; }
+  .url-copy-row { flex-direction: column; }
+  .copy-btn { justify-content: center; }
+}
+
+/* ─── Legacy / Game Styles ─── */
 .gameUrlInputField {
   min-width: 650px;
   background: #e3e3e3;

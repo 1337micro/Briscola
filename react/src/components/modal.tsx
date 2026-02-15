@@ -8,7 +8,7 @@ interface CreateButtonProps {
   buttonText?: string;
 }
 
-const CreateButton: React.FC<CreateButtonProps> = ({ onOk, buttonText = "Create Game" }) => {
+const CreateButton: React.FC<CreateButtonProps> = ({ onOk, buttonText = "Create Briscola 300 Game" }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();

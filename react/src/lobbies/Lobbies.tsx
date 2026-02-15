@@ -20,14 +20,14 @@ function Lobbies() {
   const dataSource = lobbies.map( (lobby:any) => {
     console.log(lobby)
     const playerName = lobby.players[0].name || 'Anonymous';
-    return {key: lobby._id, playerName: playerName, lobbyDescription: `Click to join ${playerName}'s lobby`}
+    return {key: lobby._id, playerName: playerName, gameType: lobby.gameType ?? '300'};
   })
 
   const columns = [
     {
       title: 'Player Name',
       dataIndex: 'playerName',
-      key: 'key',
+      key: 'playerName',
     },
     {
       title: 'Lobby',
@@ -40,6 +40,14 @@ function Lobbies() {
         >
           Click to join {playerName}'s lobby
         </a>
+      }
+    },
+    {
+      title: 'Game Type',
+      dataIndex: 'gameType',
+      key: 'key',
+      render: (gameType: string) => {
+        return gameType
       }
     }
   ];
