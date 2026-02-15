@@ -206,7 +206,7 @@ function BackendServer() {
                         game.dealNextCardToAllPlayers()
                     }
 
-                    let winningPlayerIndex = game.getWinningPlayerIndex()
+                    let winningPlayerIndex = game.getWinningPlayerIndex(game.trumpSuit)
                     game.currentPlayerToActByIndex = winningPlayerIndex
                     game.firstPlayerToActByIndex = game.currentPlayerToActByIndex;
 

@@ -5,6 +5,7 @@ import {Card} from './Card.js'
 import {MiddlePile} from './MiddlePile.js'
 import {Constants} from './Constants.js'
 import {BriscolaError} from './errors/BriscolaError.js'
+import {suits} from "./Suits";
 
 class Game {
     constructor(gameState = {}) {
@@ -32,7 +33,7 @@ class Game {
         this.deck.shuffle();
         const hand1 = new Hand({gameType: this.gameType});
         this.isBriscola500() ?
-            hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
+            hand1.addCards([new Card({rank: 9, suit: suits().bastoni}), new Card({rank: 10, suit: suits().bastoni}), this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()]) :
             hand1.addCards([this.deck.drawCard(), this.deck.drawCard(), this.deck.drawCard()])
 
         const hand2 = new Hand({gameType: this.gameType});
@@ -46,7 +47,7 @@ class Game {
         this.players = [this.player1, this.player2]
         this.trumpCard = this.isBriscola500() ? null : this.deck.drawTrumpCard();
         this.trumpSuit = this.isBriscola500() ? null : this.trumpCard.suit;
-        this.middlePile = new MiddlePile({trumpCard: this.trumpCard})
+        this.middlePile = new MiddlePile({trumpSuit: this.trumpSuit})
 
         this.firstPlayerToActByIndex = 0
         this.currentPlayerToActByIndex = this.firstPlayerToActByIndex
@@ -81,27 +82,23 @@ class Game {
     /**
      * winning for the particular round
      */
-    getWinningPlayerIndex() {
-        return (this.firstPlayerToActByIndex + this.middlePile.decideWinningCardIndex()) % Constants.gameConstants.NUMBER_OF_PLAYERS
+    getWinningPlayerIndex(trumpSuit) {
+        return (this.firstPlayerToActByIndex + this.middlePile.decideWinningCardIndex(trumpSuit)) % Constants.gameConstants.NUMBER_OF_PLAYERS
     }
 
     /**
      * winning for the particular round
      */
     getWinningPlayer() {
-        return this.players[this.getWinningPlayerIndex()]
+        return this.players[this.getWinningPlayerIndex(this.trumpSuit)]
     }
 
     isGameOver() {
         return this.deck.cards.length === 0 && this.players.every((player) => player.hand.cards.length === 0)
     }
 
-    autoSetNextToAct() {
-        this.currentPlayerToActByIndex = this.getWinningPlayerIndex()
-    }
-
     dealNextCardToAllPlayers() {
-        const winningPlayerIndex = this.getWinningPlayerIndex()
+        const winningPlayerIndex = this.getWinningPlayerIndex(this.trumpSuit)
 
         let indexOfPlayerToGetNextCard = winningPlayerIndex
         do {
@@ -140,7 +137,6 @@ class Game {
     }
 
     computerAI(computerHand) {
-        const trumpSuit = this.trumpSuit;
         //player hand sorted ascending in point value
         const sortedComputerCards = computerHand.cards.sort((cardA, cardB) => cardA.points - cardB.points);
         const ourTrumpCards = sortedComputerCards.filter(card => card.suit === this.trumpSuit)
@@ -191,36 +187,6 @@ class Game {
             }
 
 
-        }
-    }
-
-    //play a round at random for testing
-    _playRound() {
-        const currentPlayerToActByIndex = this.currentPlayerToActByIndex
-        const otherPlayerToActByIndex = (currentPlayerToActByIndex + 1) % Constants.gameConstants.NUMBER_OF_PLAYERS
-
-        const currentPlayerToAct = this.players[currentPlayerToActByIndex]
-        const otherPlayer = this.players[otherPlayerToActByIndex]
-
-        this.middlePile = new MiddlePile(this.middlePile)
-        const firstCardPlayed = currentPlayerToAct.hand.cards.pop()
-        this.addCardToHistory(firstCardPlayed, currentPlayerToActByIndex)
-        const secondCardPlayed = otherPlayer.hand.cards.pop()
-        this.addCardToHistory(secondCardPlayed, otherPlayerToActByIndex)
-
-        this.middlePile.addCard(firstCardPlayed)
-        this.middlePile.addCard(secondCardPlayed)
-
-        let winningPlayer = this.getWinningPlayer()
-        let winningPlayerIndex = this.getWinningPlayerIndex()
-
-        this.currentPlayerToActByIndex = winningPlayerIndex
-        this.firstPlayerToActByIndex = this.currentPlayerToActByIndex;
-        winningPlayer.pile.addCards(this.middlePile.cards)
-        this.middlePile.reset()
-
-        if (!this.isDeckEmpty()) {
-            this.dealNextCardToAllPlayers()
         }
     }
 }

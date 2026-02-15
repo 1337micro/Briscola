@@ -11,7 +11,6 @@ import {CardList} from "./CardList";
 class MiddlePile extends CardList {
     constructor(middlePileState = {}) {
         super(middlePileState)
-        this.trumpCard = middlePileState.trumpCard
     }
 
     reset() {
@@ -33,7 +32,7 @@ class MiddlePile extends CardList {
         }
     }
 
-    decideWinningCard() {
+    decideWinningCard(trumpSuit) {
         if (!this.isPileComplete()) {
             throw new MiddlePileIncompleteError()
         } else {
@@ -42,9 +41,9 @@ class MiddlePile extends CardList {
             for (let i = 1; i < this.cards.length; i++) {
                 let otherCard = this.cards[i]
                 //the winning card is a trump suit
-                if (winningCard.suit === this.trumpSuit) {
+                if (winningCard.suit === trumpSuit) {
                     //the other card is also trump suit
-                    if (otherCard.suit === this.trumpSuit) {
+                    if (otherCard.suit === trumpSuit) {
                         //the other card is also a trump suit
                         if (Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(otherCard.rank) <
                             Constants.gameConstants.LIST_OF_STRENGTHS_BY_RANK.indexOf(winningCard.rank)) {
@@ -56,7 +55,7 @@ class MiddlePile extends CardList {
                     }
                 }
                 //the other card is a trump suit
-                else if (otherCard.suit === this.trumpSuit) {
+                else if (otherCard.suit === trumpSuit) {
                     //but the winning card isn't,
                     winningCard = otherCard;
                 } else {
@@ -72,8 +71,8 @@ class MiddlePile extends CardList {
         }
     }
 
-    decideWinningCardIndex() {
-        return this.indexOfCard(this.decideWinningCard());
+    decideWinningCardIndex(trumpSuit) {
+        return this.indexOfCard(this.decideWinningCard(trumpSuit));
     }
 }
 
