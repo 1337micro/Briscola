@@ -1,4 +1,4 @@
-FROM node:16 as build
+FROM node:21 as build
 WORKDIR /app
 COPY ./react/package.json /app/package.json
 COPY ./react/package-lock.json /app/package-lock.json
