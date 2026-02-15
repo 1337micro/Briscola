@@ -1,5 +1,4 @@
 import { Button } from "antd";
-import { RobotOutlined, ThunderboltOutlined, TrophyOutlined } from "@ant-design/icons";
 import Lobbies from "../lobbies/Lobbies";
 
 import "./Index.css";
@@ -43,21 +42,21 @@ function Index() {
       <section className="actions-section">
         <div className="action-cards">
           <div className="action-card">
-            <div className="action-card-icon"><ThunderboltOutlined /></div>
+            <div className="action-card-icon">⚡</div>
             <h3>Briscola 300</h3>
-            <p>Classic rules, first to 300 points wins.</p>
+            <p>Classic rules</p>
             <CreateButton onOk={handleCreateGame} />
           </div>
 
           <div className="action-card">
-            <div className="action-card-icon"><TrophyOutlined /></div>
+            <div className="action-card-icon">🏆</div>
             <h3>Briscola 500</h3>
-            <p>Extended game, first to 500 points wins.</p>
+            <p>Five-card Briscola</p>
             <CreateButton onOk={handleCreateGameBriscola500} buttonText="Create Briscola 500 Game" />
           </div>
 
           <div className="action-card">
-            <div className="action-card-icon"><RobotOutlined /></div>
+            <div className="action-card-icon">🤖</div>
             <h3>Play vs AI</h3>
             <p>Practice against the computer opponent.</p>
             <Button
