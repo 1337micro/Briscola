@@ -355,7 +355,7 @@ function setUpBackOfDeck()
     if (!hand || !hand.cards) return 0;
     return hand.cards.reduce((sum, card) => {
       const points = Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[card.rank] || 0;
-      return sum + (points > 0 ? points : 0);
+      return sum + points;
     }, 0);
   }
 
