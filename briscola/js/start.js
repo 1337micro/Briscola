@@ -44,6 +44,7 @@ import {
 } from './utils/generators.js'
 import {hideGreeting, isSinglePlayer, getLobbyName, getMyPlayerObject, getOpponentPlayer} from './utils/general.js'
 import { scaleToWindow } from './utils/scaleWindow.js'
+import { drawCardTableBackground } from './utils/tableBackground.js'
 
 const PLAY_CARD_SOUND = new Howl({ src:[Constants.soundUrl.PLAY_CARD], volume: 0.35 });
 const SHUFFLE_CARDS_SOUND = new Howl({ src:[Constants.soundUrl.SHUFFLE_CARDS], volume: 0.25 });
@@ -71,6 +72,7 @@ async function start()
   hideGreeting()
   //Add the canvas that Pixi automatically created for you to the HTML document
   document.body.appendChild(app.view);
+  drawCardTableBackground(app);
   
   let playerToActText = generatePlayerToActText(game)
   app.stage.addChild(playerToActText)
