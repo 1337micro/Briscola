@@ -46,6 +46,10 @@ function callBrisk(suit)
 {
     socket.emit(Constants.events.CALL_BRISK, suit)
 }
+function requestMisdeal()
+{
+    socket.emit(Constants.events.MISDEAL)
+}
 function onBriskCalled(cb)
 {
     socket.on(Constants.events.BRISK_CALLED, function(game)
@@ -136,5 +140,6 @@ export {
     onOpponentLeft, 
     onRedirect,
     callBrisk,
-    onBriskCalled
+    onBriskCalled,
+    requestMisdeal
 }
