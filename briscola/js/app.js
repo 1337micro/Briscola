@@ -16,7 +16,7 @@ let app = new PIXI.Application({
 });
 
 
-app.renderer.backgroundColor = 0xFFFFFF // white
+app.renderer.backgroundColor = 0x2E7D32 // dark green card table
 
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
