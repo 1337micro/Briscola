@@ -20,6 +20,7 @@ const Constants = {
         TRUMP_CARD: "TRUMP_CARD",
         CALL_BRISK: "CALL_BRISK",
         BRISK_CALLED: "BRISK_CALLED",
+        MISDEAL: "MISDEAL",
 
         REDIRECT: "REDIRECT"
     },

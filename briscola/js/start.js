@@ -15,7 +15,7 @@ import {
   onOpponentLeft,
   onRedirect,
   onComputerCardPlayed,
-  onFirstToActComputerCardPlayed, callBrisk, onBriskCalled
+  onFirstToActComputerCardPlayed, callBrisk, onBriskCalled, requestMisdeal
 } from './eventHandlers.js'
 import {
   _scaleSpriteDownTo,
@@ -86,6 +86,7 @@ async function start()
 
   let middlePileCardSprites = []
   let horseKingButtons = []
+  let misdealButtonSprite = null
   onGameUpdate((newGameObj)=>
   {
       game = newGameObj     
@@ -350,6 +351,18 @@ function setUpBackOfDeck()
     );
   }
 
+  function countHandPoints(hand) {
+    if (!hand || !hand.cards) return 0;
+    return hand.cards.reduce((sum, card) => {
+      const points = Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[card.rank] || 0;
+      return sum + (points > 0 ? points : 0);
+    }, 0);
+  }
+
+  function isFirstRound(game) {
+    return game.players.every(p => !p.pile || !p.pile.cards || p.pile.cards.length === 0);
+  }
+
   function callBriskButton(suitAbbr, index, enabled) {
     const suitName = Constants.gameConstants.MAP_ABBREVIATION_TO_SUITS[suitAbbr];
 
@@ -384,10 +397,49 @@ function setUpBackOfDeck()
     return button;
   }
 
+  function createMisdealButton(index, enabled) {
+    const button = new PIXI.Container();
+
+    const bg = new PIXI.Graphics();
+    bg.beginFill(enabled ? 0xFF5722 : 0x9E9E9E);
+    bg.drawRoundedRect(0, 0, 200, 36, 8);
+    bg.endFill();
+    button.addChild(bg);
+
+    const text = new PIXI.Text('Misdeal', {
+      fontFamily: 'Arial',
+      fontSize: 14,
+      fill: 0xFFFFFF,
+      align: 'center'
+    });
+    text.x = 10;
+    text.y = 9;
+    button.addChild(text);
+
+    button.x = 0.05 * screenWidth;
+    button.y = (screenHeight - 260) + (index * 45);
+
+    button.interactive = enabled;
+    button.buttonMode = enabled;
+
+    button.on('pointerdown', () => {
+      requestMisdeal();
+    });
+
+    return button;
+  }
+
   function updateHorseKingButtons(game) {
     for (const btn of horseKingButtons) {
       if (btn.parent) btn.parent.removeChild(btn);
     }
+    if (misdealButtonSprite && misdealButtonSprite.parent) {
+      misdealButtonSprite.parent.removeChild(misdealButtonSprite);
+      misdealButtonSprite = null;
+    }
+
+    let nextButtonIndex = 0;
+
     if(game.gameType === Constants.gameConstants.BRSICOLA_500 && game.trumpSuit == null) {
       horseKingButtons = [];
 
@@ -395,11 +447,22 @@ function setUpBackOfDeck()
       const matchingSuits = findHorseKingSuits(hand);
       const myTurn = isMyTurnToAct(game);
 
-      matchingSuits.forEach((suit, index) => {
-        const button = callBriskButton(suit, index, myTurn);
+      matchingSuits.forEach((suit) => {
+        const button = callBriskButton(suit, nextButtonIndex, myTurn);
         app.stage.addChild(button);
         horseKingButtons.push(button);
+        nextButtonIndex++;
       });
+    }
+
+    if (isFirstRound(game)) {
+      const hand = game.playerForClientSide.hand;
+      const handPoints = countHandPoints(hand);
+      if (handPoints < 5) {
+        const myTurn = isMyTurnToAct(game);
+        misdealButtonSprite = createMisdealButton(nextButtonIndex, myTurn);
+        app.stage.addChild(misdealButtonSprite);
+      }
     }
   }
 }

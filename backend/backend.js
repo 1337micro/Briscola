@@ -241,20 +241,6 @@ function BackendServer() {
 
             }
 
-            function emitGameOver(game) {
-                game.players.forEach(function (player, index) {
-                    const deepCopyGame = cloneDeep(game)
-                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
-                    if (socket.id === player.socketId) {
-                        //the current player made this request so we have to send it normally with socket.emit()
-                        socket.emit(Constants.events.GAME_OVER, deepCopyGame)
-                    } else {
-                        //this player is not the current socket, so we can send a message to the default room of this player with .emit()
-                        io.to(player.socketId).emit(Constants.events.GAME_OVER, deepCopyGame)
-                    }
-                })
-            }
-
 
         })
 
@@ -268,6 +254,18 @@ function BackendServer() {
                 } else {
                     //this player is not the current socket, so we can send a message to the default room of this player with .emit()
                     io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                }
+            })
+        }
+
+        function emitGameOver(game) {
+            game.players.forEach(function (player, index) {
+                const deepCopyGame = cloneDeep(game)
+                deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                if (socket.id === player.socketId) {
+                    socket.emit(Constants.events.GAME_OVER, deepCopyGame)
+                } else {
+                    io.to(player.socketId).emit(Constants.events.GAME_OVER, deepCopyGame)
                 }
             })
         }
@@ -291,6 +289,32 @@ function BackendServer() {
 
                     emitEvent(game, Constants.events.BRISK_CALLED, suit);
                     emitUpdateGame(game)
+                }
+            }
+        })
+
+        socket.on(Constants.events.MISDEAL, async function () {
+            const gameFromDb = await database.getGame(socket.handshake.query.gameId);
+            if (gameFromDb == undefined) {
+                console.error("Undefined game?")
+                return;
+            }
+
+            if (gameFromDb.currentPlayerToActByIndex === session.playerIndex) {
+                let game = new Game(gameFromDb);
+                let playerIndex = session.playerIndex;
+                let player = game.players[playerIndex];
+
+                const isFirstRound = game.players.every(p => p.pile.cards.length === 0);
+                const handPoints = player.hand.cards.reduce((sum, card) => {
+                    const points = Constants.gameConstants.MAP_RANK_TO_NUMBER_OF_POINTS[card.rank] || 0;
+                    return sum + (points > 0 ? points : 0);
+                }, 0);
+
+                if (isFirstRound && handPoints < 5) {
+                    game.players[0].points = 0;
+                    game.players[1].points = 0;
+                    emitGameOver(game)
                 }
             }
         })
