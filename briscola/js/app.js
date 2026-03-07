@@ -16,7 +16,9 @@ let app = new PIXI.Application({
 });
 
 
-app.renderer.backgroundColor = 0xFFFFFF // white
+app.renderer.backgroundColor = 0x1B5E20 // dark green felt
+
+document.body.style.backgroundColor = '#1a1a2e';
 
 app.renderer.autoResize = true;
 app.renderer.resize(window.innerWidth, window.innerHeight);
