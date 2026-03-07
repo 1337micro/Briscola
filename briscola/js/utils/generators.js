@@ -23,7 +23,7 @@ export function generatePlayerToActText(game)
   {
     playerToActText = new PIXI.Text("Opponent's move", playerMoveTextStyle);
   }
-  playerToActText.x = 0.05*screenWidth;
+  playerToActText.x = 0.06*screenWidth;
   playerToActText.y = screenHeight - 300;
 
   return  playerToActText
@@ -35,7 +35,8 @@ export function generateYourPlayerNameText(game)
   let yourNameText = new PIXI.Text(game.playerForClientSide.name, nameTextStyle)
   
   yourNameText.x = screenWidth - 300;
-  yourNameText.y = screenHeight - 100;
+  // Position inside the table bottom (table ends at 92.5% of screen height; 0.87 keeps the text well within).
+  yourNameText.y = screenHeight * 0.87;
 
   return  yourNameText
 }

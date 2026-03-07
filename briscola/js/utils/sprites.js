@@ -33,7 +33,7 @@ export function _positionCardSprite(cardSprite, x, y)
 export function _positionOpponentBackCardSprites(backOfCardSprites)
 {
   backOfCardSprites.forEach((backOfCardSprite, i) =>{
-    _positionCardSprite(backOfCardSprite, screenWidth / 4 + 100*i, 0)
+    _positionCardSprite(backOfCardSprite, screenWidth / 4 + 100*i, screenHeight * 0.09)
   })
 }
 export function _positionBackOfCard(backOfCardSprite)
@@ -71,8 +71,10 @@ export function _positionTrumpCard(trumpCardSprite)
 //for hand
 export function _positionCardSprites(cardSprites)
 {
+  // Position player hand just inside the table bottom (table ends at 92.5% of screen height).
+  // Cards are scaled to 0.5 (original 328px height → 164px) + 10px margin = 174px offset.
   cardSprites.forEach((cardSprite, i) => {
-    _positionCardSprite(cardSprite, screenWidth / 4 + 100*i, screenHeight - 200)
+    _positionCardSprite(cardSprite, screenWidth / 4 + 100*i, screenHeight * 0.925 - 174)
   })
 }
 
