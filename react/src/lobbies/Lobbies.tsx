@@ -4,9 +4,15 @@ import {useEffect, useState} from "react";
 
 import './Lobbies.css'
 
+interface Lobby {
+  _id: string;
+  players: { name: string }[];
+  gameType?: string;
+}
+
 function Lobbies() {
 
-  const [lobbies, setLobbies] = useState([]);
+  const [lobbies, setLobbies] = useState<Lobby[]>([]);
   useEffect(() => {
     axios({
       method: 'get',
@@ -17,7 +23,7 @@ function Lobbies() {
       .then(setLobbies)
   }, [])
 
-  const dataSource = lobbies.map( (lobby:any) => {
+  const dataSource = lobbies.map( (lobby: Lobby) => {
     console.log(lobby)
     const playerName = lobby.players[0].name || 'Anonymous';
     return {key: lobby._id, playerName: playerName, gameType: lobby.gameType ?? '300'};
@@ -33,7 +39,7 @@ function Lobbies() {
       title: 'Lobby',
       dataIndex: 'playerName',
       key: 'key',
-      render: (playerName:any, lobby:any) => {
+      render: (playerName: string, lobby: {key: string}) => {
         return <a
           href={`http://${window.location.hostname}:80/game.html?gameId=${lobby.key}&name=${playerName}`}
           target='_top'
