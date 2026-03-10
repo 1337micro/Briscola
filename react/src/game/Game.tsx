@@ -417,7 +417,7 @@ const Game: React.FC = () => {
             src="/images/backOfCard.png"
             alt="opponent card"
             className="card"
-            style={{ left: `calc(25% + ${i * 100}px)` }}
+            style={{ left: `calc(25% + ${i * 150}px)` }}
           />
         ))}
       </div>
@@ -462,7 +462,7 @@ const Game: React.FC = () => {
             src={`/images/${card.rank}${card.suit}.png`}
             alt={`${card.rank}${card.suit}`}
             className={`card player-card${canClick ? ' interactive' : ''}`}
-            style={{ left: `calc(25% + ${i * 100}px)` }}
+            style={{ left: `calc(25% + ${i * 150}px)` }}
             onClick={() => canClick && handleCardClick(card)}
           />
         ))}
