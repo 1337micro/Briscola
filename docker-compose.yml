@@ -11,8 +11,11 @@ services:
     build:
       context: .
       dockerfile: BackendDockerfile
-    ports:
-      - "3000:3000"
+    # Not published to the host: nginx reaches it in-network as backend:3000
+    # (socket.io is proxied via the /socket.io/ location). Publishing :3000
+    # directly bypassed nginx and exposed the game server (and its CORS *).
+    expose:
+      - "3000"
   react:
     restart: always
     build:

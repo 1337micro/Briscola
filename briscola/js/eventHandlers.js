@@ -3,7 +3,8 @@ import { Constants } from './Constants.js'
 
 const urlParams = new URLSearchParams(window.location.search);
 const gameId = urlParams.get('gameId');
-const socket = io(`http://${window.location.hostname}:3000?gameId=`+gameId )
+// Same-origin: proxied through nginx (:80) instead of the exposed :3000.
+const socket = io(`${window.location.origin}?gameId=`+gameId )
 function _onCardPress(arg, game)
 {
     const cardPressed = arg.currentTarget.card
