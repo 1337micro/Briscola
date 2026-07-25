@@ -4,6 +4,7 @@ const database = require('./database.js')
 const express = require('express')
 const pino = require('pino');
 const expressPino = require('express-pino-logger');
+const crypto = require('crypto');
 
 const logger = pino({level: process.env.LOG_LEVEL || 'info'});
 const expressLogger = expressPino({logger});
@@ -20,7 +21,15 @@ const io = Server(http, {pingTimeout: 10000});
 import {Game} from "../briscola/js/Game.js"
 
 var session = require("express-session")({
-    secret: "my-secret",
+    // Signing secret for the connect.sid cookie. Never hard-code it: a known
+    // or guessable secret lets an attacker forge validly-signed session
+    // cookies. Load it from the environment; fall back to a random per-boot
+    // secret when unset (that invalidates existing sessions on restart, which
+    // is safe here as clients rebind on reconnect).
+    // NOTE: also set `cookie: { secure: true }` once the site is served over
+    // TLS. resave/saveUninitialized are intentionally left as-is because the
+    // socket turn-authorization currently relies on the per-connection session.
+    secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
     resave: true,
     saveUninitialized: true
 });
@@ -38,6 +47,33 @@ io.use(sharedsession(session, {
     autoSave: true
 }));
 
+
+// --- Security: per-recipient game redaction -------------------------------
+// The raw game object holds BOTH players' hands and the entire undrawn deck
+// in draw order. Emitting it to every client leaks the opponent's hand and
+// lets any player predict every future draw (see the game-state-disclosure
+// finding). Build a view that keeps only what the recipient is entitled to
+// (their own hand, the public trump, piles, scores) and replaces the
+// opponent's hand and the undrawn deck with same-length placeholders, so the
+// client still renders the right number of card backs / remaining-deck size
+// without any hidden values ever reaching the wire.
+function redactCards(cards) {
+    return Array.isArray(cards) ? cards.map(function () { return {rank: null, suit: null}; }) : cards;
+}
+
+function redactGameForPlayer(game, index) {
+    const view = cloneDeep(game);
+    view.playerForClientSide = view.players[index];
+
+    const opponent = view.players[1 - index];
+    if (opponent && opponent.hand) {
+        opponent.hand.cards = redactCards(opponent.hand.cards);
+    }
+    if (view.deck) {
+        view.deck.cards = redactCards(view.deck.cards);
+    }
+    return view;
+}
 
 function BackendServer() {
     expressApp.use(express.static(__dirname))
@@ -71,29 +107,32 @@ function BackendServer() {
         let session = socket.handshake.session;
         socket.on(Constants.events.REQUEST_GAME_START, async function (playerName) {
             if (socket.handshake.query.gameId) {
-                let game = await database.getGame(socket.handshake.query.gameId);
-                if (game.started) {
-                    //this game already started. The user refreshed the page on an existing game. Redirecting to new game
-                    socket.emit(Constants.events.REDIRECT, `/new?name=${playerName}&gameType=${game.gameType}`)
+                let existing = await database.getGame(socket.handshake.query.gameId);
+                if (!existing) {
                     return;
                 }
-                let playerIndex = 0;
-                if (game.players[0].socketId == undefined) {
-                    playerIndex = 0;
-                    game.player1.socketId = socket.id
-                } else if (game.players[1].socketId == undefined) {
-                    //len 1
-                    playerIndex = 1;
-                    game.player2.socketId = socket.id
+                if (existing.started) {
+                    //this game already started. The user refreshed the page on an existing game. Redirecting to new game
+                    socket.emit(Constants.events.REDIRECT, `/new?name=${playerName}&gameType=${existing.gameType}`)
+                    return;
                 }
+
+                // Atomically claim a free seat (fixes the seat-hijack race and
+                // removes the "default to seat 0" clobber on a full game).
+                const claim = await database.claimSeat(socket.handshake.query.gameId, socket.id, playerName)
+                if (!claim) {
+                    //no free seat (game full or already started) — send elsewhere
+                    //instead of overwriting player 1's seat.
+                    socket.emit(Constants.events.REDIRECT, `/new?name=${playerName}&gameType=${existing.gameType}`)
+                    return;
+                }
+
+                let game = claim.game;
+                let playerIndex = claim.playerIndex;
                 session.playerIndex = playerIndex
                 session.gameId = game._id
-
-                game.players[playerIndex].socketId = socket.id;
-                game.players[playerIndex].name = playerName;
                 game.playerForClientSide = game.players[playerIndex]
 
-                await database.saveGame(game)
                 lobbies.addLobby(game);
                 if (game.players[0].socketId && game.players[1].socketId) {
                     const isPlayer1Connected = isSocketConnected(game.players[0].socketId)
@@ -108,12 +147,16 @@ function BackendServer() {
                             //player 1 left
                             logger.info("Player 1 left before game could be started.. Resetting player 1", game._id)
                             game.players[0].socketId = undefined//waits for another player
+                            if (game.player1) game.player1.socketId = undefined
                         }
                         if (!isPlayer2Connected) {
                             //player 2 left
                             logger.info("Player 2 left before game could be started.. Resetting player 2", game._id)
                             game.players[1].socketId = undefined//waits for another player
+                            if (game.player2) game.player2.socketId = undefined
                         }
+                        //persist the freed seat so the claim is actually released
+                        await database.saveGame(game)
                     }
 
                 }
@@ -122,14 +165,13 @@ function BackendServer() {
 
             function emitGetGame(game) {
                 game.players.forEach(function (player, index) {
-                    const deepCopyGame = cloneDeep(game)
-                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    const view = redactGameForPlayer(game, index)
                     if (socket.id === player.socketId) {
                         //the current player made this request so we have to send it normally with socket.emit()
-                        socket.emit(Constants.events.GET_GAME, deepCopyGame)
+                        socket.emit(Constants.events.GET_GAME, view)
                     } else {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
-                        io.to(player.socketId).emit(Constants.events.GET_GAME, deepCopyGame)
+                        io.to(player.socketId).emit(Constants.events.GET_GAME, view)
                     }
 
                 })
@@ -160,14 +202,13 @@ function BackendServer() {
 
             function emitGetGame(game) {
                 game.players.forEach(function (player, index) {
-                    const deepCopyGame = cloneDeep(game)
-                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    const view = redactGameForPlayer(game, index)
                     if (socket.id === player.socketId) {
                         //the current player made this request so we have to send it normally with socket.emit()
-                        socket.emit(Constants.events.GET_GAME, deepCopyGame)
+                        socket.emit(Constants.events.GET_GAME, view)
                     } else {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
-                        io.to(player.socketId).emit(Constants.events.GET_GAME, deepCopyGame)
+                        io.to(player.socketId).emit(Constants.events.GET_GAME, view)
                     }
 
                 })
@@ -218,7 +259,14 @@ function BackendServer() {
                         emitGameOver(game)
                     }
 
-                    emitEvent(game, Constants.events.ROUND_OVER, winningPlayer)
+                    // Don't ship the winner's hand to the loser. The client
+                    // ignores this payload's contents, but it must not leak on
+                    // the wire; send a copy with the hand redacted.
+                    const roundWinnerView = cloneDeep(winningPlayer)
+                    if (roundWinnerView.hand) {
+                        roundWinnerView.hand.cards = redactCards(roundWinnerView.hand.cards)
+                    }
+                    emitEvent(game, Constants.events.ROUND_OVER, roundWinnerView)
                 }
 
                 emitEvent(game, Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
@@ -246,26 +294,24 @@ function BackendServer() {
 
         function emitUpdateGame(game) {
             game.players.forEach(function (player, index) {
-                const deepCopyGame = cloneDeep(game)
-                deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                const view = redactGameForPlayer(game, index)
                 if (socket.id === player.socketId) {
                     //the current player made this request so we have to send it normally with socket.emit()
-                    socket.emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    socket.emit(Constants.events.UPDATE_GAME, view)
                 } else {
                     //this player is not the current socket, so we can send a message to the default room of this player with .emit()
-                    io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    io.to(player.socketId).emit(Constants.events.UPDATE_GAME, view)
                 }
             })
         }
 
         function emitGameOver(game) {
             game.players.forEach(function (player, index) {
-                const deepCopyGame = cloneDeep(game)
-                deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                const view = redactGameForPlayer(game, index)
                 if (socket.id === player.socketId) {
-                    socket.emit(Constants.events.GAME_OVER, deepCopyGame)
+                    socket.emit(Constants.events.GAME_OVER, view)
                 } else {
-                    io.to(player.socketId).emit(Constants.events.GAME_OVER, deepCopyGame)
+                    io.to(player.socketId).emit(Constants.events.GAME_OVER, view)
                 }
             })
         }

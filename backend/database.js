@@ -113,7 +113,63 @@ async function saveGame(game)
 }
 
 
+/**
+ * Atomically claim a free seat in a not-yet-started game.
+ *
+ * Fixes the seat-hijack race: previously REQUEST_GAME_START read the game,
+ * picked an empty seat in memory, then saved — so two concurrent joiners could
+ * both read the same seat as empty and overwrite each other (and a joiner to a
+ * full game defaulted to seat 0, clobbering player 1). Here the emptiness check
+ * and the write happen in a single findOneAndUpdate, so only one caller can win
+ * a given seat.
+ *
+ * Seats are tried in order (player1 then player2). The filter `<seat>: null`
+ * matches both null and a missing field, so a freshly-inserted game qualifies.
+ *
+ * @param {String} id game ObjectId (string or ObjectID)
+ * @param {String} socketId claiming socket's id
+ * @param {String} playerName
+ * @returns {Promise<{playerIndex:number, game:Object}|null>} claimed seat + the
+ *          updated game document, or null if no seat is free / the game started.
+ */
+async function claimSeat(id, socketId, playerName)
+{
+    if (typeof id === "string") {
+        id = ObjectID(id)
+    }
+    const seats = [
+        {index: 0, seat: "player1", arr: "players.0"},
+        {index: 1, seat: "player2", arr: "players.1"}
+    ]
+    const connectedClient = await client
+    const collection = connectedClient
+        .db(process.env.DB_GAMES_DATABASE_NAME)
+        .collection(process.env.DB_GAMES_COLLECTION_NAME)
+
+    for (const s of seats) {
+        const set = {}
+        set[s.seat + ".socketId"] = socketId
+        set[s.seat + ".name"] = playerName
+        set[s.arr + ".socketId"] = socketId
+        set[s.arr + ".name"] = playerName
+
+        const filter = {_id: id, started: {$ne: true}}
+        filter[s.seat + ".socketId"] = null // matches null OR missing
+
+        const result = await collection.findOneAndUpdate(
+            filter,
+            {$set: set},
+            {returnOriginal: false} // mongodb v3 driver: return the updated doc
+        )
+        if (result && result.value) {
+            return {playerIndex: s.index, game: result.value}
+        }
+    }
+    return null // no free seat (game full or already started)
+}
+
 module.exports.getGame = getGame;
+module.exports.claimSeat = claimSeat;
 module.exports.insertNewGame = insertNewGame;
 module.exports.insertNewGameString = insertNewGameString;
 module.exports.saveGame = saveGame;

@@ -201,7 +201,9 @@ const Game: React.FC = () => {
 
     // ── Socket ──
     const gameId = getGameId();
-    const socket: SocketIOInstance = io(`http://${window.location.hostname}:3000?gameId=${gameId}`);
+    // Connect same-origin so traffic is proxied through nginx (:80) rather
+    // than the directly-exposed :3000. socket.io uses the default /socket.io path.
+    const socket: SocketIOInstance = io(`${window.location.origin}?gameId=${gameId}`);
     socketRef.current = socket;
 
     // Request game start
