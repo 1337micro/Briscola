@@ -39,6 +39,33 @@ io.use(sharedsession(session, {
 }));
 
 
+// --- Security: per-recipient game redaction -------------------------------
+// The raw game object holds BOTH players' hands and the entire undrawn deck
+// in draw order. Emitting it to every client leaks the opponent's hand and
+// lets any player predict every future draw (see the game-state-disclosure
+// finding). Build a view that keeps only what the recipient is entitled to
+// (their own hand, the public trump, piles, scores) and replaces the
+// opponent's hand and the undrawn deck with same-length placeholders, so the
+// client still renders the right number of card backs / remaining-deck size
+// without any hidden values ever reaching the wire.
+function redactCards(cards) {
+    return Array.isArray(cards) ? cards.map(function () { return {rank: null, suit: null}; }) : cards;
+}
+
+function redactGameForPlayer(game, index) {
+    const view = cloneDeep(game);
+    view.playerForClientSide = view.players[index];
+
+    const opponent = view.players[1 - index];
+    if (opponent && opponent.hand) {
+        opponent.hand.cards = redactCards(opponent.hand.cards);
+    }
+    if (view.deck) {
+        view.deck.cards = redactCards(view.deck.cards);
+    }
+    return view;
+}
+
 function BackendServer() {
     expressApp.use(express.static(__dirname))
 
@@ -122,14 +149,13 @@ function BackendServer() {
 
             function emitGetGame(game) {
                 game.players.forEach(function (player, index) {
-                    const deepCopyGame = cloneDeep(game)
-                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    const view = redactGameForPlayer(game, index)
                     if (socket.id === player.socketId) {
                         //the current player made this request so we have to send it normally with socket.emit()
-                        socket.emit(Constants.events.GET_GAME, deepCopyGame)
+                        socket.emit(Constants.events.GET_GAME, view)
                     } else {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
-                        io.to(player.socketId).emit(Constants.events.GET_GAME, deepCopyGame)
+                        io.to(player.socketId).emit(Constants.events.GET_GAME, view)
                     }
 
                 })
@@ -160,14 +186,13 @@ function BackendServer() {
 
             function emitGetGame(game) {
                 game.players.forEach(function (player, index) {
-                    const deepCopyGame = cloneDeep(game)
-                    deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                    const view = redactGameForPlayer(game, index)
                     if (socket.id === player.socketId) {
                         //the current player made this request so we have to send it normally with socket.emit()
-                        socket.emit(Constants.events.GET_GAME, deepCopyGame)
+                        socket.emit(Constants.events.GET_GAME, view)
                     } else {
                         //this player is not the current socket, so we can send a message to the default room of this player with .emit()
-                        io.to(player.socketId).emit(Constants.events.GET_GAME, deepCopyGame)
+                        io.to(player.socketId).emit(Constants.events.GET_GAME, view)
                     }
 
                 })
@@ -218,7 +243,14 @@ function BackendServer() {
                         emitGameOver(game)
                     }
 
-                    emitEvent(game, Constants.events.ROUND_OVER, winningPlayer)
+                    // Don't ship the winner's hand to the loser. The client
+                    // ignores this payload's contents, but it must not leak on
+                    // the wire; send a copy with the hand redacted.
+                    const roundWinnerView = cloneDeep(winningPlayer)
+                    if (roundWinnerView.hand) {
+                        roundWinnerView.hand.cards = redactCards(roundWinnerView.hand.cards)
+                    }
+                    emitEvent(game, Constants.events.ROUND_OVER, roundWinnerView)
                 }
 
                 emitEvent(game, Constants.events.CARD_PLAYED, cardPlayed)//tell clients that a card was played so that it will get displayed
@@ -246,26 +278,24 @@ function BackendServer() {
 
         function emitUpdateGame(game) {
             game.players.forEach(function (player, index) {
-                const deepCopyGame = cloneDeep(game)
-                deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                const view = redactGameForPlayer(game, index)
                 if (socket.id === player.socketId) {
                     //the current player made this request so we have to send it normally with socket.emit()
-                    socket.emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    socket.emit(Constants.events.UPDATE_GAME, view)
                 } else {
                     //this player is not the current socket, so we can send a message to the default room of this player with .emit()
-                    io.to(player.socketId).emit(Constants.events.UPDATE_GAME, deepCopyGame)
+                    io.to(player.socketId).emit(Constants.events.UPDATE_GAME, view)
                 }
             })
         }
 
         function emitGameOver(game) {
             game.players.forEach(function (player, index) {
-                const deepCopyGame = cloneDeep(game)
-                deepCopyGame.playerForClientSide = deepCopyGame.players[index];
+                const view = redactGameForPlayer(game, index)
                 if (socket.id === player.socketId) {
-                    socket.emit(Constants.events.GAME_OVER, deepCopyGame)
+                    socket.emit(Constants.events.GAME_OVER, view)
                 } else {
-                    io.to(player.socketId).emit(Constants.events.GAME_OVER, deepCopyGame)
+                    io.to(player.socketId).emit(Constants.events.GAME_OVER, view)
                 }
             })
         }
