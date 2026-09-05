@@ -87,6 +87,23 @@ const KING_RANK = 10;
 const BRISCOLA_500 = '500';
 const NUMBER_OF_PLAYERS = 2;
 
+// ─── Card skins ──────────────────────────────────────────────────────────────
+
+const CARD_SKINS: Record<string, { label: string; path: string }> = {
+  classic: { label: 'Classic', path: '/images' },
+  trevisane: { label: 'Trevisane', path: '/images/trevisane' },
+};
+
+const CARD_SKIN_STORAGE_KEY = 'cardSkin';
+
+function getInitialCardSkin(): string {
+  try {
+    const saved = localStorage.getItem(CARD_SKIN_STORAGE_KEY);
+    if (saved && CARD_SKINS[saved]) return saved;
+  } catch { /* storage unavailable */ }
+  return 'classic';
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getUrlParam(name: string): string | null {
@@ -158,6 +175,19 @@ const Game: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   /** Prevents the player from clicking a second card while awaiting confirmation */
   const [pendingPlay, setPendingPlay] = useState(false);
+  const [cardSkin, setCardSkin] = useState<string>(getInitialCardSkin);
+
+  const cardImage = useCallback(
+    (rank: number, suit: string) => `${CARD_SKINS[cardSkin].path}/${rank}${suit}.png`,
+    [cardSkin],
+  );
+
+  const handleSkinChange = useCallback((skin: string) => {
+    setCardSkin(skin);
+    try {
+      localStorage.setItem(CARD_SKIN_STORAGE_KEY, skin);
+    } catch { /* storage unavailable */ }
+  }, []);
 
   const playCardAudioRef = useRef<HTMLAudioElement | null>(null);
   const shuffleAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -426,7 +456,7 @@ const Game: React.FC = () => {
       {middlePileCards.map((entry) => (
         <img
           key={entry.id}
-          src={`/images/${entry.rank}${entry.suit}.png`}
+          src={cardImage(entry.rank, entry.suit)}
           alt={`${entry.rank}${entry.suit}`}
           className="card pile-card"
           style={{
@@ -439,7 +469,7 @@ const Game: React.FC = () => {
       {/* ── Trump card (rotated 90°, right side) ── */}
       {game.trumpCard && !is500 && showTrumpCard && (
         <img
-          src={`/images/${game.trumpCard.rank}${game.trumpCard.suit}.png`}
+          src={cardImage(game.trumpCard.rank, game.trumpCard.suit)}
           alt="trump card"
           className="card trump-card"
         />
@@ -459,7 +489,7 @@ const Game: React.FC = () => {
         {myPlayer.hand.cards.map((card, i) => (
           <img
             key={`${card.rank}${card.suit}`}
-            src={`/images/${card.rank}${card.suit}.png`}
+            src={cardImage(card.rank, card.suit)}
             alt={`${card.rank}${card.suit}`}
             className={`card player-card${canClick ? ' interactive' : ''}`}
             style={{ left: `calc(25% + ${i * 150}px)` }}
@@ -476,6 +506,16 @@ const Game: React.FC = () => {
         <div className="info-text deck-count">Deck: {deckCount}</div>
         <div className="info-text trump-suit">Trump Suit: {trumpSuitName}</div>
         <div className="info-text player-name">{myPlayer.name}</div>
+        <select
+          className="skin-select"
+          value={cardSkin}
+          onChange={(e) => handleSkinChange(e.target.value)}
+          aria-label="Card style"
+        >
+          {Object.entries(CARD_SKINS).map(([key, { label }]) => (
+            <option key={key} value={key}>{label} cards</option>
+          ))}
+        </select>
       </div>
 
       {/* ── Action buttons (left side) ── */}
@@ -507,12 +547,12 @@ const Game: React.FC = () => {
       {briskCalledSuit && (
         <div className="brisk-announcement">
           <img
-            src={`/images/9${briskCalledSuit}.png`}
+            src={cardImage(HORSE_RANK, briskCalledSuit)}
             alt="horse"
             className="card brisk-card"
           />
           <img
-            src={`/images/10${briskCalledSuit}.png`}
+            src={cardImage(KING_RANK, briskCalledSuit)}
             alt="king"
             className="card brisk-card"
           />
