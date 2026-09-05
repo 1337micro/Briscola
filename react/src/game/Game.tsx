@@ -176,6 +176,8 @@ const Game: React.FC = () => {
   /** Prevents the player from clicking a second card while awaiting confirmation */
   const [pendingPlay, setPendingPlay] = useState(false);
   const [cardSkin, setCardSkin] = useState<string>(getInitialCardSkin);
+  const [copied, setCopied] = useState(false);
+  const inviteInputRef = useRef<HTMLInputElement | null>(null);
 
   const cardImage = useCallback(
     (rank: number, suit: string) => `${CARD_SKINS[cardSkin].path}/${rank}${suit}.png`,
@@ -221,6 +223,34 @@ const Game: React.FC = () => {
     const id = setTimeout(fn, ms);
     timeoutsRef.current.push(id);
   }, []);
+
+  const copyInviteLink = useCallback(async () => {
+    const url = window.location.href;
+    let ok = false;
+    // navigator.clipboard only exists in a secure context (HTTPS/localhost).
+    // The game is served over plain HTTP, so fall back to selecting the input
+    // and using the legacy execCommand('copy'), which works without HTTPS.
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(url);
+        ok = true;
+      } catch { /* fall through to legacy path */ }
+    }
+    if (!ok && inviteInputRef.current) {
+      const input = inviteInputRef.current;
+      input.focus();
+      input.select();
+      input.setSelectionRange(0, url.length);
+      try {
+        ok = document.execCommand('copy');
+      } catch { /* clipboard unavailable */ }
+      input.blur();
+    }
+    if (ok) {
+      setCopied(true);
+      scheduleTimeout(() => setCopied(false), 2000);
+    }
+  }, [scheduleTimeout]);
 
   useEffect(() => {
     // ── Sounds ──
@@ -365,6 +395,7 @@ const Game: React.FC = () => {
           <p className="waiting-subtitle">Share this link to invite a friend:</p>
           <div className="url-copy-row">
             <input
+              ref={inviteInputRef}
               className="url-input"
               type="text"
               readOnly
@@ -372,9 +403,9 @@ const Game: React.FC = () => {
             />
             <button
               className="copy-btn"
-              onClick={() => navigator.clipboard.writeText(window.location.href).catch(() => { /* clipboard unavailable */ })}
+              onClick={copyInviteLink}
             >
-              Copy
+              {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
         </div>
