@@ -6,6 +6,8 @@ services:
       dockerfile: NginxDockerfile
     ports:
       - "80:80"
+    depends_on:
+      - backend
   backend:
     restart: always
     build:
