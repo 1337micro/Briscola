@@ -95,6 +95,7 @@ function BackendServer() {
 
                 await database.saveGame(game)
                 lobbies.addLobby(game);
+                logger.info('A lobby has been created', JSON.stringify(game, null, 2));
                 if (game.players[0].socketId && game.players[1].socketId) {
                     const isPlayer1Connected = isSocketConnected(game.players[0].socketId)
                     const isPlayer2Connected = isSocketConnected(game.players[1].socketId)
@@ -103,6 +104,7 @@ function BackendServer() {
                         await database.saveGame(game)
                         emitGetGame(game)
                         lobbies.removeLobby(game);
+                        logger.info('A lobby has been removed', JSON.stringify(game, null, 2));
                     } else {
                         if (!isPlayer1Connected) {
                             //player 1 left

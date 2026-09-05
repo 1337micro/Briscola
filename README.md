@@ -31,3 +31,5 @@ http://briscola.xyz/
 
 - open a terminal and cd into your nginx/ directory run</br>
 ```start nginx```
+
+- navigate to localhost:80 in a browser
