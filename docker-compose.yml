@@ -13,10 +13,6 @@ services:
       dockerfile: BackendDockerfile
     ports:
       - "3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      - mongo
   react:
     restart: always
     build:
@@ -24,16 +20,3 @@ services:
       dockerfile: ReactDockerfile
     ports:
       - "5173:5173"
-  mongo:
-    restart: always
-    image: mongo:7
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
