@@ -347,9 +347,25 @@ function BackendServer() {
     expressApp.get("/new", makeNewGame)
     expressApp.get("/newAgainstComputer", makeNewSinglePlayerGame)
 
+    // The lobby list is public and unauthenticated. A lobby entry is the raw
+    // game object, which holds both players' hands and the entire undrawn deck
+    // in draw order — so returning it as-is lets anyone who loads the home page
+    // read the deck and predict every future card of every open game. Project
+    // it down to just what the client renders (see react/src/lobbies/Lobbies.tsx:
+    // the lobby id, the players' names and the game type).
+    function toPublicLobby(game) {
+        return {
+            _id: game._id,
+            gameType: game.gameType,
+            players: (game.players || []).map(function (player) {
+                return {name: (player && player.name) || ''}
+            })
+        }
+    }
+
     function listActiveLobbies(req, res) {
         lobbies.purgeEmptyLobbies();
-        res.json(lobbies.getLobbies())
+        res.json(lobbies.getLobbies().map(toPublicLobby))
     }
 
     function makeNewGame(req, res) {
