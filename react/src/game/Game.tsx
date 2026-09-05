@@ -260,7 +260,7 @@ const Game: React.FC = () => {
 
     socket.on(EVENTS.GAME_OVER, (data) => {
       setGameOverData(data as GameState);
-      setPhase('gameover');
+      setTimeout(() => setPhase('gameover'), 3000);
     });
 
     socket.on('disconnect', (reason) => {
