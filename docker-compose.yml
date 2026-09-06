@@ -1,11 +1,21 @@
 services:
-  nginx:
+  caddy:
     restart: always
     build:
       context: .
-      dockerfile: NginxDockerfile
+      dockerfile: CaddyDockerfile
     ports:
       - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      # Certificates live here. Without a persistent volume every redeploy
+      # re-requests them and you hit Let's Encrypt's duplicate-certificate
+      # rate limit (5 per week).
+      - caddy-data:/data
+      - caddy-config:/config
     depends_on:
       - backend
   backend:
@@ -13,8 +23,10 @@ services:
     build:
       context: .
       dockerfile: BackendDockerfile
+    # Reached by caddy over the compose network as backend:3000; bound to
+    # localhost so it is not exposed publicly.
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     env_file:
       - .env
     depends_on:
@@ -25,7 +37,7 @@ services:
       context: .
       dockerfile: ReactDockerfile
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
   mongo:
     restart: always
     image: mongo:7
@@ -33,9 +45,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASS}
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo-data:/data/db
 
 volumes:
   mongo-data:
+  caddy-data:
+  caddy-config:

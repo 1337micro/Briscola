@@ -1,0 +1,12 @@
+FROM node:21 as build
+WORKDIR /app
+COPY ./react/package.json /app/package.json
+COPY ./react/package-lock.json /app/package-lock.json
+RUN npm install
+COPY ./react .
+RUN npm run build
+
+FROM caddy:2-alpine
+COPY ./infra/caddy/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/dist /srv
+EXPOSE 80 443

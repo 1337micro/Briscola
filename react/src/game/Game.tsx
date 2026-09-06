@@ -261,7 +261,9 @@ const Game: React.FC = () => {
 
     // ── Socket ──
     const gameId = getGameId();
-    const socket: SocketIOInstance = io(`http://${window.location.hostname}:3000?gameId=${gameId}`);
+    // Same-origin: the reverse proxy forwards /socket.io to the backend. A
+    // hardcoded http://…:3000 would be blocked as mixed content on HTTPS.
+    const socket: SocketIOInstance = io(`${window.location.origin}?gameId=${gameId}`);
     socketRef.current = socket;
 
     // Request game start

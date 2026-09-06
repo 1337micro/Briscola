@@ -1,0 +1,41 @@
+# To receive Let's Encrypt expiry/problem notices, add a global block above the
+# site with a real address:
+#     {
+#         email you@example.com
+#     }
+# Caddy registers without a contact address if this is omitted, which is fine
+# for renewal itself — it just means no warning email if renewal starts failing.
+
+{$DOMAIN} {
+	encode gzip zstd
+
+	root * /srv
+
+	# Socket.IO. The client used to dial http://<host>:3000 directly, which a
+	# browser blocks as mixed content once the page itself is served over
+	# HTTPS. It now connects same-origin (see react/src/game/Game.tsx) and is
+	# proxied through here, so port 3000 no longer needs to be public.
+	handle /socket.io/* {
+		reverse_proxy backend:3000
+	}
+
+	# The lobby list is fetched by the client as /lobbies (see
+	# react/src/lobbies/Lobbies.tsx) and is served by the backend's /join
+	# endpoint.
+	handle /lobbies {
+		rewrite * /join
+		reverse_proxy backend:3000
+	}
+
+	@api path /new /newAgainstComputer /join
+	handle @api {
+		reverse_proxy backend:3000
+	}
+
+	# Static SPA build, with a fallback so deep links resolve to index.html
+	# instead of 404ing.
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}
