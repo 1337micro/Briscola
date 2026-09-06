@@ -1,5 +1,5 @@
 # To play the game:
-http://briscola.xyz/
+https://briscola.xyz/
 </br>
 
 ## Environment variables (.env)
