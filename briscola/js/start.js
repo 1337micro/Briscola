@@ -201,7 +201,7 @@ async function start()
     //remove all elements
     removeAllSpritesOnScreen()
     let textFontSize = 24
-    let textPositionX = 0
+    let textPositionX = screenWidth * 0.06
     let textPositionY = screenHeight/2;
 
     const gameOverStyle = {fontFamily : 'Arial', fontSize: textFontSize, align : 'center'}
@@ -386,7 +386,7 @@ function setUpBackOfDeck()
     text.y = 9;
     button.addChild(text);
 
-    button.x = 0.05 * screenWidth;
+    button.x = 0.06 * screenWidth;
     button.y = (screenHeight - 260) + (index * 45);
 
     button.interactive = enabled;
@@ -418,7 +418,7 @@ function setUpBackOfDeck()
     text.y = 9;
     button.addChild(text);
 
-    button.x = 0.05 * screenWidth;
+    button.x = 0.06 * screenWidth;
     button.y = (screenHeight - 260) + (index * 45);
 
     button.interactive = enabled;
